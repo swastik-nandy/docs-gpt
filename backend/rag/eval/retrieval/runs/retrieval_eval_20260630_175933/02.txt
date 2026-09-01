@@ -1,0 +1,34 @@
+QUERY: what network mode must Fargate tasks use
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.28489764778437277, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 0.5, 'source_coverage': 1.0, 'score_gap': 0.1022707400497552})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: architect-your-solution
+chunk_id: doc_f9253cbeee835c1b:s0_architect_your_application_for_amazon_ecs:b3
+text: Context: Architect your application for Amazon ECS Function: explanation Text: The networking mode to use for the containers in your task. The networking mode determines how your task communicates over the network. For tasks that run on EC2 instances and Amazon ECS Managed Instances, there are multiple options, but we recommend that you use the `awsvpc` network mode. The `awsvpc` network mode simplifies container networking by giving you more control over how your applications communicate with e
+
+--- context 2 ---
+source_id: aws-fargate
+chunk_id: doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b1
+text: Context: Architect for AWS Fargate for Amazon ECS Function: explanation Text: When you run your tasks and services with Fargate, you package your application in containers, specify the CPU and memory requirements, define networking and IAM policies, and launch the application. Each Fargate task has its own isolation boundary and does not share the underlying kernel, CPU resources, memory resources, or elastic network interface with another task. You configure your task definitions for Fargate by
+
+--- context 3 ---
+source_id: aws-fargate
+chunk_id: doc_e57ded6cc07f6574:s5_service_load_balancing:b2
+text: Context: Architect for AWS Fargate for Amazon ECS Heading: Service load balancing Function: explanation Text: When you create a target group for these services, you must choose `ip` as the target type, not `instance`. This is because tasks that use the `awsvpc` network mode are associated with an elastic network interface, not an Amazon EC2 instance. For more information, see Use load balancing to distribute Amazon ECS service traffic.
+
+--- context 4 ---
+source_id: aws-fargate
+chunk_id: doc_e57ded6cc07f6574:s4_platform_versions:b1
+text: Context: Architect for AWS Fargate for Amazon ECS Heading: Platform versions Function: explanation Text: New revisions of platform versions are released as the runtime environment evolves, for example, if there are kernel or operating system updates, new features, bug fixes, or security updates. A Fargate platform version is updated by making a new platform version revision. Each task runs on one platform version revision during its lifecycle. If you want to use the latest platform version revis
+
+--- context 5 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s3_networking:b4
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: Linux tasks that run on external instances must use the `bridge`, `host`, or `none` network modes. The `awsvpc` network mode isn't supported. For more information about each network mode, see Amazon ECS task networking options for EC2 instances.

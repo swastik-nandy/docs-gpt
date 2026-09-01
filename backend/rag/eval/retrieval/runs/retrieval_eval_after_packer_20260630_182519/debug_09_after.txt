@@ -1,0 +1,404 @@
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.38129255502121756, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.002253865827116745})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b3
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: When you update a daemon to a new task definition revision, Amazon ECS performs a rolling deployment across all instances in the associated capacity providers. During the deployment, Amazon ECS drains a configurable percentage of instances simultaneously, provisions replacement instances with the updated daemon, and replaces your Amazon ECS service tasks automatically. Amazon ECS provides built-in c
+
+--- context 2 ---
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b4
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: AWS CloudTrail Logs CloudTrail provides a record of actions taken by a user, role, or an AWS service in Amazon ECS. Using the information collected by CloudTrail, you can determine the request that was made to Amazon ECS, the IP address from which the request was made, who made the request, when it was made, and additional details. For more information, see Log Amazon ECS API calls using AWS CloudTrai
+
+--- context 3 ---
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b2
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Logs Monitor, store, and access the log files from the containers in your Amazon ECS tasks by specifying the `awslogs` log driver in your task definitions. For more information, see Using the awslogs driver. You can also monitor, store, and access the operating system and Amazon ECS container agent log files from your Amazon ECS container instances. This method for accessing logs can
+
+--- context 4 ---
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b1
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Alarms Watch a single metric over a time period that you specify, and perform one or more actions based on the value of the metric relative to a given threshold over a number of time periods. The action is a notification sent to an Amazon Simple Notification Service (Amazon SNS) topic or Amazon EC2 Auto Scaling policy. CloudWatch alarms do not invoke actions simply because they are i
+
+--- context 5 ---
+source_id: clusters
+chunk_id: doc_584e9f744ea27b0b:s2_cluster_components:b3
+text: Context: Amazon ECS clusters Heading: Cluster components Function: explanation Text: A monitoring option CloudWatch Container Insights comes at an additional cost and is a fully managed service. It automatically collects, aggregates, and summarizes Amazon ECS metrics and logs.
+
+Debug candidates
+----------------
+query_terms: amazon, cloudtrail, cloudwatch, ecs, how, monitor
+anchor_terms: amazon, cloudtrail, cloudwatch, ecs
+anchor_phrases: amazon ecs, amazon ecs cloudwatch, cloudwatch cloudtrail, ecs cloudwatch, ecs cloudwatch cloudtrail
+
+--- candidate 1 ---
+selected: yes
+rank: 1
+rerank_score: 0.22986284
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b3
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: When you update a daemon to a new task definition revision, Amazon ECS performs a rolling deployment across all instances in the associated capacity providers. During the deployment, Amazon ECS drains a configurable percentage of instances simultaneously, provisions replacement instances with the updated daemon, and replaces your Amazon ECS service tasks automatically. Amazon ECS provides built-in c
+
+--- candidate 2 ---
+selected: yes
+rank: 2
+rerank_score: 0.22934476
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b2
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Logs Monitor, store, and access the log files from the containers in your Amazon ECS tasks by specifying the `awslogs` log driver in your task definitions. For more information, see Using the awslogs driver. You can also monitor, store, and access the operating system and Amazon ECS container agent log files from your Amazon ECS container instances. This method for accessing logs can
+
+--- candidate 3 ---
+selected: yes
+rank: 3
+rerank_score: 0.21429709
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b4
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: AWS CloudTrail Logs CloudTrail provides a record of actions taken by a user, role, or an AWS service in Amazon ECS. Using the information collected by CloudTrail, you can determine the request that was made to Amazon ECS, the IP address from which the request was made, who made the request, when it was made, and additional details. For more information, see Log Amazon ECS API calls using AWS CloudTrai
+
+--- candidate 4 ---
+selected: yes
+rank: 4
+rerank_score: 0.20946449
+source_id: clusters
+chunk_id: doc_584e9f744ea27b0b:s2_cluster_components:b3
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters Heading: Cluster components Function: explanation Text: A monitoring option CloudWatch Container Insights comes at an additional cost and is a fully managed service. It automatically collects, aggregates, and summarizes Amazon ECS metrics and logs.
+
+--- candidate 5 ---
+selected: no
+rank: 5
+rerank_score: 0.20844817
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s2_considerations:b4
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters for external instances Heading: Considerations Function: explanation Text: To send container logs to CloudWatch Logs, make sure that you create and specify a task execution IAM role in your task definition.
+
+--- candidate 6 ---
+selected: no
+rank: 6
+rerank_score: 0.19667464
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s3_networking:b15
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: If your tasks require communication with any other AWS services, make sure that those service endpoints are allowed. Example applications include using Amazon ECR to pull container images or using CloudWatch for CloudWatch Logs. For more information, see Service endpoints in the AWS General Reference.
+
+--- candidate 7 ---
+selected: no
+rank: 7
+rerank_score: 0.1942636
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b3
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Events Match events and route them to one or more target functions or streams to make changes, capture state information, and take corrective action. For more information, see Automate responses to Amazon ECS errors using EventBridge in this guide and EventBridge is the evolution of Amazon CloudWatch Events in the Amazon EventBridge User Guide.
+
+--- candidate 8 ---
+selected: no
+rank: 8
+rerank_score: 0.19374265
+source_id: tutorials
+chunk_id: doc_6472961b11332555:s0_tutorials_for_amazon_ecs:b10
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Tutorials for Amazon ECS Function: instruction Text: tutorial overview: Set up a simple Lambda function that listens for task events and writes them out to a CloudWatch Logs log stream. | learn more: Configuring Amazon ECS to listen for CloudWatch Events events
+
+--- candidate 9 ---
+selected: no
+rank: 9
+rerank_score: 0.18751773
+source_id: tutorials
+chunk_id: doc_6472961b11332555:s0_tutorials_for_amazon_ecs:b13
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Tutorials for Amazon ECS Function: instruction Text: tutorial overview: Deploy Fluent Bit containers on their Windows instances running in Amazon ECS to stream logs generated by the Windows tasks to Amazon CloudWatch for centralized logging. | learn more: Deploying Fluent Bit on Amazon ECS Windows containers
+
+--- candidate 10 ---
+selected: no
+rank: 10
+rerank_score: 0.18365787
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b7
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Another important part of monitoring Amazon ECS involves manually monitoring those items that the CloudWatch alarms don't cover. The CloudWatch, Trusted Advisor, and other AWS console dashboards provide an at-a-glance view of the state of your AWS environment. We recommend that you also check the log files on your container instances and the containers in your tasks.
+
+--- candidate 11 ---
+selected: no
+rank: 11
+rerank_score: 0.18104309
+source_id: aws-fargate
+chunk_id: doc_e57ded6cc07f6574:s6_usage_metrics:b0
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Architect for AWS Fargate for Amazon ECS Heading: Usage metrics Function: explanation Text: You can use CloudWatch usage metrics to provide visibility into your accounts usage of resources. Use these metrics to visualize your current service usage on CloudWatch graphs and dashboards.
+
+--- candidate 12 ---
+selected: yes
+rank: 12
+rerank_score: 0.1799408
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b1
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Alarms Watch a single metric over a time period that you specify, and perform one or more actions based on the value of the metric relative to a given threshold over a number of time periods. The action is a notification sent to an Amazon Simple Notification Service (Amazon SNS) topic or Amazon EC2 Auto Scaling policy. CloudWatch alarms do not invoke actions simply because they are i
+
+--- candidate 13 ---
+selected: no
+rank: 13
+rerank_score: 0.16075926
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b2
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.50
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The Active Directory is in the AWS Cloud - For this configuration, you create a connection between your on-premises network and the AWS Cloud using an AWS Direct Connect connection. For information about how to create the connection, see Amazon Virtual Private Cloud Connectivity Options.You create an Active Directory in the AWS Cloud. For information about how to get s
+
+--- candidate 14 ---
+selected: no
+rank: 14
+rerank_score: 0.15684363
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s0_amazon_ecs_managed_daemons:b0
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.50
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Function: explanation Text: Amazon ECS Managed Daemons enable you to deploy and manage software agents, such as security, observability, and networking agents, across your container infrastructure on Amazon ECS Managed Instances. Managed Daemons decouple daemon lifecycle management from application operations. You can deploy, update, and monitor agents independently, without redeploying workloads or coordinating changes across services.
+
+--- candidate 15 ---
+selected: no
+rank: 15
+rerank_score: 0.15553829
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b1
+heading: ()
+query_overlap: 0.33
+anchor_overlap: 0.50
+anchor_phrase_hits: amazon ecs
+text: Context: Schedule your containers on Amazon ECS Function: explanation Text: Amazon ECS provides a service scheduler for long-running tasks and applications. It also provides the ability to run standalone tasks or scheduled tasks for batch jobs or single run tasks. You can specify the task placement strategies and constraints for running tasks that best meet your needs. For example, you can specify whether tasks run across multiple Availability Zones or within a single Availability Zone. And, opt
+
+Debug candidates
+----------------
+query_terms: amazon, cloudtrail, cloudwatch, ecs, how, monitor
+anchor_terms: amazon, cloudtrail, cloudwatch, ecs
+anchor_phrases: amazon ecs, amazon ecs cloudwatch, cloudwatch cloudtrail, ecs cloudwatch, ecs cloudwatch cloudtrail
+
+--- candidate 1 ---
+selected: yes
+rank: 1
+rerank_score: 0.22986284
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b3
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: When you update a daemon to a new task definition revision, Amazon ECS performs a rolling deployment across all instances in the associated capacity providers. During the deployment, Amazon ECS drains a configurable percentage of instances simultaneously, provisions replacement instances with the updated daemon, and replaces your Amazon ECS service tasks automatically. Amazon ECS provides built-in c
+
+--- candidate 2 ---
+selected: yes
+rank: 2
+rerank_score: 0.22934476
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b2
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Logs Monitor, store, and access the log files from the containers in your Amazon ECS tasks by specifying the `awslogs` log driver in your task definitions. For more information, see Using the awslogs driver. You can also monitor, store, and access the operating system and Amazon ECS container agent log files from your Amazon ECS container instances. This method for accessing logs can
+
+--- candidate 3 ---
+selected: yes
+rank: 3
+rerank_score: 0.21429709
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b4
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: AWS CloudTrail Logs CloudTrail provides a record of actions taken by a user, role, or an AWS service in Amazon ECS. Using the information collected by CloudTrail, you can determine the request that was made to Amazon ECS, the IP address from which the request was made, who made the request, when it was made, and additional details. For more information, see Log Amazon ECS API calls using AWS CloudTrai
+
+--- candidate 4 ---
+selected: yes
+rank: 4
+rerank_score: 0.20946449
+source_id: clusters
+chunk_id: doc_584e9f744ea27b0b:s2_cluster_components:b3
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters Heading: Cluster components Function: explanation Text: A monitoring option CloudWatch Container Insights comes at an additional cost and is a fully managed service. It automatically collects, aggregates, and summarizes Amazon ECS metrics and logs.
+
+--- candidate 5 ---
+selected: no
+rank: 5
+rerank_score: 0.20844817
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s2_considerations:b4
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters for external instances Heading: Considerations Function: explanation Text: To send container logs to CloudWatch Logs, make sure that you create and specify a task execution IAM role in your task definition.
+
+--- candidate 6 ---
+selected: no
+rank: 6
+rerank_score: 0.19667464
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s3_networking:b15
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: If your tasks require communication with any other AWS services, make sure that those service endpoints are allowed. Example applications include using Amazon ECR to pull container images or using CloudWatch for CloudWatch Logs. For more information, see Service endpoints in the AWS General Reference.
+
+--- candidate 7 ---
+selected: no
+rank: 7
+rerank_score: 0.1942636
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b3
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Events Match events and route them to one or more target functions or streams to make changes, capture state information, and take corrective action. For more information, see Automate responses to Amazon ECS errors using EventBridge in this guide and EventBridge is the evolution of Amazon CloudWatch Events in the Amazon EventBridge User Guide.
+
+--- candidate 8 ---
+selected: no
+rank: 8
+rerank_score: 0.19374265
+source_id: tutorials
+chunk_id: doc_6472961b11332555:s0_tutorials_for_amazon_ecs:b10
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Tutorials for Amazon ECS Function: instruction Text: tutorial overview: Set up a simple Lambda function that listens for task events and writes them out to a CloudWatch Logs log stream. | learn more: Configuring Amazon ECS to listen for CloudWatch Events events
+
+--- candidate 9 ---
+selected: no
+rank: 9
+rerank_score: 0.18751773
+source_id: tutorials
+chunk_id: doc_6472961b11332555:s0_tutorials_for_amazon_ecs:b13
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Tutorials for Amazon ECS Function: instruction Text: tutorial overview: Deploy Fluent Bit containers on their Windows instances running in Amazon ECS to stream logs generated by the Windows tasks to Amazon CloudWatch for centralized logging. | learn more: Deploying Fluent Bit on Amazon ECS Windows containers
+
+--- candidate 10 ---
+selected: no
+rank: 10
+rerank_score: 0.18365787
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b7
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Another important part of monitoring Amazon ECS involves manually monitoring those items that the CloudWatch alarms don't cover. The CloudWatch, Trusted Advisor, and other AWS console dashboards provide an at-a-glance view of the state of your AWS environment. We recommend that you also check the log files on your container instances and the containers in your tasks.
+
+--- candidate 11 ---
+selected: no
+rank: 11
+rerank_score: 0.18104309
+source_id: aws-fargate
+chunk_id: doc_e57ded6cc07f6574:s6_usage_metrics:b0
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Architect for AWS Fargate for Amazon ECS Heading: Usage metrics Function: explanation Text: You can use CloudWatch usage metrics to provide visibility into your accounts usage of resources. Use these metrics to visualize your current service usage on CloudWatch graphs and dashboards.
+
+--- candidate 12 ---
+selected: yes
+rank: 12
+rerank_score: 0.1799408
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b1
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Alarms Watch a single metric over a time period that you specify, and perform one or more actions based on the value of the metric relative to a given threshold over a number of time periods. The action is a notification sent to an Amazon Simple Notification Service (Amazon SNS) topic or Amazon EC2 Auto Scaling policy. CloudWatch alarms do not invoke actions simply because they are i
+
+--- candidate 13 ---
+selected: no
+rank: 13
+rerank_score: 0.16075926
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b2
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.50
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The Active Directory is in the AWS Cloud - For this configuration, you create a connection between your on-premises network and the AWS Cloud using an AWS Direct Connect connection. For information about how to create the connection, see Amazon Virtual Private Cloud Connectivity Options.You create an Active Directory in the AWS Cloud. For information about how to get s
+
+--- candidate 14 ---
+selected: no
+rank: 14
+rerank_score: 0.15684363
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s0_amazon_ecs_managed_daemons:b0
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.50
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Function: explanation Text: Amazon ECS Managed Daemons enable you to deploy and manage software agents, such as security, observability, and networking agents, across your container infrastructure on Amazon ECS Managed Instances. Managed Daemons decouple daemon lifecycle management from application operations. You can deploy, update, and monitor agents independently, without redeploying workloads or coordinating changes across services.
+
+--- candidate 15 ---
+selected: no
+rank: 15
+rerank_score: 0.15553829
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b1
+heading: ()
+query_overlap: 0.33
+anchor_overlap: 0.50
+anchor_phrase_hits: amazon ecs
+text: Context: Schedule your containers on Amazon ECS Function: explanation Text: Amazon ECS provides a service scheduler for long-running tasks and applications. It also provides the ability to run standalone tasks or scheduled tasks for batch jobs or single run tasks. You can specify the task placement strategies and constraints for running tasks that best meet your needs. For example, you can specify whether tasks run across multiple Availability Zones or within a single Availability Zone. And, opt

@@ -1,0 +1,182 @@
+{
+  "request": {
+    "query": "what is aws fargate",
+    "tenant": {
+      "tenant_id": "tnt_local_000000000001",
+      "user_id": "usr_local_000000000001",
+      "session_id": null
+    },
+    "mode": "hybrid_rrf",
+    "top_k": 5,
+    "memory_policy": {
+      "enabled": true,
+      "scope": "session",
+      "include_short_term": true,
+      "include_long_term": false,
+      "max_chat_turns": 8,
+      "max_user_turns": 4,
+      "max_assistant_turns": 4,
+      "preserve_recent_turns": 4,
+      "memory_top_k": 6,
+      "token_budget": 1600
+    },
+    "query_processing": {
+      "mode": "hybrid",
+      "allow_query_rewrite": true,
+      "allow_filter_extraction": true,
+      "allow_intent_classification": true,
+      "allow_hypothetical_answer": false,
+      "max_rewritten_queries": 3,
+      "max_extracted_terms": 24
+    },
+    "request_id": null,
+    "conversation_id": "cnv_demo_1785370157_bc0102fa",
+    "source_constraints": {
+      "source_id": null,
+      "job_id": null,
+      "parser_doc_id": null,
+      "section_id": null,
+      "ir_id": null,
+      "heading_path": [],
+      "payload_filters": {}
+    },
+    "chat_history": [
+      {
+        "role": "user",
+        "content": "what is aws fargate",
+        "turn_id": "0962dbc0-293d-4484-9967-4ab45bdbe359",
+        "created_at": null,
+        "metadata": {
+          "source": "postgres_conversation_turns",
+          "turn_index": 1,
+          "raw_text": "what is aws fargate",
+          "resolved_text": null
+        }
+      }
+    ],
+    "metadata": {
+      "source": "generation_retrieval_node",
+      "turn_id": "0962dbc0-293d-4484-9967-4ab45bdbe359",
+      "raw_user_message": "what is aws fargate",
+      "current_user_message": "what is aws fargate",
+      "planned_retrieval_query": "what is aws fargate",
+      "retrieval_query": "what is aws fargate",
+      "effective_top_k": 5,
+      "turn_plan": {
+        "action": "document_question",
+        "needs_document_retrieval": true,
+        "retrieval_query": "what is aws fargate",
+        "answer_scope": "knowledge_base",
+        "allow_conversation_answer": false,
+        "needs_clarification": false,
+        "uses_previous_turns": false,
+        "confidence": 0.86,
+        "reason": "User is asking a concrete technical/product question that must be answered from source documents.",
+        "metadata": {
+          "deterministic": true,
+          "generic_technical_source_bound": true,
+          "planner_provider": "system",
+          "planner_model": "deterministic_chat_mode",
+          "planner_fallback_used": false,
+          "recent_user_message_available": false,
+          "recent_assistant_message_available": false
+        }
+      },
+      "stateful_retrieval": {
+        "enabled": true,
+        "raw_query": "what is aws fargate",
+        "resolved_query": "what is aws fargate",
+        "query_changed": false,
+        "needed_resolution": false,
+        "resolved_entity": null,
+        "strategy": "no_referential_marker",
+        "confidence": 1.0,
+        "metadata": {
+          "resolution_enabled": true
+        },
+        "conversation_context": {
+          "conversation_id": "cnv_demo_1785370157_bc0102fa",
+          "recent_turn_count": 1,
+          "recent_entity_count": 0,
+          "has_summary": false,
+          "working_memory_count": 0
+        }
+      }
+    }
+  },
+  "normalized_query": {
+    "original_query": "what is aws fargate",
+    "normalized_query": "what is aws fargate",
+    "intent": "unknown",
+    "defects": [],
+    "rewritten_queries": [],
+    "extracted_terms": [],
+    "extracted_filters": [],
+    "hypothetical_answer": null,
+    "requires_memory": false,
+    "metadata": {
+      "fallback": true,
+      "source": "graph_output"
+    }
+  },
+  "decision": {
+    "is_sufficient": false,
+    "confidence": "very_low",
+    "confidence_score": 0.0,
+    "reason": "AttributeError: 'tuple' object has no attribute 'append'",
+    "should_rewrite": false,
+    "rewrite_reason": null,
+    "metadata": {
+      "fallback": true,
+      "source": "graph_output",
+      "warnings": []
+    }
+  },
+  "context_blocks": [],
+  "reranked_candidates": [],
+  "trace": [
+    {
+      "stage": "created",
+      "message": "Retrieval graph state created.",
+      "metadata": {
+        "tenant_id": "tnt_local_000000000001",
+        "mode": "hybrid_rrf",
+        "top_k": 5,
+        "has_chat_history": true,
+        "has_source_constraints": false,
+        "wants_memory": true,
+        "wants_short_term_memory": true,
+        "wants_long_term_memory": false
+      }
+    }
+  ],
+  "warnings": [],
+  "errors": [
+    {
+      "stage": "failed",
+      "message": "'tuple' object has no attribute 'append'",
+      "error_type": "AttributeError",
+      "metadata": {
+        "runtime": "langgraph"
+      }
+    }
+  ],
+  "metadata": {
+    "retrieval_graph_seconds": 18.795898,
+    "retrieval_graph_debug": {
+      "current_stage": "failed",
+      "retry_count": 0,
+      "rewrite_count": 0,
+      "dense_count": 0,
+      "sparse_count": 0,
+      "corrective_count": 0,
+      "fused_count": 0,
+      "expanded_count": 0,
+      "reranked_count": 0,
+      "context_count": 0,
+      "error_count": 1,
+      "warning_count": 0
+    },
+    "retrieval_trace_id": "dccea713-07c1-4fb9-a253-f9452dc4b93a"
+  }
+}

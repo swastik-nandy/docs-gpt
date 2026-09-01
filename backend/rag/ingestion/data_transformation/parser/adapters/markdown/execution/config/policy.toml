@@ -1,0 +1,115 @@
+[markdown_execution_policy.defaults]
+user_tier = "internal"
+demand_level = "low"
+local_cpu_count = 0
+max_local_workers = 0
+allow_process_pool = true
+prefer_fast_execution = true
+available_resource_classes = ["tiny", "small", "medium", "large", "xlarge"]
+[markdown_execution_policy.resource_classes.tiny]
+max_workers = 1
+relative_cpu = 0.5
+
+[markdown_execution_policy.resource_classes.small]
+max_workers = 1
+relative_cpu = 1.0
+
+[markdown_execution_policy.resource_classes.medium]
+max_workers = 2
+relative_cpu = 2.0
+
+[markdown_execution_policy.resource_classes.large]
+max_workers = 4
+relative_cpu = 4.0
+
+[markdown_execution_policy.resource_classes.xlarge]
+max_workers = 8
+relative_cpu = 8.0
+[markdown_execution_policy.user_tiers.free]
+max_resource_class = "small"
+max_workers = 1
+allow_process_pool = false
+prefer_fast_execution = false
+
+[markdown_execution_policy.user_tiers.standard]
+max_resource_class = "medium"
+max_workers = 2
+allow_process_pool = true
+prefer_fast_execution = false
+
+[markdown_execution_policy.user_tiers.premium]
+max_resource_class = "large"
+max_workers = 4
+allow_process_pool = true
+prefer_fast_execution = true
+
+[markdown_execution_policy.user_tiers.internal]
+max_resource_class = "xlarge"
+max_workers = 8
+allow_process_pool = true
+prefer_fast_execution = true
+[markdown_execution_policy.demand_levels.low]
+resource_pressure = "low"
+worker_multiplier = 1.0
+downgrade_resource_class_by = 0
+
+[markdown_execution_policy.demand_levels.normal]
+resource_pressure = "normal"
+worker_multiplier = 1.0
+downgrade_resource_class_by = 0
+
+[markdown_execution_policy.demand_levels.high]
+resource_pressure = "high"
+worker_multiplier = 0.5
+downgrade_resource_class_by = 1
+
+[markdown_execution_policy.demand_levels.critical]
+resource_pressure = "critical"
+worker_multiplier = 0.25
+downgrade_resource_class_by = 2
+[markdown_execution_policy.strategy_defaults.single_document]
+execution_mode = "sequential"
+min_resource_class = "tiny"
+preferred_resource_class = "small"
+process_pool_allowed = false
+should_parse = true
+
+[markdown_execution_policy.strategy_defaults.full_parse_then_chunk_fanout]
+execution_mode = "sequential"
+min_resource_class = "small"
+preferred_resource_class = "medium"
+process_pool_allowed = false
+should_parse = true
+
+[markdown_execution_policy.strategy_defaults.spine_fragmented]
+execution_mode = "process_pool"
+min_resource_class = "medium"
+preferred_resource_class = "large"
+process_pool_allowed = true
+should_parse = true
+
+[markdown_execution_policy.strategy_defaults.quarantine]
+execution_mode = "sequential"
+min_resource_class = "tiny"
+preferred_resource_class = "tiny"
+process_pool_allowed = false
+should_parse = false
+[markdown_execution_policy.size_class_overrides.small]
+preferred_resource_class = "tiny"
+max_workers = 1
+
+[markdown_execution_policy.size_class_overrides.normal]
+preferred_resource_class = "small"
+max_workers = 1
+
+[markdown_execution_policy.size_class_overrides.large]
+preferred_resource_class = "medium"
+max_workers = 2
+
+[markdown_execution_policy.size_class_overrides.huge]
+preferred_resource_class = "large"
+max_workers = 4
+
+[markdown_execution_policy.size_class_overrides.pathological]
+preferred_resource_class = "xlarge"
+max_workers = 8

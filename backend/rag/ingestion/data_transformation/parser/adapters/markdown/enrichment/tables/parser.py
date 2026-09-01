@@ -1,0 +1,332 @@
+#--------------------------------------TABLE PARSER-------------------------------------------
+
+import re
+from typing import Any
+
+
+DEBUG = False
+
+
+def _log(stage: str, msg: str) -> None:
+    if DEBUG:
+        print(f"[TableParser::{stage}] {msg}")
+
+
+#---------------- HELPERS ----------------#
+
+def _clean_cell(cell: Any) -> str:
+    """
+    Normalize a cell without destroying meaning.
+    Keeps empty cells as empty strings.
+    """
+    text = str(cell) if cell is not None else ""
+    text = text.strip()
+
+    # normalize internal whitespace
+    text = re.sub(r"\s+", " ", text)
+
+    # remove light markdown emphasis only
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"\*(.*?)\*", r"\1", text)
+
+    return text
+
+
+def _is_separator_cell(cell: str) -> bool:
+    """
+    Markdown separator cells usually look like:
+    --- , :--- , ---: , :---:
+    """
+    if cell is None:
+        return False
+
+    text = str(cell).strip()
+    return bool(text) and all(ch in "-: " for ch in text)
+
+
+def _is_separator_row(row: Any) -> bool:
+    """
+    Detect markdown separator rows structurally, without domain assumptions.
+    """
+    cells = _normalize_row(row)
+
+    if not cells:
+        return False
+
+    non_empty = [c for c in cells if c.strip()]
+    if not non_empty:
+        return False
+
+    return all(_is_separator_cell(cell) for cell in non_empty)
+
+
+def _split_pipe_row(row: str) -> list[str]:
+    """
+    Split a markdown pipe row while preserving empty cells.
+    Example:
+    '| a | | c |' -> ['a', '', 'c']
+    """
+    text = row.strip()
+
+    # Strip only one outer pipe from each side if present
+    if text.startswith("|"):
+        text = text[1:]
+    if text.endswith("|"):
+        text = text[:-1]
+
+    parts = text.split("|")
+    return [_clean_cell(part) for part in parts]
+
+
+def _normalize_row(row: Any) -> list[str]:
+    """
+    Normalize a row into a list of cells while preserving position.
+    Never drops empty cells.
+    """
+    if isinstance(row, list):
+        return [_clean_cell(cell) for cell in row]
+
+    return _split_pipe_row(str(row))
+
+
+def _normalize_header(cell: str, seen: set[str] | None = None, index: int = 0) -> str:
+    """
+    Normalize header names without injecting domain meaning.
+    Ensures non-empty, unique header keys.
+    """
+    key = re.sub(r"\W+", "_", (cell or "").lower().strip()).strip("_")
+
+    if not key:
+        key = f"column_{index + 1}"
+
+    if seen is not None:
+        base = key
+        suffix = 2
+        while key in seen:
+            key = f"{base}_{suffix}"
+            suffix += 1
+        seen.add(key)
+
+    return key
+
+
+def _row_has_any_content(row: list[str]) -> bool:
+    return any(cell.strip() for cell in row)
+
+
+def _shape_signature(rows: list[list[str]]) -> dict[str, Any]:
+    widths = [len(r) for r in rows if r]
+    if not widths:
+        return {
+            "min_cols": 0,
+            "max_cols": 0,
+            "mode_cols": 0,
+            "row_widths": [],
+        }
+
+    freq: dict[int, int] = {}
+    for width in widths:
+        freq[width] = freq.get(width, 0) + 1
+
+    mode_cols = max(freq.items(), key=lambda x: (x[1], x[0]))[0]
+
+    return {
+        "min_cols": min(widths),
+        "max_cols": max(widths),
+        "mode_cols": mode_cols,
+        "row_widths": widths,
+    }
+
+
+#---------------- MAIN PARSER ----------------#
+
+def _detect_blank_header_table(rows: list[Any]) -> tuple[bool, int]:
+    """
+    Detect Markdown tables whose declared header row is structurally blank.
+
+    Example:
+        |  |  |
+        | --- | --- |
+        | Key | Value |
+
+    In this shape, the first meaningful row is data, not a header.
+    """
+
+    normalized_rows: list[list[str]] = []
+
+    for row in rows or []:
+        if row is None:
+            continue
+
+        normalized = _normalize_row(row)
+
+        if normalized:
+            normalized_rows.append(normalized)
+
+    for index in range(len(normalized_rows) - 1):
+        current = normalized_rows[index]
+        next_row = normalized_rows[index + 1]
+
+        if (
+            current
+            and not _row_has_any_content(current)
+            and _is_separator_row(next_row)
+        ):
+            return True, max(len(current), len(next_row))
+
+    return False, 0
+
+
+def parse_table(rows: list[Any]) -> dict[str, Any] | None:
+    """
+    Parse a table structurally and loss-aware.
+
+    Principles:
+    - No domain-specific assumptions
+    - Preserve empty cells
+    - Preserve raw row shape
+    - Salvage inconsistent rows without hiding anomalies
+    - Do not promote first data row to headers for blank-header Markdown tables
+    """
+
+    if not rows:
+        _log("SKIP", "No rows received")
+        return None
+
+    _log("START", f"raw_rows={len(rows)}")
+
+    headerless, declared_width = _detect_blank_header_table(rows)
+
+    #---------------- NORMALIZE / FILTER ----------------#
+
+    cleaned_rows: list[list[str]] = []
+
+    for idx, row in enumerate(rows):
+        if row is None:
+            continue
+
+        normalized = _normalize_row(row)
+
+        if not normalized:
+            continue
+
+        # Ignore fully empty rows, but blank-header shape was detected above.
+        if not _row_has_any_content(normalized):
+            continue
+
+        # Ignore markdown separator rows.
+        if _is_separator_row(normalized):
+            _log("FILTER", f"separator_row_index={idx}")
+            continue
+
+        cleaned_rows.append(normalized)
+
+    _log("CLEAN", f"valid_rows={len(cleaned_rows)} headerless={headerless}")
+
+    if not cleaned_rows:
+        return None
+
+    #---------------- SHAPE ANALYSIS ----------------#
+
+    shape = _shape_signature(cleaned_rows)
+    target_cols = declared_width or shape["mode_cols"] or len(cleaned_rows[0])
+
+    _log(
+        "SHAPE",
+        f"min={shape['min_cols']} max={shape['max_cols']} mode={shape['mode_cols']} target={target_cols}"
+    )
+
+    #---------------- HEADER ----------------#
+
+    if headerless:
+        header_cells = [""] * target_cols
+        data_rows = cleaned_rows
+        data_start_index = 0
+    else:
+        header_raw = cleaned_rows[0]
+        header_cells = header_raw[:target_cols] + [""] * max(0, target_cols - len(header_raw))
+        data_rows = cleaned_rows[1:]
+        data_start_index = 1
+
+    seen_headers: set[str] = set()
+    header = [
+        _normalize_header(cell, seen=seen_headers, index=i)
+        for i, cell in enumerate(header_cells)
+    ]
+
+    _log("HEADER", f"{header}")
+
+    #---------------- ROWS ----------------#
+
+    structured_rows: list[dict[str, str]] = []
+    raw_rows: list[list[str]] = []
+    anomalies: list[dict[str, Any]] = []
+
+    for offset, row in enumerate(data_rows):
+        i = data_start_index + offset
+        original_width = len(row)
+        cols = row[:target_cols] + [""] * max(0, target_cols - len(row))
+
+        anomaly = None
+
+        if original_width < target_cols:
+            anomaly = {
+                "row_index": i,
+                "kind": "short_row",
+                "expected_cols": target_cols,
+                "actual_cols": original_width,
+            }
+            _log("PAD", f"row_{i} expected={target_cols} actual={original_width}")
+
+        elif original_width > target_cols:
+            anomaly = {
+                "row_index": i,
+                "kind": "long_row",
+                "expected_cols": target_cols,
+                "actual_cols": original_width,
+            }
+            _log("TRIM", f"row_{i} expected={target_cols} actual={original_width}")
+
+        try:
+            structured_rows.append(dict(zip(header, cols)))
+            raw_rows.append(row.copy())
+
+            if anomaly:
+                anomalies.append(anomaly)
+
+        except Exception as e:
+            _log("ERROR", f"row_{i} failed {e}")
+            anomalies.append({
+                "row_index": i,
+                "kind": "build_error",
+                "error": str(e),
+                "actual_cols": original_width,
+            })
+            raw_rows.append(row.copy())
+
+    _log("ROWS", f"parsed_rows={len(structured_rows)}")
+
+    #---------------- FINAL ----------------#
+
+    table = {
+        "type": "table",
+        "headers": header,
+        "header_raw": header_cells,
+        "rows": structured_rows,
+        "raw_rows": raw_rows,
+        "headerless": headerless,
+        "shape": {
+            "target_cols": target_cols,
+            "min_cols": shape["min_cols"],
+            "max_cols": shape["max_cols"],
+            "mode_cols": shape["mode_cols"],
+        },
+    }
+
+    if anomalies:
+        table["anomalies"] = anomalies
+
+    _log("DONE", f"table_built rows={len(structured_rows)} cols={target_cols}")
+
+    return table
+

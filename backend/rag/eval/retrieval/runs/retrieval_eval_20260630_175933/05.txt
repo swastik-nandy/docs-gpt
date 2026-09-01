@@ -1,0 +1,34 @@
+QUERY: how do I troubleshoot ECS Anywhere errors
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.4530933194288937, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.21418827061403994})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b23
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about ECS Exec and Amazon ECS Anywhere errors, see one of the following.
+
+--- context 2 ---
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b25
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Troubleshoot Amazon ECS Anywhere. | learn more: Troubleshoot Amazon ECS Anywhere issues
+
+--- context 3 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s0_amazon_ecs_clusters_for_external_instances:b0
+text: Context: Amazon ECS clusters for external instances Function: explanation Text: Amazon ECS Anywhere provides support for registering an external instance such as an on-premises server or virtual machine (VM), to your Amazon ECS cluster. External instances are optimized for running applications that generate outbound traffic or process data. If your application requires inbound traffic, the lack of Elastic Load Balancing support makes running these workloads less efficient. Amazon ECS added a new
+
+--- context 4 ---
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b14
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Resolve task definition memory error. | learn more: Troubleshoot Amazon ECS task definition invalid CPU or memory errors
+
+--- context 5 ---
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b35
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Resolve API errors. | learn more: Amazon ECS API failure reasons

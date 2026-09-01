@@ -1,0 +1,55 @@
+CURRENT USER MESSAGE:
+do i need to pay extra if i dont manage infra
+
+RETRIEVAL QUERY USED:
+pricing for not managing infrastructure
+
+ANSWER MODE:
+answer_scope=knowledge_base; retrieval_required=true; action=document_question; retrieval_query=pricing for not managing infrastructure
+
+RECENT CONVERSATION:
+None
+
+RETRIEVED DOCUMENTS:
+[doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6] title=untitled source_id=clusterschunk_id=doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6score=0.56609596
+Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: explanation Text: Fargate Serverless compute - Pay only for the resources your tasks use without managing any infrastructure. Ideal for variable workloads and getting started quickly. Use when:
+
+[doc_584e9f744ea27b0b:s4_capacity_providers:b7] title=untitled source_id=clusterschunk_id=doc_584e9f744ea27b0b:s4_capacity_providers:b7score=0.4638247
+Context: Amazon ECS clusters Heading: Capacity providers Function: explanation Text: Fargate capacity providers Serverless compute where you pay only for the resources your tasks use without managing any infrastructure. You just need to associate the pre-defined capacity providers (Fargate and Fargate Spot) with the cluster.
+
+[doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16] title=untitled source_id=clusterschunk_id=doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16score=0.0014599
+Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: reference Text: Note: Amazon ECS Managed Instances is the recommended choice for most new workloads as it provides the best combination of performance, cost optimization, and operational simplicity while allowing AWS to handle infrastructure management tasks.
+
+[doc_29370e71a8e71dba:s4_pricing:b2] title=untitled source_id=welcomechunk_id=doc_29370e71a8e71dba:s4_pricing:b2score=0.01081838
+Context: What is Amazon Elastic Container Service? Heading: Pricing Function: explanation Text: AWS Fargate pricing – Pricing information for Fargate.
+
+[doc_29370e71a8e71dba:s4_pricing:b0] title=untitled source_id=welcomechunk_id=doc_29370e71a8e71dba:s4_pricing:b0score=0.01080592
+Context: What is Amazon Elastic Container Service? Heading: Pricing Function: explanation Text: Amazon ECS pricing depends on the capacity option you choose for your containers.
+
+RETRIEVED MEMORY:
+None
+
+PROVENANCE:
+None
+
+Write only the final answer for the user.
+
+Rules:
+- Do not mention ANSWER MODE.
+- Do not mention the turn plan.
+- Do not explain any routing or planner decision.
+- Do not reveal internal reasoning.
+- Answer the CURRENT USER MESSAGE, not the retrieval query. Use RETRIEVAL QUERY USED only to understand why these documents were retrieved.
+- If answer_scope=knowledge_base, answer from retrieved documents only.
+- If retrieved documents provide qualitative billing, cost, pricing, or charging behavior, answer that supported part directly. Only say exact pricing is missing when the user asks for exact prices, rates, fees, or numbers.
+- If answer_scope=general_conversation, chat normally.
+- If answer_scope=assistant_profile, answer using fixed Docs-GPT identity.
+
+SETUP / CONFIGURATION ANSWER RULE:
+- If the user asks how to configure, set up, deploy, create, or run something, look for all retrieved chunks that describe setup pieces.
+- Prefer a helpful grounded sequence over a narrow refusal.
+- Good structure:
+  1. Direct answer: “Yes, the docs show the main pieces.”
+  2. Grounded setup path from retrieved chunks.
+  3. What is missing, only if something important is missing.
+- Never say “no step-by-step guide” if the retrieved documents include relevant setup requirements, parameters, walkthroughs, task/service concepts, or getting-started material.

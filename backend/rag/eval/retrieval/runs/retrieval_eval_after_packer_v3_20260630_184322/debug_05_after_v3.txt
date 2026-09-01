@@ -1,0 +1,389 @@
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.4530933194288937, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.21418827061403994})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 2
+
+--- context 1 ---
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b23
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about ECS Exec and Amazon ECS Anywhere errors, see one of the following.
+
+--- context 2 ---
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b25
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Troubleshoot Amazon ECS Anywhere. | learn more: Troubleshoot Amazon ECS Anywhere issues
+
+Debug candidates
+----------------
+query_terms: anywhere, ecs, error, how, troubleshoot
+anchor_terms: anywhere, ecs
+anchor_phrases: ecs anywhere
+
+--- candidate 1 ---
+selected: yes
+rank: 1
+rerank_score: 0.25422746
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b23
+heading: ()
+query_overlap: 0.60
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about ECS Exec and Amazon ECS Anywhere errors, see one of the following.
+
+--- candidate 2 ---
+selected: yes
+rank: 2
+rerank_score: 0.19977492
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b25
+heading: ()
+query_overlap: 0.60
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Troubleshoot Amazon ECS Anywhere. | learn more: Troubleshoot Amazon ECS Anywhere issues
+
+--- candidate 3 ---
+selected: no
+rank: 3
+rerank_score: 0.19328386
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s0_amazon_ecs_clusters_for_external_instances:b0
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS clusters for external instances Function: explanation Text: Amazon ECS Anywhere provides support for registering an external instance such as an on-premises server or virtual machine (VM), to your Amazon ECS cluster. External instances are optimized for running applications that generate outbound traffic or process data. If your application requires inbound traffic, the lack of Elastic Load Balancing support makes running these workloads less efficient. Amazon ECS added a new
+
+--- candidate 4 ---
+selected: no
+rank: 4
+rerank_score: 0.18973443
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b14
+heading: ()
+query_overlap: 0.60
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Resolve task definition memory error. | learn more: Troubleshoot Amazon ECS task definition invalid CPU or memory errors
+
+--- candidate 5 ---
+selected: no
+rank: 5
+rerank_score: 0.18896143
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b35
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Resolve API errors. | learn more: Amazon ECS API failure reasons
+
+--- candidate 6 ---
+selected: no
+rank: 6
+rerank_score: 0.17637521
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b34
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about API errors, see one of the following.
+
+--- candidate 7 ---
+selected: no
+rank: 7
+rerank_score: 0.17417125
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b2
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Resolve stopped task errors. | learn more: Viewing Amazon ECS stopped task errors
+
+--- candidate 8 ---
+selected: no
+rank: 8
+rerank_score: 0.16937451
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b8
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about service errors, see one of the following.
+
+--- candidate 9 ---
+selected: no
+rank: 9
+rerank_score: 0.16726437
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b2
+heading: ()
+query_overlap: 0.60
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The Active Directory is in the AWS Cloud - For this configuration, you create a connection between your on-premises network and the AWS Cloud using an AWS Direct Connect connection. For information about how to create the connection, see Amazon Virtual Private Cloud Connectivity Options.You create an Active Directory in the AWS Cloud. For information about how to get s
+
+--- candidate 10 ---
+selected: no
+rank: 10
+rerank_score: 0.16572526
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b3
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The Active Directory is in the on-premises data center. - For this configuration, you join your external instances to the on-premises Active Directory. You then use the locally available credentials when you run the Amazon ECS tasks.
+
+--- candidate 11 ---
+selected: no
+rank: 11
+rerank_score: 0.16321407
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b3
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: View stopped task errors. | learn more: Resolve Amazon ECS stopped task errors
+
+--- candidate 12 ---
+selected: no
+rank: 12
+rerank_score: 0.1589979
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s1_supported_operating_systems_and_system_architectures:b3
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS clusters for external instances Heading: Supported operating systems and system architectures Function: explanation Text: RHEL 9 — You must ensure that Docker is installed before you run the ECS Anywhere install script. For more information, see Install Docker Engine on RHEL in the Docker documentation.
+
+--- candidate 13 ---
+selected: no
+rank: 13
+rerank_score: 0.15827774
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b13
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about task definition errors, see one of the following.
+
+--- candidate 14 ---
+selected: no
+rank: 14
+rerank_score: 0.1562426
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b15
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about Amazon ECS agent errors, see one of the following.
+
+--- candidate 15 ---
+selected: no
+rank: 15
+rerank_score: 0.15600413
+source_id: welcome
+chunk_id: doc_29370e71a8e71dba:s1_terminology_and_components:b10
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: What is Amazon Elastic Container Service? Heading: Terminology and components Function: explanation Text: On-premises virtual machines (VM) or servers Amazon ECS Anywhere provides support for registering an external instance such as an on-premises server or virtual machine (VM), to your Amazon ECS cluster.
+
+Debug candidates
+----------------
+query_terms: anywhere, ecs, error, how, troubleshoot
+anchor_terms: anywhere, ecs
+anchor_phrases: ecs anywhere
+
+--- candidate 1 ---
+selected: yes
+rank: 1
+rerank_score: 0.25422746
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b23
+heading: ()
+query_overlap: 0.60
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about ECS Exec and Amazon ECS Anywhere errors, see one of the following.
+
+--- candidate 2 ---
+selected: yes
+rank: 2
+rerank_score: 0.19977492
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b25
+heading: ()
+query_overlap: 0.60
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Troubleshoot Amazon ECS Anywhere. | learn more: Troubleshoot Amazon ECS Anywhere issues
+
+--- candidate 3 ---
+selected: no
+rank: 3
+rerank_score: 0.19328386
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s0_amazon_ecs_clusters_for_external_instances:b0
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS clusters for external instances Function: explanation Text: Amazon ECS Anywhere provides support for registering an external instance such as an on-premises server or virtual machine (VM), to your Amazon ECS cluster. External instances are optimized for running applications that generate outbound traffic or process data. If your application requires inbound traffic, the lack of Elastic Load Balancing support makes running these workloads less efficient. Amazon ECS added a new
+
+--- candidate 4 ---
+selected: no
+rank: 4
+rerank_score: 0.18973443
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b14
+heading: ()
+query_overlap: 0.60
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Resolve task definition memory error. | learn more: Troubleshoot Amazon ECS task definition invalid CPU or memory errors
+
+--- candidate 5 ---
+selected: no
+rank: 5
+rerank_score: 0.18896143
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b35
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Resolve API errors. | learn more: Amazon ECS API failure reasons
+
+--- candidate 6 ---
+selected: no
+rank: 6
+rerank_score: 0.17637521
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b34
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about API errors, see one of the following.
+
+--- candidate 7 ---
+selected: no
+rank: 7
+rerank_score: 0.17417125
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b2
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: Resolve stopped task errors. | learn more: Viewing Amazon ECS stopped task errors
+
+--- candidate 8 ---
+selected: no
+rank: 8
+rerank_score: 0.16937451
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b8
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about service errors, see one of the following.
+
+--- candidate 9 ---
+selected: no
+rank: 9
+rerank_score: 0.16726437
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b2
+heading: ()
+query_overlap: 0.60
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The Active Directory is in the AWS Cloud - For this configuration, you create a connection between your on-premises network and the AWS Cloud using an AWS Direct Connect connection. For information about how to create the connection, see Amazon Virtual Private Cloud Connectivity Options.You create an Active Directory in the AWS Cloud. For information about how to get s
+
+--- candidate 10 ---
+selected: no
+rank: 10
+rerank_score: 0.16572526
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b3
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The Active Directory is in the on-premises data center. - For this configuration, you join your external instances to the on-premises Active Directory. You then use the locally available credentials when you run the Amazon ECS tasks.
+
+--- candidate 11 ---
+selected: no
+rank: 11
+rerank_score: 0.16321407
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b3
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: reference Text: action: View stopped task errors. | learn more: Resolve Amazon ECS stopped task errors
+
+--- candidate 12 ---
+selected: no
+rank: 12
+rerank_score: 0.1589979
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s1_supported_operating_systems_and_system_architectures:b3
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: Amazon ECS clusters for external instances Heading: Supported operating systems and system architectures Function: explanation Text: RHEL 9 — You must ensure that Docker is installed before you run the ECS Anywhere install script. For more information, see Install Docker Engine on RHEL in the Docker documentation.
+
+--- candidate 13 ---
+selected: no
+rank: 13
+rerank_score: 0.15827774
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b13
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about task definition errors, see one of the following.
+
+--- candidate 14 ---
+selected: no
+rank: 14
+rerank_score: 0.1562426
+source_id: troubleshooting
+chunk_id: doc_050872613ce6bcac:s0_amazon_ecs_troubleshooting:b15
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 0.50
+anchor_phrase_hits: -
+text: Context: Amazon ECS troubleshooting Function: explanation Text: For information about Amazon ECS agent errors, see one of the following.
+
+--- candidate 15 ---
+selected: no
+rank: 15
+rerank_score: 0.15600413
+source_id: welcome
+chunk_id: doc_29370e71a8e71dba:s1_terminology_and_components:b10
+heading: ()
+query_overlap: 0.40
+anchor_overlap: 1.00
+anchor_phrase_hits: ecs anywhere
+text: Context: What is Amazon Elastic Container Service? Heading: Terminology and components Function: explanation Text: On-premises virtual machines (VM) or servers Amazon ECS Anywhere provides support for registering an external instance such as an on-premises server or virtual machine (VM), to your Amazon ECS cluster.

@@ -1,0 +1,24 @@
+name: docs-gpt-local
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: docs-gpt-qdrant
+    restart: unless-stopped
+
+    user: "${UID}:${GID}"
+
+    ports:
+      - "127.0.0.1:6333:6333"
+      - "127.0.0.1:6334:6334"
+
+    volumes:
+      - ./rag/vector_db/qdrant:/qdrant/storage
+
+    environment:
+      QDRANT__TELEMETRY_DISABLED: "true"
+
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535

@@ -1,0 +1,653 @@
+from __future__ import annotations
+
+import inspect
+from enum import Enum
+import time
+from dataclasses import dataclass
+from types import SimpleNamespace
+from typing import Any, Awaitable, Callable, TypedDict
+
+from langgraph.graph import END, START, StateGraph
+
+from rag.retrieval.adaptive.actions import (
+    RetrievalAction,
+    RetrievalActionDecision,
+    RetrievalActionRecord,
+    RetrievalActionStatus,
+)
+from rag.retrieval.adaptive.confidence import apply_confidence_estimate
+from rag.retrieval.adaptive.engine import AdaptiveRetrievalEngine
+from rag.retrieval.adaptive.output import adaptive_result_to_graph_output
+from rag.retrieval.adaptive.signals import DefaultQuerySignalExtractor
+from rag.retrieval.adaptive.state import AdaptiveRetrievalState
+from rag.retrieval.contracts.request import RetrievalRequest
+from rag.retrieval.graph.output import (
+    create_runtime_error_state,
+    finalize_graph_output,
+)
+from rag.retrieval.graph.state import (
+    RetrievalGraphOutput,
+    RetrievalGraphStage,
+    RetrievalGraphState,
+    RetrievalTraceEvent,
+    add_error,
+    create_initial_state,
+)
+
+
+Payload = dict[str, Any]
+
+
+class AdaptiveRetrievalGraphState(TypedDict, total=False):
+    request: RetrievalRequest
+    adaptive_state: AdaptiveRetrievalState
+    final_decision: RetrievalActionDecision
+    errors: list[str]
+    metadata: Payload
+
+
+@dataclass(frozen=True)
+class AdaptiveRetrievalGraphRuntimeConfig:
+    recursion_limit: int = 32
+    include_debug_metadata: bool = True
+
+    def validate(self) -> None:
+        if self.recursion_limit <= 0:
+            raise ValueError("recursion_limit must be greater than zero.")
+
+        if not isinstance(self.include_debug_metadata, bool):
+            raise ValueError("include_debug_metadata must be boolean.")
+
+
+class AdaptiveRetrievalGraphRuntime:
+    """
+    LangGraph orchestration shell for adaptive retrieval.
+
+    Important boundary:
+      - LangGraph owns the routing.
+      - AdaptiveRetrievalEngine still owns action implementations.
+      - AdaptivePolicy still owns the decision logic.
+    """
+
+    def __init__(
+        self,
+        *,
+        engine: AdaptiveRetrievalEngine | None = None,
+        config: AdaptiveRetrievalGraphRuntimeConfig | None = None,
+    ) -> None:
+        self.engine = engine or AdaptiveRetrievalEngine()
+        self.config = config or AdaptiveRetrievalGraphRuntimeConfig()
+        self.config.validate()
+        self.graph = build_adaptive_retrieval_graph(self)
+
+    async def retrieve(
+        self,
+        request: RetrievalRequest,
+        *,
+        metadata: Payload | None = None,
+    ) -> RetrievalGraphOutput:
+        request.validate()
+
+        graph_state = AdaptiveRetrievalGraphState(
+            request=request,
+            errors=[],
+            metadata=dict(metadata or {}),
+        )
+
+        started = time.perf_counter()
+
+        try:
+            final_state = await self.graph.ainvoke(
+                graph_state,
+                config={"recursion_limit": self.config.recursion_limit},
+            )
+
+            adaptive_state = final_state.get("adaptive_state")
+            if adaptive_state is None:
+                failed = create_runtime_error_state(
+                    base_state=create_initial_state(request),
+                    exc=RuntimeError("adaptive graph finished without adaptive_state"),
+                )
+                return finalize_graph_output(
+                    failed,
+                    started=started,
+                    include_debug_metadata=self.config.include_debug_metadata,
+                )
+
+            result = SimpleNamespace(
+                state=adaptive_state,
+                final_decision=final_state.get("final_decision"),
+            )
+
+            output = adaptive_result_to_graph_output(
+                result,
+                metadata={
+                    **dict(final_state.get("metadata", {})),
+                    "backend": "adaptive_graph",
+                    "langgraph_runtime": True,
+                    "elapsed_ms": round((time.perf_counter() - started) * 1000, 3),
+                },
+            )
+
+            if self.config.include_debug_metadata:
+                output["metadata"]["graph_runtime"] = {
+                    "recursion_limit": self.config.recursion_limit,
+                    "node_trace_count": len(output.get("trace", [])),
+                }
+
+            return output
+
+        except Exception as exc:
+            failed = create_runtime_error_state(
+                base_state=create_initial_state(request),
+                exc=exc,
+            )
+            return finalize_graph_output(
+                failed,
+                started=started,
+                include_debug_metadata=self.config.include_debug_metadata,
+            )
+
+    async def prepare_node(
+        self,
+        state: AdaptiveRetrievalGraphState,
+    ) -> AdaptiveRetrievalGraphState:
+        request = state["request"]
+
+        query_plan = None
+        normalized_query = None
+
+        processor = getattr(self.engine.components, "query_processor", None)
+        if processor is not None:
+            query_plan = await processor.process(request)
+            query_plan.validate()
+            normalized_query = query_plan.normalized_query
+        else:
+            normalized_query = self.engine._normalize_query(request)
+
+        normalized_query.validate()
+
+        signal_extractor = getattr(
+            self.engine,
+            "signal_extractor",
+            DefaultQuerySignalExtractor(),
+        )
+
+        query_signals = signal_extractor.extract(
+            request=request,
+            normalized_query=normalized_query,
+        )
+
+        adaptive_state = AdaptiveRetrievalState.create(
+            request=request,
+            normalized_query=normalized_query,
+            query_signals=query_signals,
+        )
+
+        if query_plan is not None:
+            adaptive_state.metadata["query_processing"] = {
+                "planner": query_plan.planner,
+                "intent": query_plan.intent.value,
+                "retrieval_mode": query_plan.retrieval_mode.value,
+                "tool_hints": [hint.value for hint in query_plan.tool_hints],
+                "semantic_queries": list(query_plan.semantic_queries),
+                "exact_terms": list(query_plan.exact_terms),
+                "source_hints": list(query_plan.source_hints),
+                "requires_memory": query_plan.requires_memory,
+                "needs_agentic_loop": query_plan.needs_agentic_loop,
+                "needs_exact_search": query_plan.needs_exact_search,
+                "needs_source_navigation": query_plan.needs_source_navigation,
+                "confidence": query_plan.confidence,
+                "reasoning": query_plan.reasoning,
+            }
+
+        self._apply_confidence(adaptive_state)
+        self._snapshot(adaptive_state, last_action=None)
+
+        return {
+            "adaptive_state": adaptive_state,
+            "metadata": {
+                **dict(state.get("metadata", {})),
+                "backend": "adaptive_graph",
+            },
+        }
+
+    async def action_node(
+        self,
+        graph_state: AdaptiveRetrievalGraphState,
+        *,
+        action: RetrievalAction,
+    ) -> AdaptiveRetrievalGraphState:
+        adaptive_state = self._require_adaptive_state(graph_state)
+
+        decision = self._choose_next_action(adaptive_state)
+
+        if decision.action != action:
+            decision = RetrievalActionDecision(
+                action=action,
+                estimated_gain=decision.estimated_gain,
+                estimated_cost_ms=decision.estimated_cost_ms,
+                score=decision.score,
+                reason=(
+                    f"langgraph routed to {action.value}; "
+                    f"policy currently preferred {decision.action.value}"
+                ),
+                metadata=dict(decision.metadata),
+            )
+
+        record = await self._execute_action(
+            adaptive_state,
+            decision=decision,
+        )
+
+        self._append_action_record(adaptive_state, record)
+        self._apply_confidence(adaptive_state)
+        self._snapshot(
+            adaptive_state,
+            last_action=action.value,
+            metadata={
+                "decision": action.value,
+                "decision_score": decision.score,
+            },
+        )
+
+        return {
+            "adaptive_state": adaptive_state,
+            "metadata": dict(graph_state.get("metadata", {})),
+        }
+
+    async def stop_node(
+        self,
+        graph_state: AdaptiveRetrievalGraphState,
+    ) -> AdaptiveRetrievalGraphState:
+        adaptive_state = self._require_adaptive_state(graph_state)
+        decision = self._choose_next_action(adaptive_state)
+
+        record = RetrievalActionRecord(
+            action=RetrievalAction.STOP,
+            status=RetrievalActionStatus.SKIPPED,
+            hop=adaptive_state.hop,
+            reason=decision.reason,
+            latency_ms=None,
+            input_count=None,
+            output_count=None,
+            materially_changed=None,
+            error=None,
+            metadata={
+                "terminal": True,
+                "score": decision.score,
+            },
+        )
+
+        self._append_action_record(adaptive_state, record)
+        self._snapshot(
+            adaptive_state,
+            last_action=RetrievalAction.STOP.value,
+            metadata={"terminal_action": RetrievalAction.STOP.value},
+        )
+
+        return {
+            "adaptive_state": adaptive_state,
+            "final_decision": decision,
+            "metadata": dict(graph_state.get("metadata", {})),
+        }
+
+    async def fallback_node(
+        self,
+        graph_state: AdaptiveRetrievalGraphState,
+    ) -> AdaptiveRetrievalGraphState:
+        adaptive_state = self._require_adaptive_state(graph_state)
+        decision = self._choose_next_action(adaptive_state)
+
+        record = RetrievalActionRecord(
+            action=RetrievalAction.FALLBACK_NO_ANSWER,
+            status=RetrievalActionStatus.SKIPPED,
+            hop=adaptive_state.hop,
+            reason=decision.reason,
+            latency_ms=None,
+            input_count=None,
+            output_count=None,
+            materially_changed=None,
+            error=None,
+            metadata={
+                "terminal": True,
+                "score": decision.score,
+            },
+        )
+
+        self._append_action_record(adaptive_state, record)
+        self._snapshot(
+            adaptive_state,
+            last_action=RetrievalAction.FALLBACK_NO_ANSWER.value,
+            metadata={"terminal_action": RetrievalAction.FALLBACK_NO_ANSWER.value},
+        )
+
+        return {
+            "adaptive_state": adaptive_state,
+            "final_decision": decision,
+            "metadata": dict(graph_state.get("metadata", {})),
+        }
+
+    def route_next_action(
+        self,
+        graph_state: AdaptiveRetrievalGraphState,
+    ) -> str:
+        errors = graph_state.get("errors") or []
+        if errors:
+            return AdaptiveGraphNode.FALLBACK.value
+
+        adaptive_state = graph_state.get("adaptive_state")
+        if adaptive_state is None:
+            return AdaptiveGraphNode.FALLBACK.value
+
+        decision = self._choose_next_action(adaptive_state)
+        action = decision.action
+
+        if action == RetrievalAction.STOP:
+            return AdaptiveGraphNode.STOP.value
+
+        if action == RetrievalAction.FALLBACK_NO_ANSWER:
+            return AdaptiveGraphNode.FALLBACK.value
+
+        return ACTION_TO_NODE[action]
+
+    def _choose_next_action(
+        self,
+        adaptive_state: AdaptiveRetrievalState,
+    ) -> RetrievalActionDecision:
+        decision = self.engine.policy.choose_next_action(adaptive_state)
+
+        if inspect.isawaitable(decision):
+            raise RuntimeError("policy.choose_next_action must be synchronous.")
+
+        return decision
+
+    async def _execute_action(
+        self,
+        adaptive_state: AdaptiveRetrievalState,
+        *,
+        decision: RetrievalActionDecision,
+    ) -> RetrievalActionRecord:
+        action = decision.action
+        before_count = len(tuple(adaptive_state.active_candidates()))
+        started = time.perf_counter()
+
+        try:
+            input_count, output_count = await self._call_action_method(
+                adaptive_state,
+                action=action,
+            )
+            latency_ms = (time.perf_counter() - started) * 1000.0
+            after_count = len(tuple(adaptive_state.active_candidates()))
+
+            return RetrievalActionRecord(
+                action=action,
+                status=RetrievalActionStatus.SUCCEEDED,
+                hop=adaptive_state.hop,
+                reason=decision.reason,
+                latency_ms=latency_ms,
+                input_count=input_count,
+                output_count=output_count,
+                materially_changed=before_count != after_count,
+                error=None,
+                metadata={
+                    "before_count": before_count,
+                    "after_count": after_count,
+                    "estimated_gain": decision.estimated_gain,
+                    "estimated_cost_ms": decision.estimated_cost_ms,
+                    "decision_score": decision.score,
+                    **dict(decision.metadata or {}),
+                },
+            )
+
+        except Exception as exc:
+            latency_ms = (time.perf_counter() - started) * 1000.0
+
+            adaptive_state.add_error(f"{action.value} failed: {exc}")
+
+            return RetrievalActionRecord(
+                action=action,
+                status=RetrievalActionStatus.FAILED,
+                hop=adaptive_state.hop,
+                reason=decision.reason,
+                latency_ms=latency_ms,
+                input_count=None,
+                output_count=None,
+                materially_changed=None,
+                error=str(exc),
+                metadata={
+                    "estimated_gain": decision.estimated_gain,
+                    "estimated_cost_ms": decision.estimated_cost_ms,
+                    "decision_score": decision.score,
+                    "exception_type": type(exc).__name__,
+                    **dict(decision.metadata or {}),
+                },
+            )
+
+    async def _call_action_method(
+        self,
+        adaptive_state: AdaptiveRetrievalState,
+        *,
+        action: RetrievalAction,
+    ) -> tuple[int | None, int | None]:
+        method_name = ACTION_TO_ENGINE_METHOD[action]
+        method = getattr(self.engine, method_name, None)
+
+        if method is None:
+            raise AttributeError(
+                f"AdaptiveRetrievalEngine is missing {method_name} for {action.value}."
+            )
+
+        result = method(adaptive_state)
+        if inspect.isawaitable(result):
+            result = await result
+
+        if isinstance(result, tuple) and len(result) == 2:
+            return result
+
+        return (None, None)
+
+    def _apply_confidence(self, adaptive_state: AdaptiveRetrievalState) -> None:
+        estimator = getattr(self.engine, "confidence_estimator", None)
+        if estimator is None:
+            return
+
+        apply_confidence_estimate(adaptive_state, estimator)
+
+    def _snapshot(
+        self,
+        adaptive_state: AdaptiveRetrievalState,
+        *,
+        last_action: str | None,
+        metadata: Payload | None = None,
+    ) -> None:
+        snapshot_method = getattr(adaptive_state, "snapshot", None)
+        if snapshot_method is not None:
+            snapshot = snapshot_method(
+                last_action=last_action,
+                metadata=metadata or {},
+            )
+            adaptive_state.snapshots = tuple(adaptive_state.snapshots or ()) + (snapshot,)
+        adaptive_state.hop += 1 if last_action is not None else 0
+
+    def _append_action_record(
+        self,
+        adaptive_state: AdaptiveRetrievalState,
+        record: RetrievalActionRecord,
+    ) -> None:
+        records = getattr(adaptive_state, "action_records", None)
+
+        if hasattr(records, "append"):
+            records.append(record)
+            return
+
+        adaptive_state.action_records = tuple(records or ()) + (record,)
+
+    def _require_adaptive_state(
+        self,
+        graph_state: AdaptiveRetrievalGraphState,
+    ) -> AdaptiveRetrievalState:
+        adaptive_state = graph_state.get("adaptive_state")
+        if adaptive_state is None:
+            raise ValueError("Adaptive graph state is missing adaptive_state.")
+
+        return adaptive_state
+
+
+class AdaptiveGraphNode(str, Enum):
+    PREPARE = "prepare"
+    MEMORY_LOOKUP = "memory_lookup"
+    SPARSE_SEARCH = "sparse_search"
+    DENSE_SEARCH = "dense_search"
+    FUSE = "fuse"
+    SCORE_RERANK = "score_rerank"
+    CE_RERANK = "ce_rerank"
+    LINKED_EXPAND = "linked_expand"
+    ESCALATE_K = "escalate_k"
+    ESCALATE_DENSE = "escalate_dense"
+    VERIFY_EVIDENCE = "verify_evidence"
+    PACK_CONTEXT = "pack_context"
+    STOP = "stop"
+    FALLBACK = "fallback_no_answer"
+
+
+ACTION_TO_NODE: dict[RetrievalAction, str] = {
+    RetrievalAction.MEMORY_LOOKUP: AdaptiveGraphNode.MEMORY_LOOKUP.value,
+    RetrievalAction.SPARSE_SEARCH: AdaptiveGraphNode.SPARSE_SEARCH.value,
+    RetrievalAction.DENSE_SEARCH: AdaptiveGraphNode.DENSE_SEARCH.value,
+    RetrievalAction.FUSE: AdaptiveGraphNode.FUSE.value,
+    RetrievalAction.SCORE_RERANK: AdaptiveGraphNode.SCORE_RERANK.value,
+    RetrievalAction.CE_RERANK: AdaptiveGraphNode.CE_RERANK.value,
+    RetrievalAction.LINKED_EXPAND: AdaptiveGraphNode.LINKED_EXPAND.value,
+    RetrievalAction.ESCALATE_K: AdaptiveGraphNode.ESCALATE_K.value,
+    RetrievalAction.ESCALATE_DENSE: AdaptiveGraphNode.ESCALATE_DENSE.value,
+    RetrievalAction.VERIFY_EVIDENCE: AdaptiveGraphNode.VERIFY_EVIDENCE.value,
+    RetrievalAction.PACK_CONTEXT: AdaptiveGraphNode.PACK_CONTEXT.value,
+}
+
+
+ACTION_TO_ENGINE_METHOD: dict[RetrievalAction, str] = {
+    RetrievalAction.MEMORY_LOOKUP: "_memory_lookup",
+    RetrievalAction.SPARSE_SEARCH: "_sparse_search",
+    RetrievalAction.DENSE_SEARCH: "_dense_search",
+    RetrievalAction.FUSE: "_fuse",
+    RetrievalAction.SCORE_RERANK: "_score_rerank",
+    RetrievalAction.CE_RERANK: "_ce_rerank",
+    RetrievalAction.LINKED_EXPAND: "_linked_expand",
+    RetrievalAction.ESCALATE_K: "_escalate_k",
+    RetrievalAction.ESCALATE_DENSE: "_escalate_dense",
+    RetrievalAction.VERIFY_EVIDENCE: "_verify_evidence",
+    RetrievalAction.PACK_CONTEXT: "_pack_context",
+}
+
+
+def build_adaptive_retrieval_graph(runtime: AdaptiveRetrievalGraphRuntime):
+    workflow = StateGraph(AdaptiveRetrievalGraphState)
+
+    workflow.add_node(AdaptiveGraphNode.PREPARE.value, runtime.prepare_node)
+    workflow.add_node(
+        AdaptiveGraphNode.MEMORY_LOOKUP.value,
+        _action_node(runtime, RetrievalAction.MEMORY_LOOKUP),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.SPARSE_SEARCH.value,
+        _action_node(runtime, RetrievalAction.SPARSE_SEARCH),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.DENSE_SEARCH.value,
+        _action_node(runtime, RetrievalAction.DENSE_SEARCH),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.FUSE.value,
+        _action_node(runtime, RetrievalAction.FUSE),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.SCORE_RERANK.value,
+        _action_node(runtime, RetrievalAction.SCORE_RERANK),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.CE_RERANK.value,
+        _action_node(runtime, RetrievalAction.CE_RERANK),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.LINKED_EXPAND.value,
+        _action_node(runtime, RetrievalAction.LINKED_EXPAND),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.ESCALATE_K.value,
+        _action_node(runtime, RetrievalAction.ESCALATE_K),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.ESCALATE_DENSE.value,
+        _action_node(runtime, RetrievalAction.ESCALATE_DENSE),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.VERIFY_EVIDENCE.value,
+        _action_node(runtime, RetrievalAction.VERIFY_EVIDENCE),
+    )
+    workflow.add_node(
+        AdaptiveGraphNode.PACK_CONTEXT.value,
+        _action_node(runtime, RetrievalAction.PACK_CONTEXT),
+    )
+    workflow.add_node(AdaptiveGraphNode.STOP.value, runtime.stop_node)
+    workflow.add_node(AdaptiveGraphNode.FALLBACK.value, runtime.fallback_node)
+
+    workflow.add_edge(START, AdaptiveGraphNode.PREPARE.value)
+
+    action_nodes = [
+        AdaptiveGraphNode.PREPARE.value,
+        AdaptiveGraphNode.MEMORY_LOOKUP.value,
+        AdaptiveGraphNode.SPARSE_SEARCH.value,
+        AdaptiveGraphNode.DENSE_SEARCH.value,
+        AdaptiveGraphNode.FUSE.value,
+        AdaptiveGraphNode.SCORE_RERANK.value,
+        AdaptiveGraphNode.CE_RERANK.value,
+        AdaptiveGraphNode.LINKED_EXPAND.value,
+        AdaptiveGraphNode.ESCALATE_K.value,
+        AdaptiveGraphNode.ESCALATE_DENSE.value,
+        AdaptiveGraphNode.VERIFY_EVIDENCE.value,
+        AdaptiveGraphNode.PACK_CONTEXT.value,
+    ]
+
+    route_map = {
+        AdaptiveGraphNode.MEMORY_LOOKUP.value: AdaptiveGraphNode.MEMORY_LOOKUP.value,
+        AdaptiveGraphNode.SPARSE_SEARCH.value: AdaptiveGraphNode.SPARSE_SEARCH.value,
+        AdaptiveGraphNode.DENSE_SEARCH.value: AdaptiveGraphNode.DENSE_SEARCH.value,
+        AdaptiveGraphNode.FUSE.value: AdaptiveGraphNode.FUSE.value,
+        AdaptiveGraphNode.SCORE_RERANK.value: AdaptiveGraphNode.SCORE_RERANK.value,
+        AdaptiveGraphNode.CE_RERANK.value: AdaptiveGraphNode.CE_RERANK.value,
+        AdaptiveGraphNode.LINKED_EXPAND.value: AdaptiveGraphNode.LINKED_EXPAND.value,
+        AdaptiveGraphNode.ESCALATE_K.value: AdaptiveGraphNode.ESCALATE_K.value,
+        AdaptiveGraphNode.ESCALATE_DENSE.value: AdaptiveGraphNode.ESCALATE_DENSE.value,
+        AdaptiveGraphNode.VERIFY_EVIDENCE.value: AdaptiveGraphNode.VERIFY_EVIDENCE.value,
+        AdaptiveGraphNode.PACK_CONTEXT.value: AdaptiveGraphNode.PACK_CONTEXT.value,
+        AdaptiveGraphNode.STOP.value: AdaptiveGraphNode.STOP.value,
+        AdaptiveGraphNode.FALLBACK.value: AdaptiveGraphNode.FALLBACK.value,
+    }
+
+    for node_name in action_nodes:
+        workflow.add_conditional_edges(
+            node_name,
+            runtime.route_next_action,
+            route_map,
+        )
+
+    workflow.add_edge(AdaptiveGraphNode.STOP.value, END)
+    workflow.add_edge(AdaptiveGraphNode.FALLBACK.value, END)
+
+    return workflow.compile()
+
+
+def _action_node(
+    runtime: AdaptiveRetrievalGraphRuntime,
+    action: RetrievalAction,
+):
+    async def node(
+        state: AdaptiveRetrievalGraphState,
+    ) -> AdaptiveRetrievalGraphState:
+        return await runtime.action_node(
+            state,
+            action=action,
+        )
+
+    return node

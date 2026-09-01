@@ -1,0 +1,667 @@
+{
+  "tenant_id": "tnt_local_000000000001",
+  "user_id": "usr_local_000000000001",
+  "conversation_id": "cnv_demo_1785371118_fad482a1",
+  "turn_id": "58d7959c-1189-40a0-bb55-6c4fae15ae54",
+  "current_user_message": "what is aws fargate",
+  "raw_user_message": "what is aws fargate",
+  "retrieval_query": "what is aws fargate",
+  "turn_plan": {
+    "action": "document_question",
+    "needs_document_retrieval": true,
+    "retrieval_query": "what is aws fargate",
+    "answer_scope": "knowledge_base",
+    "allow_conversation_answer": false,
+    "needs_clarification": false,
+    "uses_previous_turns": false,
+    "confidence": 0.86,
+    "reason": "User is asking a concrete technical/product question that must be answered from source documents.",
+    "metadata": {
+      "deterministic": true,
+      "generic_technical_source_bound": true,
+      "planner_provider": "system",
+      "planner_model": "deterministic_chat_mode",
+      "planner_fallback_used": false,
+      "recent_user_message_available": false,
+      "recent_assistant_message_available": false
+    }
+  },
+  "recent_turns": [],
+  "conversation_summary": null,
+  "retrieved_memory": [],
+  "retrieval_state": {
+    "query": "what is aws fargate",
+    "rewritten_query": "what is aws fargate",
+    "retrieval_trace_id": "7fc511e7-6dfc-412b-9846-bf6a4332357c",
+    "stateful_retrieval": {
+      "enabled": true,
+      "raw_query": "what is aws fargate",
+      "resolved_query": "what is aws fargate",
+      "query_changed": false,
+      "needed_resolution": false,
+      "resolved_entity": null,
+      "strategy": "no_referential_marker",
+      "confidence": 1.0,
+      "metadata": {
+        "resolution_enabled": true
+      },
+      "conversation_context": {
+        "conversation_id": "cnv_demo_1785371118_fad482a1",
+        "recent_turn_count": 1,
+        "recent_entity_count": 0,
+        "has_summary": false,
+        "working_memory_count": 0
+      }
+    },
+    "retrieval_metadata": {
+      "backend": "adaptive_graph",
+      "action_count": 5,
+      "snapshot_count": 1,
+      "confidence": 0.26323379041624445,
+      "confidence_reason": "value=0.263; score_gap=0.02274850716468413; exact_coverage=0.500; source_coverage=1.000; penalties=['high_score_entropy']",
+      "query_signals": {
+        "normalized_query": "what is aws fargate",
+        "token_count": 4,
+        "lexical_specificity": 0.08,
+        "is_exactish": false,
+        "is_structural_or_multi_hop": false,
+        "is_chat_dependent": false,
+        "likely_needs_memory": false,
+        "has_chat_history": true,
+        "has_session_context": false
+      },
+      "actions": [
+        {
+          "action": "sparse_search",
+          "status": "succeeded",
+          "hop": 0,
+          "reason": "selected highest gain/cost action: sparse_search; score=0.016391",
+          "latency_ms": 10041.605139005696,
+          "input_count": 0,
+          "output_count": 30,
+          "materially_changed": true,
+          "error": null,
+          "before_count": 0,
+          "after_count": 30,
+          "estimated_gain": 0.7375999999999999,
+          "estimated_cost_ms": 45.0,
+          "decision_score": 0.01639111111111111,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [],
+          "confidence": 0.0
+        },
+        {
+          "action": "score_rerank",
+          "status": "succeeded",
+          "hop": 1,
+          "reason": "selected highest gain/cost action: score_rerank; score=0.037037",
+          "latency_ms": 2.607142996566836,
+          "input_count": 30,
+          "output_count": 30,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.2,
+          "estimated_cost_ms": 5.4,
+          "decision_score": 0.037037037037037035,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [
+            "sparse_search"
+          ],
+          "confidence": 0.36257837726519576
+        },
+        {
+          "action": "ce_rerank",
+          "status": "succeeded",
+          "hop": 2,
+          "reason": "forced CE rerank before context packing: high candidate score entropy; entropy=0.9434",
+          "latency_ms": 8503.485254004772,
+          "input_count": 30,
+          "output_count": 30,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.4600000000000001,
+          "estimated_cost_ms": 330.0,
+          "decision_score": 0.0013939393939393942,
+          "policy": "greedy_gain_cost_with_ce_gate",
+          "forced": true,
+          "trigger": "high candidate score entropy; entropy=0.9434",
+          "completed_actions": [
+            "score_rerank",
+            "sparse_search"
+          ],
+          "confidence": 0.3671710075631443,
+          "score_gap": 0.32797941381968887,
+          "score_entropy": 0.9434199313554991,
+          "reranked_count": 30
+        },
+        {
+          "action": "pack_context",
+          "status": "succeeded",
+          "hop": 3,
+          "reason": "selected highest gain/cost action: pack_context; score=0.118750",
+          "latency_ms": 42.20035199978156,
+          "input_count": 30,
+          "output_count": 3,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.95,
+          "estimated_cost_ms": 8.0,
+          "decision_score": 0.11875,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [
+            "ce_rerank",
+            "score_rerank",
+            "sparse_search"
+          ],
+          "confidence": 0.7002358609868938
+        },
+        {
+          "action": "stop",
+          "status": "skipped",
+          "hop": 4,
+          "reason": "context already packed",
+          "latency_ms": null,
+          "input_count": null,
+          "output_count": null,
+          "materially_changed": null,
+          "error": null,
+          "terminal": true,
+          "score": 1.0
+        }
+      ],
+      "source": "generation_retrieval_node",
+      "turn_id": "58d7959c-1189-40a0-bb55-6c4fae15ae54",
+      "raw_user_message": "what is aws fargate",
+      "current_user_message": "what is aws fargate",
+      "planned_retrieval_query": "what is aws fargate",
+      "retrieval_query": "what is aws fargate",
+      "effective_top_k": 5,
+      "stateful_retrieval": {
+        "enabled": true,
+        "raw_query": "what is aws fargate",
+        "resolved_query": "what is aws fargate",
+        "query_changed": false,
+        "needed_resolution": false,
+        "resolved_entity": null,
+        "strategy": "no_referential_marker",
+        "confidence": 1.0,
+        "metadata": {
+          "resolution_enabled": true
+        },
+        "conversation_context": {
+          "conversation_id": "cnv_demo_1785371118_fad482a1",
+          "recent_turn_count": 1,
+          "recent_entity_count": 0,
+          "has_summary": false,
+          "working_memory_count": 0
+        }
+      },
+      "raw_query": "what is aws fargate",
+      "resolved_query": "what is aws fargate",
+      "query_changed": false,
+      "resolution_strategy": "no_referential_marker",
+      "langgraph_runtime": true,
+      "elapsed_ms": 18701.604,
+      "graph_runtime": {
+        "recursion_limit": 16,
+        "node_trace_count": 5
+      },
+      "retrieval_trace_id": "7fc511e7-6dfc-412b-9846-bf6a4332357c"
+    },
+    "candidates": [
+      {
+        "point_id": "ced1c296-7a5b-55c9-a291-09140450f312",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.05727189,
+        "rank": 1
+      },
+      {
+        "point_id": "42b6d2aa-bef0-5da2-9cf4-1778c08d4dbc",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.05596904,
+        "rank": 2
+      },
+      {
+        "point_id": "7dddfb5e-21db-5c0f-8268-8dbac1707efe",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.05575591,
+        "rank": 3
+      },
+      {
+        "point_id": "31161c53-25cb-576e-b690-2a5d5af2abe4",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.05554887,
+        "rank": 4
+      },
+      {
+        "point_id": "7cccba12-94d9-5022-8147-f9fcadc5ff1e",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.05503175,
+        "rank": 5
+      },
+      {
+        "point_id": "e0911869-6b7d-56be-a0bd-615165323d23",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.05459649,
+        "rank": 6
+      },
+      {
+        "point_id": "dc4b1c06-581e-5d8e-9e45-2f8bc7b15629",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.04496392,
+        "rank": 7
+      },
+      {
+        "point_id": "44d14110-b493-58e3-966c-07f66d3b95b8",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.04471591,
+        "rank": 8
+      },
+      {
+        "point_id": "6de89e5e-eeca-51aa-a0c7-36d9d6815927",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.04434462,
+        "rank": 9
+      },
+      {
+        "point_id": "adbdc8b4-7656-510c-80de-067a07d62731",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.04424242,
+        "rank": 10
+      },
+      {
+        "point_id": "0aab47d1-8441-56f7-8407-b65adbc5a87a",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.04401628,
+        "rank": 11
+      },
+      {
+        "point_id": "94d2d562-0b59-5637-8d4d-7074ba15010e",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.04317542,
+        "rank": 12
+      },
+      {
+        "point_id": "1c49e5eb-9b83-5841-83b8-5bf2ee07910c",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.04265863,
+        "rank": 13
+      },
+      {
+        "point_id": "5dd0ff55-672b-575f-84cb-5cabad901cd8",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.04247351,
+        "rank": 14
+      },
+      {
+        "point_id": "59335ad7-9c02-50d0-a81f-73f5254b4885",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.03521396,
+        "rank": 15
+      },
+      {
+        "point_id": "0ce114c7-b252-5168-a9b1-66b425c6aef3",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.0246294,
+        "rank": 16
+      },
+      {
+        "point_id": "46a86642-abb0-5a75-9071-e18434b4c3cc",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01312903,
+        "rank": 17
+      },
+      {
+        "point_id": "432a8bd7-f8ac-5361-9c10-47fb908e0fec",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01287302,
+        "rank": 18
+      },
+      {
+        "point_id": "cafbc552-acea-5b33-84a8-35e12b9b2b34",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.012625,
+        "rank": 19
+      },
+      {
+        "point_id": "a524fdc6-c9a0-5b68-ab83-fba1a5edad23",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01238462,
+        "rank": 20
+      },
+      {
+        "point_id": "696db27b-33c4-5123-87ff-97d8d3251f6d",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01215152,
+        "rank": 21
+      },
+      {
+        "point_id": "1ed86b15-3521-5744-82f5-28c096abe735",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01192537,
+        "rank": 22
+      },
+      {
+        "point_id": "075c82c1-3fb1-50a6-977a-781d41affb0f",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01170588,
+        "rank": 23
+      },
+      {
+        "point_id": "1a994e8f-d6b1-55da-a7b9-13c6d8f8eef7",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01128571,
+        "rank": 24
+      },
+      {
+        "point_id": "314c0d66-5370-548c-9797-155eae59fc39",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01108451,
+        "rank": 25
+      },
+      {
+        "point_id": "8c1b76e9-5247-590c-9718-786fc3c128a0",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01069863,
+        "rank": 26
+      },
+      {
+        "point_id": "d61f0a1e-5d18-5b3a-8e30-c0fc1ffa0b2d",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01051351,
+        "rank": 27
+      },
+      {
+        "point_id": "1d8b882b-7208-5fa7-899a-5085ec356e9f",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01033333,
+        "rank": 28
+      },
+      {
+        "point_id": "81c4c051-c7b8-5b67-9a8b-10224c5aaa65",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.01550725,
+        "rank": 29
+      },
+      {
+        "point_id": "8c3a5877-20e1-57fa-9775-e36588f12deb",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.01611111,
+        "rank": 30
+      }
+    ],
+    "selected_context": [
+      {
+        "block_id": "doc_e57ded6cc07f6574:s4_platform_versions:b0",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s4_platform_versions:b0",
+        "heading": null,
+        "text": "Context: Architect for AWS Fargate for Amazon ECS Heading: Platform versions Function: explanation Text: AWS Fargate platform versions are used to refer to a specific runtime environment for Fargate task infrastructure. It is a combination of the kernel and container runtime versions. You select a platform version when you run a task or when you create a service to maintain a number of identical tasks.",
+        "score": 0.04317542,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "aws",
+            "fargate",
+            "what"
+          ],
+          "anchor_terms": [
+            "fargate"
+          ],
+          "query_phrases": [
+            "aws fargate",
+            "is aws fargate"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "definition"
+        }
+      },
+      {
+        "block_id": "doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b0",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b0",
+        "heading": null,
+        "text": "Context: Architect for AWS Fargate for Amazon ECS Function: explanation Text: AWS Fargate is a technology that you can use with Amazon ECS to run containers without having to manage servers or clusters of Amazon EC2 instances. With AWS Fargate, you no longer have to provision, configure, or scale clusters of virtual machines to run containers. This removes the need to choose server types, decide when to scale your clusters, or optimize cluster packing.",
+        "score": 0.05727189,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "aws",
+            "fargate",
+            "what"
+          ],
+          "anchor_terms": [
+            "fargate"
+          ],
+          "query_phrases": [
+            "aws fargate",
+            "is aws fargate"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "definition"
+        }
+      },
+      {
+        "block_id": "doc_e57ded6cc07f6574:s4_platform_versions:b1",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s4_platform_versions:b1",
+        "heading": null,
+        "text": "Context: Architect for AWS Fargate for Amazon ECS Heading: Platform versions Function: explanation Text: New revisions of platform versions are released as the runtime environment evolves, for example, if there are kernel or operating system updates, new features, bug fixes, or security updates. A Fargate platform version is updated by making a new platform version revision. Each task runs on one platform version revision during its lifecycle. If you want to use the latest platform version revision, then you must start a new task. A new task that runs on Fargate always runs on the latest revision of a platform version, ensuring that tasks are always started on secure and patched infrastructure.",
+        "score": 0.04424242,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "aws",
+            "fargate",
+            "what"
+          ],
+          "anchor_terms": [
+            "fargate"
+          ],
+          "query_phrases": [
+            "aws fargate",
+            "is aws fargate"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "definition"
+        }
+      }
+    ],
+    "citations": [
+      {
+        "block_id": "doc_e57ded6cc07f6574:s4_platform_versions:b0",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s4_platform_versions:b0",
+        "heading": null
+      },
+      {
+        "block_id": "doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b0",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b0",
+        "heading": null
+      },
+      {
+        "block_id": "doc_e57ded6cc07f6574:s4_platform_versions:b1",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s4_platform_versions:b1",
+        "heading": null
+      }
+    ],
+    "warnings": []
+  },
+  "context_bundle": {
+    "retrieved_documents": [
+      {
+        "block_id": "doc_e57ded6cc07f6574:s4_platform_versions:b0",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s4_platform_versions:b0",
+        "heading": null,
+        "text": "Context: Architect for AWS Fargate for Amazon ECS Heading: Platform versions Function: explanation Text: AWS Fargate platform versions are used to refer to a specific runtime environment for Fargate task infrastructure. It is a combination of the kernel and container runtime versions. You select a platform version when you run a task or when you create a service to maintain a number of identical tasks.",
+        "score": 0.04317542,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "aws",
+            "fargate",
+            "what"
+          ],
+          "anchor_terms": [
+            "fargate"
+          ],
+          "query_phrases": [
+            "aws fargate",
+            "is aws fargate"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "definition"
+        }
+      },
+      {
+        "block_id": "doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b0",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b0",
+        "heading": null,
+        "text": "Context: Architect for AWS Fargate for Amazon ECS Function: explanation Text: AWS Fargate is a technology that you can use with Amazon ECS to run containers without having to manage servers or clusters of Amazon EC2 instances. With AWS Fargate, you no longer have to provision, configure, or scale clusters of virtual machines to run containers. This removes the need to choose server types, decide when to scale your clusters, or optimize cluster packing.",
+        "score": 0.05727189,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "aws",
+            "fargate",
+            "what"
+          ],
+          "anchor_terms": [
+            "fargate"
+          ],
+          "query_phrases": [
+            "aws fargate",
+            "is aws fargate"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "definition"
+        }
+      },
+      {
+        "block_id": "doc_e57ded6cc07f6574:s4_platform_versions:b1",
+        "source_id": "aws-fargate",
+        "chunk_id": "doc_e57ded6cc07f6574:s4_platform_versions:b1",
+        "heading": null,
+        "text": "Context: Architect for AWS Fargate for Amazon ECS Heading: Platform versions Function: explanation Text: New revisions of platform versions are released as the runtime environment evolves, for example, if there are kernel or operating system updates, new features, bug fixes, or security updates. A Fargate platform version is updated by making a new platform version revision. Each task runs on one platform version revision during its lifecycle. If you want to use the latest platform version revision, then you must start a new task. A new task that runs on Fargate always runs on the latest revision of a platform version, ensuring that tasks are always started on secure and patched infrastructure.",
+        "score": 0.04424242,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "aws",
+            "fargate",
+            "what"
+          ],
+          "anchor_terms": [
+            "fargate"
+          ],
+          "query_phrases": [
+            "aws fargate",
+            "is aws fargate"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "definition"
+        }
+      }
+    ],
+    "retrieved_memory": [],
+    "working_memory": [],
+    "conversation_summary": null,
+    "provenance_map": {}
+  },
+  "disable_long_term_memory": true,
+  "disable_memory_write": true
+}

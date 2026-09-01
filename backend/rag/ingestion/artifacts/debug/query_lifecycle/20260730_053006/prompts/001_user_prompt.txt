@@ -1,0 +1,38 @@
+CURRENT USER MESSAGE:
+/exit
+
+ANSWER MODE:
+answer_scope=general_conversation; retrieval_required=false; action=conversation_only
+
+RECENT CONVERSATION:
+1. user: what is aws fargate
+2. assistant: I don’t have enough supporting context in the current knowledge base to answer that specific question confidently.
+
+RETRIEVED DOCUMENTS:
+None
+
+RETRIEVED MEMORY:
+None
+
+PROVENANCE:
+None
+
+Write only the final answer for the user.
+
+Rules:
+- Do not mention ANSWER MODE.
+- Do not mention the turn plan.
+- Do not explain any routing or planner decision.
+- Do not reveal internal reasoning.
+- If answer_scope=knowledge_base, answer from retrieved documents only.
+- If answer_scope=general_conversation, chat normally.
+- If answer_scope=assistant_profile, answer using fixed Docs-GPT identity.
+
+SETUP / CONFIGURATION ANSWER RULE:
+- If the user asks how to configure, set up, deploy, create, or run something, look for all retrieved chunks that describe setup pieces.
+- Prefer a helpful grounded sequence over a narrow refusal.
+- Good structure:
+  1. Direct answer: “Yes, the docs show the main pieces.”
+  2. Grounded setup path from retrieved chunks.
+  3. What is missing, only if something important is missing.
+- Never say “no step-by-step guide” if the retrieved documents include relevant setup requirements, parameters, walkthroughs, task/service concepts, or getting-started material.

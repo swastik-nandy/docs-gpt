@@ -1,0 +1,21 @@
+# rag/ingestion/data_transformation/parser/adapters/markdown/spine/config/thresholds.toml
+
+[markdown_spine_thresholds.bytes]
+small = 262144
+normal = 5242880
+large = 20971520
+huge = 52428800
+
+[markdown_spine_thresholds.estimated_tokens]
+small = 100000
+normal = 1500000
+large = 6000000
+huge = 14000000
+
+[markdown_spine_thresholds.sections]
+large_section_tokens = 500000
+
+[markdown_spine_thresholds.routing]
+normal_queue = "parser.markdown.normal"
+spine_queue = "parser.markdown.spine"
+quarantine_queue = "parser.markdown.quarantine"

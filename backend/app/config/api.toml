@@ -1,0 +1,43 @@
+[app]
+name = "Docs GPT Backend"
+api_v1_prefix = "/api/v1"
+
+[tenancy]
+default_tenant_id = "tnt_local_000000000001"
+default_user_id = "usr_local_000000000001"
+allow_client_tenant_id = false
+
+[chat]
+top_k = 5
+enable_long_term_memory = false
+enable_semantic_memory_write = false
+
+[artifacts]
+source_root = "rag/ingestion/artifacts/source"
+chunked_root = "rag/ingestion/artifacts/chunked"
+
+[uploads]
+max_files = 50
+max_file_bytes = 52428800
+max_total_bytes = 262144000
+stream_chunk_bytes = 1048576
+
+[uploads.allowed_suffixes]
+".md" = "text/markdown"
+".mdx" = "text/mdx"
+".markdown" = "text/markdown"
+".mdown" = "text/markdown"
+".mkd" = "text/markdown"
+".mdwn" = "text/markdown"
+
+[dedupe]
+enabled = true
+algorithm = "sha256"
+scope = "within_job"
+
+[markers]
+ready = "_READY"
+done = "_DONE"
+failed = "_FAILED"
+[redis]
+channel_prefix = "docs_gpt:chat"

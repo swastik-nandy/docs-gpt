@@ -1,0 +1,44 @@
+CURRENT USER MESSAGE:
+what is aws fargate
+
+ANSWER MODE:
+answer_scope=knowledge_base; retrieval_required=true; action=document_question; retrieval_query=what is aws fargate
+
+RECENT CONVERSATION:
+None
+
+RETRIEVED DOCUMENTS:
+[doc_e57ded6cc07f6574:s4_platform_versions:b0] title=untitled source_id=aws-fargatechunk_id=doc_e57ded6cc07f6574:s4_platform_versions:b0score=0.04317542
+Context: Architect for AWS Fargate for Amazon ECS Heading: Platform versions Function: explanation Text: AWS Fargate platform versions are used to refer to a specific runtime environment for Fargate task infrastructure. It is a combination of the kernel and container runtime versions. You select a platform version when you run a task or when you create a service to maintain a number of identical tasks.
+
+[doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b0] title=untitled source_id=aws-fargatechunk_id=doc_e57ded6cc07f6574:s0_architect_for_aws_fargate_for_amazon_ecs:b0score=0.05727189
+Context: Architect for AWS Fargate for Amazon ECS Function: explanation Text: AWS Fargate is a technology that you can use with Amazon ECS to run containers without having to manage servers or clusters of Amazon EC2 instances. With AWS Fargate, you no longer have to provision, configure, or scale clusters of virtual machines to run containers. This removes the need to choose server types, decide when to scale your clusters, or optimize cluster packing.
+
+[doc_e57ded6cc07f6574:s4_platform_versions:b1] title=untitled source_id=aws-fargatechunk_id=doc_e57ded6cc07f6574:s4_platform_versions:b1score=0.04424242
+Context: Architect for AWS Fargate for Amazon ECS Heading: Platform versions Function: explanation Text: New revisions of platform versions are released as the runtime environment evolves, for example, if there are kernel or operating system updates, new features, bug fixes, or security updates. A Fargate platform version is updated by making a new platform version revision. Each task runs on one platform version revision during its lifecycle. If you want to use the latest platform version revision, then you must start a new task. A new task that runs on Fargate always runs on the latest revision of a platform version, ensuring that tasks are always started on secure and patched infrastructure.
+
+RETRIEVED MEMORY:
+None
+
+PROVENANCE:
+None
+
+Write only the final answer for the user.
+
+Rules:
+- Do not mention ANSWER MODE.
+- Do not mention the turn plan.
+- Do not explain any routing or planner decision.
+- Do not reveal internal reasoning.
+- If answer_scope=knowledge_base, answer from retrieved documents only.
+- If answer_scope=general_conversation, chat normally.
+- If answer_scope=assistant_profile, answer using fixed Docs-GPT identity.
+
+SETUP / CONFIGURATION ANSWER RULE:
+- If the user asks how to configure, set up, deploy, create, or run something, look for all retrieved chunks that describe setup pieces.
+- Prefer a helpful grounded sequence over a narrow refusal.
+- Good structure:
+  1. Direct answer: “Yes, the docs show the main pieces.”
+  2. Grounded setup path from retrieved chunks.
+  3. What is missing, only if something important is missing.
+- Never say “no step-by-step guide” if the retrieved documents include relevant setup requirements, parameters, walkthroughs, task/service concepts, or getting-started material.

@@ -1,0 +1,230 @@
+#-------------------------------------- PYTHON CORE -------------------------------------------
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+#-------------------------------------- VIRTUAL ENVIRONMENTS -------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+**/.venv/
+**/venv/
+**/env/
+
+#-------------------------------------- ENV FILES / SECRETS -------------------------------------------
+.env
+.env.*
+*.env
+
+!.env.example
+!*.env.example
+
+#-------------------------------------- UV / PYTHON LOCAL -------------------------------------------
+.python-version
+
+# IMPORTANT:
+# uv.lock should stay tracked for reproducible installs.
+# Do not ignore uv.lock.
+
+#-------------------------------------- IDE / EDITOR -------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+
+#-------------------------------------- OS FILES -------------------------------------------
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+#-------------------------------------- LOGS -------------------------------------------
+logs/
+**/logs/
+*.log
+
+#-------------------------------------- TEMP FILES -------------------------------------------
+tmp/
+temp/
+*.tmp
+*.temp
+
+#-------------------------------------- BUILD / DIST -------------------------------------------
+build/
+dist/
+*.egg-info/
+.eggs/
+
+#-------------------------------------- NOTEBOOKS -------------------------------------------
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+#-------------------------------------- LOCAL EXPERIMENT FILES -------------------------------------------
+backend/check_models.py
+backend/rag/serve.py
+
+# ----------------------------------- EMBEDDING MODEL FILES ---------------------------------
+
+backend/.models
+
+#-------------------------------------- LOCAL DATABASE FILES -------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.duckdb
+**/*.sqlite
+**/*.sqlite3
+**/*.db
+**/*.duckdb
+
+backend/qdrant_db/
+**/qdrant_db/
+
+backend/chroma_db/
+**/chroma_db/
+
+backend/storage/
+storage/
+**/storage/
+
+#-------------------------------------- QDRANT VECTOR STORE -------------------------------------------
+backend/rag/vector_db/*
+!backend/rag/vector_store/.gitkeep
+
+#-------------------------------------- MODEL / LLM CACHE -------------------------------------------
+.cache/
+**/.cache/
+
+.huggingface/
+**/.huggingface/
+
+transformers_cache/
+**/transformers_cache/
+
+sentence_transformers/
+**/sentence_transformers/
+
+#-------------------------------------- DATASETS / GENERATED DATA -------------------------------------------
+data/
+datasets/
+**/data/
+**/datasets/
+
+*.jsonl
+*.parquet
+*.feather
+*.csv
+
+#-------------------------------------- INGESTION RUNTIME ARTIFACTS -------------------------------------------
+backend/rag/ingestion/artifacts/source/*
+!backend/rag/ingestion/artifacts/source/.gitkeep
+
+backend/rag/ingestion/artifacts/chunked/*
+!backend/rag/ingestion/artifacts/chunked/.gitkeep
+
+backend/rag/ingestion/artifacts/indexed/*
+!backend/rag/ingestion/artifacts/indexed/.gitkeep
+
+#-------------------------------------- OLD / EXTRA ARTIFACT OUTPUTS -------------------------------------------
+backend/artifacts/parsed/*
+!backend/artifacts/parsed/.gitkeep
+
+artifacts/parsed/*
+!artifacts/parsed/.gitkeep
+
+#-------------------------------------- TEST DATA -------------------------------------------
+test_data/**
+backend/test_data/**
+**/test_data/**
+
+!test_data/
+!backend/test_data/
+!**/test_data/
+
+!test_data/.gitkeep
+!backend/test_data/.gitkeep
+!**/test_data/.gitkeep
+
+#-------------------------------------- EVALUATION GENERATED OUTPUTS -------------------------------------------
+backend/rag/ingestion/**/evaluation/runs/
+backend/rag/ingestion/**/evaluation/reports/
+backend/rag/ingestion/**/evaluation/results/
+backend/rag/ingestion/**/evaluation/output/
+backend/rag/ingestion/**/evaluation/outputs/
+#-------------------------------------- MEDIA / LARGE FILES -------------------------------------------
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.mkv
+
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.tiff
+
+#-------------------------------------- ARCHIVES -------------------------------------------
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+#-------------------------------------- BINARY / MODEL WEIGHTS -------------------------------------------
+*.bin
+*.dat
+*.pt
+*.pth
+*.onnx
+*.safetensors
+
+#--------------------------------------- GENERATED DOCUMENTS -------------------------------------------
+*.docx
+*.pdf
+
+# ----------------------------------------- NUXT FRONTEND ------------------------------------------------------------
+
+frontend/node_modules/
+
+# Nuxt generated/build files
+frontend/.nuxt/
+frontend/.output/
+frontend/.nitro/
+frontend/.cache/
+frontend/.data/
+frontend/dist/
+
+# Environment / secrets
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Keep example env file
+!frontend/.env.example
+
+# Logs
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+
+# Testing / coverage
+frontend/coverage/
+frontend/.vitest/
+
+# TypeScript generated state
+frontend/*.tsbuildinfo
+

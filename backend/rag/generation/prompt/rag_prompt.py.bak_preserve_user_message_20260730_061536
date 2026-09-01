@@ -1,0 +1,237 @@
+from __future__ import annotations
+
+from dataclasses import asdict, is_dataclass
+from typing import Any, Mapping, Sequence
+
+from rag.generation.graph.state import ConversationState
+from rag.generation.prompt.prompt_config import PromptRegistry
+
+
+Payload = dict[str, Any]
+
+
+def get_rag_system_prompt(prompt_registry: PromptRegistry | None = None) -> str:
+    registry = prompt_registry or PromptRegistry.from_toml()
+    return registry.rag_answer.system
+
+
+def build_rag_user_prompt(
+    state: ConversationState,
+    *,
+    prompt_registry: PromptRegistry | None = None,
+) -> str:
+    registry = prompt_registry or PromptRegistry.from_toml()
+    context_bundle = state.get("context_bundle") or {}
+
+    turn_plan = state.get("turn_plan") or {}
+
+    raw_user_message = str(
+        state.get("raw_user_message")
+        or state.get("original_user_message")
+        or state.get("user_message")
+        or state.get("current_user_message")
+        or ""
+    )
+
+    retrieval_query_used = str(
+        state.get("retrieval_query")
+        or (turn_plan.get("retrieval_query") if isinstance(turn_plan, dict) else "")
+        or ""
+    )
+
+    return registry.rag_answer.user_template.format(
+        current_user_message=raw_user_message,
+        retrieval_query_used=retrieval_query_used or registry.rendering.empty_value,
+        turn_plan=_render_turn_plan(turn_plan),
+        recent_turns=_render_recent_turns(
+            state.get("recent_turns") or [],
+            prompt_registry=registry,
+        ),
+        conversation_summary=(
+            context_bundle.get("conversation_summary")
+            or state.get("conversation_summary")
+            or registry.rendering.empty_value
+        ),
+        retrieved_memory=_render_context_items(
+            context_bundle.get("retrieved_memory") or [],
+            prompt_registry=registry,
+        ),
+        retrieved_documents=_render_context_items(
+            context_bundle.get("retrieved_documents") or [],
+            prompt_registry=registry,
+        ),
+        provenance_map=_render_provenance_map(
+            context_bundle.get("provenance_map") or {},
+            prompt_registry=registry,
+        ),
+    )
+
+
+def _render_turn_plan(turn_plan: object) -> str:
+    """
+    Render only a tiny answer-mode contract for the answer model.
+
+    Full planner details must stay in state/logs/traces, not in the prompt that
+    produces the user-facing answer. This prevents the model from printing
+    planner reasoning, conflicts, metadata, or debug notes to the user.
+    """
+    if not isinstance(turn_plan, dict) or not turn_plan:
+        return "answer_scope=general_conversation; retrieval_required=false; action=conversation_only"
+
+    action = str(turn_plan.get("action") or "conversation_only").strip()
+    answer_scope = str(turn_plan.get("answer_scope") or "general_conversation").strip()
+    needs_retrieval = bool(turn_plan.get("needs_document_retrieval", False))
+
+    retrieval_query = str(turn_plan.get("retrieval_query") or "").strip()
+    if len(retrieval_query) > 220:
+        retrieval_query = retrieval_query[:220].rstrip() + "..."
+
+    parts = [
+        f"answer_scope={answer_scope}",
+        f"retrieval_required={str(needs_retrieval).lower()}",
+        f"action={action}",
+    ]
+
+    if retrieval_query:
+        parts.append(f"retrieval_query={retrieval_query}")
+
+    return "; ".join(parts)
+
+
+def _render_recent_turns(
+    messages: Sequence[Any],
+    *,
+    prompt_registry: PromptRegistry,
+    max_turns: int = 8,
+) -> str:
+    if not messages:
+        return prompt_registry.rendering.empty_value
+
+    rendered: list[str] = []
+
+    for index, message in enumerate(messages[-max_turns:], start=1):
+        role = str(getattr(message, "role", "unknown"))
+        content = " ".join(str(getattr(message, "content", "")).split())
+
+        if not content:
+            continue
+
+        if len(content) > 900:
+            content = content[:900] + "..."
+
+        rendered.append(f"{index}. {role}: {content}")
+
+    return "\n".join(rendered) if rendered else prompt_registry.rendering.empty_value
+
+
+def _render_context_items(
+    items: Sequence[Any],
+    *,
+    prompt_registry: PromptRegistry,
+) -> str:
+    if not items:
+        return prompt_registry.rendering.empty_value
+
+    rendered: list[str] = []
+
+    for index, item in enumerate(items, start=1):
+        payload = _to_payload(item)
+
+        context_id = str(
+            payload.get("context_id")
+            or payload.get("block_id")
+            or payload.get("memory_id")
+            or f"doc:{index}"
+        )
+
+        title = str(
+            payload.get("heading")
+            or payload.get("title")
+            or payload.get("fact_type")
+            or "untitled"
+        )
+
+        source_id = str(
+            payload.get("source_id")
+            or payload.get("conversation_id")
+            or payload.get("source")
+            or "unknown"
+        )
+
+        chunk_id = payload.get("chunk_id")
+        score = payload.get("score")
+        text = str(payload.get("text") or "").strip()
+
+        chunk_part = ""
+        if chunk_id:
+            chunk_part = prompt_registry.rendering.chunk_part_template.format(
+                chunk_id=chunk_id,
+            )
+
+        score_part = ""
+        if score is not None:
+            score_part = prompt_registry.rendering.score_part_template.format(
+                score=score,
+            )
+
+        header = prompt_registry.rendering.context_header_template.format(
+            context_id=context_id,
+            title=title,
+            source_id=source_id,
+            chunk_part=chunk_part,
+            score_part=score_part,
+        )
+
+        rendered.append(f"{header}\n{text}")
+
+    return "\n\n".join(rendered)
+
+
+def _render_provenance_map(
+    provenance_map: Mapping[str, Any],
+    *,
+    prompt_registry: PromptRegistry,
+) -> str:
+    if not provenance_map:
+        return prompt_registry.rendering.empty_value
+
+    rendered: list[str] = []
+
+    for context_id, item in provenance_map.items():
+        rendered.append(
+            prompt_registry.rendering.provenance_item_template.format(
+                context_id=context_id,
+                item=item,
+            )
+        )
+
+    return "\n".join(rendered) if rendered else prompt_registry.rendering.empty_value
+
+
+def _to_payload(item: Any) -> Payload:
+    if isinstance(item, Mapping):
+        return dict(item)
+
+    if is_dataclass(item):
+        return asdict(item)
+
+    payload: Payload = {}
+
+    for key in (
+        "context_id",
+        "block_id",
+        "memory_id",
+        "source_id",
+        "conversation_id",
+        "source",
+        "chunk_id",
+        "heading",
+        "title",
+        "fact_type",
+        "score",
+        "text",
+    ):
+        if hasattr(item, key):
+            payload[key] = getattr(item, key)
+
+    return payload

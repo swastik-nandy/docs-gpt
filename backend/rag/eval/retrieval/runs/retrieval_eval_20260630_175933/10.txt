@@ -1,0 +1,34 @@
+QUERY: how do tags work in Amazon ECS and should I store sensitive data in tags
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.4049210137779011, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.07316408825516367})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: tagging-resources
+chunk_id: doc_9a19f2043f23661e:s0_tagging_amazon_ecs_resources:b3
+text: Context: Tagging Amazon ECS resources Function: reference Text: Warning: There are many APIs that return tag keys and their values. Denying access to `DescribeTags` doesn’t automatically deny access to tags returned by other APIs. As a best practice, we recommend that you do not include sensitive data in your tags.
+
+--- context 2 ---
+source_id: tagging-resources
+chunk_id: doc_9a19f2043f23661e:s0_tagging_amazon_ecs_resources:b5
+text: Context: Tagging Amazon ECS resources Function: explanation Text: Tags don't have any semantic meaning to Amazon ECS and are interpreted strictly as a string of characters. You can edit tag keys and values, and you can remove tags from a resource at any time. You can set the value of a tag to an empty string, but you can't set the value of a tag to null. If you add a tag that has the same key as an existing tag on that resource, the new value overwrites the earlier value. When you delete a resou
+
+--- context 3 ---
+source_id: tagging-resources
+chunk_id: doc_9a19f2043f23661e:s0_tagging_amazon_ecs_resources:b6
+text: Context: Tagging Amazon ECS resources Function: explanation Text: If you use AWS Identity and Access Management (IAM), you can control which users in your AWS account have permission to manage tags.
+
+--- context 4 ---
+source_id: tagging-resources
+chunk_id: doc_9a19f2043f23661e:s3_restrictions:b1
+text: Context: Tagging Amazon ECS resources Heading: Restrictions Function: explanation Text: A maximum of 50 tags can be associated with a resource.
+
+--- context 5 ---
+source_id: tagging-resources
+chunk_id: doc_9a19f2043f23661e:s0_tagging_amazon_ecs_resources:b1
+text: Context: Tagging Amazon ECS resources Function: explanation Text: You can use tags to categorize your Amazon ECS resources in different ways, for example, by purpose, owner, or environment. This is useful when you have many resources of the same type. You can quickly identify a specific resource based on the tags that you assigned to it. For example, you can define a set of tags for your account's Amazon ECS container instances. This helps you track each instance's owner and stack level.

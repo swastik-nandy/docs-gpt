@@ -1,0 +1,379 @@
+# rag/ingestion/data_transformation/parser/adapters/markdown/ir/relationships.py
+
+from typing import Any, Dict, List
+
+from .block_builder import refresh_retrieval_text
+
+
+# ---------------- LOW-LEVEL HELPERS ---------------- #
+
+def _add_relation(
+    source: Dict[str, Any],
+    target: Dict[str, Any],
+    relation_type: str,
+    confidence: float,
+    reason: str,
+) -> None:
+    if not source or not target:
+        return
+
+    source_id = source.get("id", "")
+    target_id = target.get("id", "")
+
+    if not source_id or not target_id:
+        return
+
+    # Never create self-relations.
+    if source_id == target_id:
+        return
+
+    relation = {
+        "type": relation_type,
+        "source_block_id": source_id,
+        "target_block_id": target_id,
+        "confidence": confidence,
+        "reason": reason,
+    }
+
+    existing = source.setdefault("relationships", [])
+
+    for rel in existing:
+        if (
+            rel.get("type") == relation_type
+            and rel.get("target_block_id") == target_id
+            and rel.get("reason") == reason
+        ):
+            return
+
+    existing.append(relation)
+
+
+def _set_meta_parent(
+    block: Dict[str, Any],
+    parent: Dict[str, Any],
+    parent_kind: str,
+) -> None:
+    if not block or not parent:
+        return
+
+    if block.get("id") == parent.get("id"):
+        return
+
+    block.setdefault("meta", {})
+
+    if parent_kind == "instruction":
+        block["meta"]["parent_instruction"] = parent.get("text", "")
+        block["meta"]["parent_instruction_id"] = parent.get("id", "")
+
+    elif parent_kind == "context":
+        block["meta"]["parent_context"] = parent.get("text", "")
+        block["meta"]["parent_context_id"] = parent.get("id", "")
+
+
+def _set_section_context_parent(block: Dict[str, Any]) -> None:
+    """
+    Last-resort retrieval evidence fallback.
+
+    If a code block has no parent instruction/context, use section-level
+    context so it is not orphaned during retrieval.
+    """
+
+    if not block:
+        return
+
+    meta = block.setdefault("meta", {})
+
+    if meta.get("parent_instruction") or meta.get("parent_context"):
+        return
+
+    section_context = (
+        block.get("heading")
+        or block.get("local_context")
+        or block.get("context")
+    )
+
+    if not section_context:
+        return
+
+    meta["parent_context"] = section_context
+    meta["parent_context_id"] = block.get("section_id", "")
+
+
+# ---------------- BLOCK PREDICATES ---------------- #
+
+def _is_code(block: Dict[str, Any]) -> bool:
+    return block.get("type") == "code"
+
+
+def _is_non_code(block: Dict[str, Any]) -> bool:
+    return not _is_code(block)
+
+
+def _is_instruction(block: Dict[str, Any]) -> bool:
+    return block.get("function") == "instruction"
+
+
+def _is_contextual(block: Dict[str, Any]) -> bool:
+    return block.get("function") in {
+        "instruction",
+        "explanation",
+        "reference",
+        "configuration",
+        "mixed",
+    }
+
+
+def _is_command_like_code(block: Dict[str, Any]) -> bool:
+    """
+    Domain-agnostic command/code detector.
+
+    Uses only structural signals already produced by signals.py.
+    No command names. No product names.
+    """
+
+    if not _is_code(block):
+        return False
+
+    signals = block.get("signals", {}) or {}
+
+    return bool(
+        signals.get("is_command_like")
+        or signals.get("has_flags")
+    )
+
+
+def _is_example_like_code(block: Dict[str, Any]) -> bool:
+    """
+    Domain-agnostic example/config detector.
+
+    Uses function + structural shape, not domain terms.
+    """
+
+    if not _is_code(block):
+        return False
+
+    signals = block.get("signals", {}) or {}
+    function = block.get("function")
+
+    if function in {"example", "configuration"}:
+        return True
+
+    if signals.get("has_symbols") and not _is_command_like_code(block):
+        return True
+
+    return False
+
+
+def _is_short_instruction_label(block: Dict[str, Any]) -> bool:
+    """
+    Detect short instruction labels without domain-specific terms.
+
+    Examples:
+    - Generate the changelog:
+    - Check code samples:
+    - Report: Summarize what changed:
+    """
+
+    if not _is_instruction(block):
+        return False
+
+    if _is_code(block):
+        return False
+
+    text = (block.get("text") or "").strip()
+    words = text.split()
+    signals = block.get("signals", {}) or {}
+
+    if len(words) > 16:
+        return False
+
+    if text.endswith(":"):
+        return True
+
+    if signals.get("is_labeled_action"):
+        return True
+
+    return False
+
+
+# ---------------- RELATION PASSES ---------------- #
+
+def link_following_items(blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Add light sequential context.
+
+    Every block points to the previous block in the same section.
+    """
+
+    previous = None
+
+    for block in blocks:
+        if previous:
+            _add_relation(
+                source=block,
+                target=previous,
+                relation_type="follows",
+                confidence=0.55,
+                reason="sequential_neighbor_in_section",
+            )
+
+        previous = block
+
+    return blocks
+
+
+def link_code_to_previous_instruction(blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Link command-like code blocks to the nearest previous non-code instruction.
+
+    Important:
+    code blocks may have function='instruction', but they must not become
+    the instruction parent for themselves or later sibling code blocks.
+    """
+
+    last_non_code_instruction = None
+
+    for block in blocks:
+        if _is_code(block):
+            if last_non_code_instruction and _is_command_like_code(block):
+                _set_meta_parent(
+                    block=block,
+                    parent=last_non_code_instruction,
+                    parent_kind="instruction",
+                )
+
+                _add_relation(
+                    source=block,
+                    target=last_non_code_instruction,
+                    relation_type="implements",
+                    confidence=0.88,
+                    reason="command_like_code_after_instruction",
+                )
+
+            continue
+
+        if _is_instruction(block):
+            last_non_code_instruction = block
+
+    return blocks
+
+
+def link_immediate_code_after_instruction_label(blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Strong edge for:
+    short instruction label → immediately following code.
+    """
+
+    for index, block in enumerate(blocks):
+        if not _is_short_instruction_label(block):
+            continue
+
+        next_block = blocks[index + 1] if index + 1 < len(blocks) else None
+
+        if not next_block or not _is_code(next_block):
+            continue
+
+        _set_meta_parent(
+            block=next_block,
+            parent=block,
+            parent_kind="instruction",
+        )
+
+        _add_relation(
+            source=next_block,
+            target=block,
+            relation_type="implements",
+            confidence=0.92,
+            reason="code_immediately_after_instruction_label",
+        )
+
+    return blocks
+
+
+def link_code_to_previous_context(blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Link example/config code blocks to nearest previous non-code contextual block.
+
+    This handles JSON, config, response examples, and standalone examples.
+    It does not force them to pretend they are commands.
+    """
+
+    last_non_code_context = None
+
+    for block in blocks:
+        if _is_code(block):
+            if last_non_code_context and _is_example_like_code(block):
+                _set_meta_parent(
+                    block=block,
+                    parent=last_non_code_context,
+                    parent_kind="context",
+                )
+
+                _add_relation(
+                    source=block,
+                    target=last_non_code_context,
+                    relation_type="supports",
+                    confidence=0.72,
+                    reason="example_like_code_after_context",
+                )
+
+            continue
+
+        if _is_non_code(block) and _is_contextual(block):
+            last_non_code_context = block
+
+    return blocks
+
+
+def link_unparented_code_to_section_context(
+    blocks: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """
+    Last-resort evidence fallback.
+
+    If a code block has neither parent_instruction nor parent_context,
+    attach section-level context in metadata.
+
+    This is not a graph edge because section IDs are not block IDs.
+    It only enriches retrieval_text.
+    """
+
+    for block in blocks:
+        if not _is_code(block):
+            continue
+
+        _set_section_context_parent(block)
+
+    return blocks
+
+
+def refresh_all_retrieval_texts(blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    for block in blocks:
+        refresh_retrieval_text(block)
+    return blocks
+
+
+def enrich_block_relationships(blocks: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Apply relationship enrichment after block IDs are assigned.
+
+    Order matters:
+    1. sequential follows edges
+    2. command-like code → previous instruction
+    3. immediate instruction label → code
+    4. example/config code → previous context
+    5. orphan code → section context fallback
+    6. refresh retrieval_text after metadata changes
+    """
+
+    if not blocks:
+        return blocks
+
+    blocks = link_following_items(blocks)
+    blocks = link_code_to_previous_instruction(blocks)
+    blocks = link_immediate_code_after_instruction_label(blocks)
+    blocks = link_code_to_previous_context(blocks)
+    blocks = link_unparented_code_to_section_context(blocks)
+    blocks = refresh_all_retrieval_texts(blocks)
+
+    return blocks

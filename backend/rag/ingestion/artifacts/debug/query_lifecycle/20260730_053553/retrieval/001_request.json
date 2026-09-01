@@ -1,0 +1,72 @@
+{
+  "query": "what is aws fargate",
+  "tenant": {
+    "tenant_id": "tnt_local_000000000001",
+    "user_id": "usr_local_000000000001",
+    "session_id": null
+  },
+  "mode": "hybrid_rrf",
+  "top_k": 5,
+  "memory_policy": {
+    "enabled": true,
+    "scope": "session",
+    "include_short_term": true,
+    "include_long_term": false,
+    "max_chat_turns": 8,
+    "max_user_turns": 4,
+    "max_assistant_turns": 4,
+    "preserve_recent_turns": 4,
+    "memory_top_k": 6,
+    "token_budget": 1600
+  },
+  "query_processing": {
+    "mode": "hybrid",
+    "allow_query_rewrite": true,
+    "allow_filter_extraction": true,
+    "allow_intent_classification": true,
+    "allow_hypothetical_answer": false,
+    "max_rewritten_queries": 3,
+    "max_extracted_terms": 24
+  },
+  "request_id": null,
+  "conversation_id": "cnv_demo_1785369954_af667aa5",
+  "source_constraints": {
+    "source_id": null,
+    "job_id": null,
+    "parser_doc_id": null,
+    "section_id": null,
+    "ir_id": null,
+    "heading_path": [],
+    "payload_filters": {}
+  },
+  "chat_history": [],
+  "metadata": {
+    "source": "generation_retrieval_node",
+    "turn_id": "0b828452-bf5f-4c1c-b6be-4196383abb94",
+    "raw_user_message": "what is aws fargate",
+    "current_user_message": "what is aws fargate",
+    "planned_retrieval_query": "what is aws fargate",
+    "retrieval_query": "what is aws fargate",
+    "effective_top_k": 5,
+    "turn_plan": {
+      "action": "document_question",
+      "needs_document_retrieval": true,
+      "retrieval_query": "what is aws fargate",
+      "answer_scope": "knowledge_base",
+      "allow_conversation_answer": false,
+      "needs_clarification": false,
+      "uses_previous_turns": false,
+      "confidence": 0.86,
+      "reason": "User is asking a concrete technical/product question that must be answered from source documents.",
+      "metadata": {
+        "deterministic": true,
+        "generic_technical_source_bound": true,
+        "planner_provider": "system",
+        "planner_model": "deterministic_chat_mode",
+        "planner_fallback_used": false,
+        "recent_user_message_available": false,
+        "recent_assistant_message_available": false
+      }
+    }
+  }
+}

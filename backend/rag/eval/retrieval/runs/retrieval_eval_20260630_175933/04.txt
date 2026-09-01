@@ -1,0 +1,34 @@
+QUERY: when should I use ECS Anywhere
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.39524728403062165, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.04351219808351033})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s0_amazon_ecs_clusters_for_external_instances:b0
+text: Context: Amazon ECS clusters for external instances Function: explanation Text: Amazon ECS Anywhere provides support for registering an external instance such as an on-premises server or virtual machine (VM), to your Amazon ECS cluster. External instances are optimized for running applications that generate outbound traffic or process data. If your application requires inbound traffic, the lack of Elastic Load Balancing support makes running these workloads less efficient. Amazon ECS added a new
+
+--- context 2 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b3
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The Active Directory is in the on-premises data center. - For this configuration, you join your external instances to the on-premises Active Directory. You then use the locally available credentials when you run the Amazon ECS tasks.
+
+--- context 3 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b1
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The following use cases were supported for ECS Anywhere when Windows was a supported operating system.
+
+--- context 4 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b2
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The Active Directory is in the AWS Cloud - For this configuration, you create a connection between your on-premises network and the AWS Cloud using an AWS Direct Connect connection. For information about how to create the connection, see Amazon Virtual Private Cloud Connectivity Options.You create an Active Directory in the AWS Cloud. For information about how to get s
+
+--- context 5 ---
+source_id: welcome
+chunk_id: doc_29370e71a8e71dba:s1_terminology_and_components:b10
+text: Context: What is Amazon Elastic Container Service? Heading: Terminology and components Function: explanation Text: On-premises virtual machines (VM) or servers Amazon ECS Anywhere provides support for registering an external instance such as an on-premises server or virtual machine (VM), to your Amazon ECS cluster.

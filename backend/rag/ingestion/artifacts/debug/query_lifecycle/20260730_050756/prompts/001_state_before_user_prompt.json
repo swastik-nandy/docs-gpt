@@ -1,0 +1,541 @@
+{
+  "tenant_id": "tnt_local_000000000001",
+  "user_id": "usr_local_000000000001",
+  "conversation_id": "cnv_demo_1785368278_b2ddd773",
+  "turn_id": "8fa82f1e-56af-4dd0-9e91-f4f98c748242",
+  "current_user_message": "what is aws fargate",
+  "raw_user_message": "what is aws fargate",
+  "retrieval_query": "what is aws fargate",
+  "turn_plan": {
+    "action": "document_question",
+    "needs_document_retrieval": true,
+    "retrieval_query": "what is aws fargate",
+    "answer_scope": "knowledge_base",
+    "allow_conversation_answer": false,
+    "needs_clarification": false,
+    "uses_previous_turns": false,
+    "confidence": 0.86,
+    "reason": "User is asking a concrete technical/product question that must be answered from source documents.",
+    "metadata": {
+      "deterministic": true,
+      "generic_technical_source_bound": true,
+      "planner_provider": "system",
+      "planner_model": "deterministic_chat_mode",
+      "planner_fallback_used": false,
+      "recent_user_message_available": false,
+      "recent_assistant_message_available": false
+    }
+  },
+  "recent_turns": [],
+  "conversation_summary": null,
+  "retrieved_memory": [],
+  "retrieval_state": {
+    "query": "what is aws fargate",
+    "rewritten_query": "what is aws fargate",
+    "retrieval_trace_id": "c84e93d5-bd98-455c-b4ae-c2e5570613c4",
+    "stateful_retrieval": {
+      "enabled": true,
+      "raw_query": "what is aws fargate",
+      "resolved_query": "what is aws fargate",
+      "query_changed": false,
+      "needed_resolution": false,
+      "resolved_entity": null,
+      "strategy": "no_referential_marker",
+      "confidence": 1.0,
+      "metadata": {
+        "resolution_enabled": true
+      },
+      "conversation_context": {
+        "conversation_id": "cnv_demo_1785368278_b2ddd773",
+        "recent_turn_count": 1,
+        "recent_entity_count": 0,
+        "has_summary": false,
+        "working_memory_count": 0
+      }
+    },
+    "retrieval_metadata": {
+      "backend": "adaptive_graph",
+      "action_count": 5,
+      "snapshot_count": 1,
+      "confidence": 0.7002358609868938,
+      "confidence_reason": "value=0.700; score_gap=0.6954500111714411; exact_coverage=0.500; source_coverage=1.000",
+      "query_signals": {
+        "normalized_query": "what is aws fargate",
+        "token_count": 4,
+        "lexical_specificity": 0.08,
+        "is_exactish": false,
+        "is_structural_or_multi_hop": false,
+        "is_chat_dependent": false,
+        "likely_needs_memory": false,
+        "has_chat_history": true,
+        "has_session_context": false
+      },
+      "actions": [
+        {
+          "action": "sparse_search",
+          "status": "succeeded",
+          "hop": 0,
+          "reason": "selected highest gain/cost action: sparse_search; score=0.016391",
+          "latency_ms": 9367.335376002302,
+          "input_count": 0,
+          "output_count": 30,
+          "materially_changed": true,
+          "error": null,
+          "before_count": 0,
+          "after_count": 30,
+          "estimated_gain": 0.7375999999999999,
+          "estimated_cost_ms": 45.0,
+          "decision_score": 0.01639111111111111,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [],
+          "confidence": 0.0
+        },
+        {
+          "action": "score_rerank",
+          "status": "succeeded",
+          "hop": 1,
+          "reason": "selected highest gain/cost action: score_rerank; score=0.037037",
+          "latency_ms": 2.6761150002130307,
+          "input_count": 30,
+          "output_count": 30,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.2,
+          "estimated_cost_ms": 5.4,
+          "decision_score": 0.037037037037037035,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [
+            "sparse_search"
+          ],
+          "confidence": 0.36257837726519576
+        },
+        {
+          "action": "ce_rerank",
+          "status": "succeeded",
+          "hop": 2,
+          "reason": "forced CE rerank before context packing: high candidate score entropy; entropy=0.9434",
+          "latency_ms": 9387.31376099895,
+          "input_count": 30,
+          "output_count": 30,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.4600000000000001,
+          "estimated_cost_ms": 330.0,
+          "decision_score": 0.0013939393939393942,
+          "policy": "greedy_gain_cost_with_ce_gate",
+          "forced": true,
+          "trigger": "high candidate score entropy; entropy=0.9434",
+          "completed_actions": [
+            "score_rerank",
+            "sparse_search"
+          ],
+          "confidence": 0.3671710075631443,
+          "score_gap": 0.32797941381968887,
+          "score_entropy": 0.9434199313554991,
+          "reranked_count": 30
+        },
+        {
+          "action": "pack_context",
+          "status": "succeeded",
+          "hop": 3,
+          "reason": "selected highest gain/cost action: pack_context; score=0.118750",
+          "latency_ms": 7.602561003295705,
+          "input_count": 30,
+          "output_count": 1,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.95,
+          "estimated_cost_ms": 8.0,
+          "decision_score": 0.11875,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [
+            "ce_rerank",
+            "score_rerank",
+            "sparse_search"
+          ],
+          "confidence": 0.7002358609868938
+        },
+        {
+          "action": "stop",
+          "status": "skipped",
+          "hop": 4,
+          "reason": "context already packed",
+          "latency_ms": null,
+          "input_count": null,
+          "output_count": null,
+          "materially_changed": null,
+          "error": null,
+          "terminal": true,
+          "score": 1.0
+        }
+      ],
+      "source": "generation_retrieval_node",
+      "turn_id": "8fa82f1e-56af-4dd0-9e91-f4f98c748242",
+      "raw_user_message": "what is aws fargate",
+      "current_user_message": "what is aws fargate",
+      "planned_retrieval_query": "what is aws fargate",
+      "retrieval_query": "what is aws fargate",
+      "effective_top_k": 5,
+      "stateful_retrieval": {
+        "enabled": true,
+        "raw_query": "what is aws fargate",
+        "resolved_query": "what is aws fargate",
+        "query_changed": false,
+        "needed_resolution": false,
+        "resolved_entity": null,
+        "strategy": "no_referential_marker",
+        "confidence": 1.0,
+        "metadata": {
+          "resolution_enabled": true
+        },
+        "conversation_context": {
+          "conversation_id": "cnv_demo_1785368278_b2ddd773",
+          "recent_turn_count": 1,
+          "recent_entity_count": 0,
+          "has_summary": false,
+          "working_memory_count": 0
+        }
+      },
+      "raw_query": "what is aws fargate",
+      "resolved_query": "what is aws fargate",
+      "query_changed": false,
+      "resolution_strategy": "no_referential_marker",
+      "langgraph_runtime": true,
+      "elapsed_ms": 18876.77,
+      "graph_runtime": {
+        "recursion_limit": 16,
+        "node_trace_count": 5
+      },
+      "retrieval_trace_id": "c84e93d5-bd98-455c-b4ae-c2e5570613c4"
+    },
+    "candidates": [
+      {
+        "point_id": "59335ad7-9c02-50d0-a81f-73f5254b4885",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 1.00349631,
+        "rank": 1
+      },
+      {
+        "point_id": "71e96985-5125-577e-89c5-4e5fb5f877e5",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.30561479,
+        "rank": 2
+      },
+      {
+        "point_id": "0ce114c7-b252-5168-a9b1-66b425c6aef3",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.07680549,
+        "rank": 3
+      },
+      {
+        "point_id": "d61f0a1e-5d18-5b3a-8e30-c0fc1ffa0b2d",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00048462,
+        "rank": 4
+      },
+      {
+        "point_id": "8ee1ec9c-4984-555a-8ad9-03235c452f28",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00085834,
+        "rank": 5
+      },
+      {
+        "point_id": "a524fdc6-c9a0-5b68-ab83-fba1a5edad23",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00088203,
+        "rank": 6
+      },
+      {
+        "point_id": "314c0d66-5370-548c-9797-155eae59fc39",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00137952,
+        "rank": 7
+      },
+      {
+        "point_id": "46a86642-abb0-5a75-9071-e18434b4c3cc",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00161073,
+        "rank": 8
+      },
+      {
+        "point_id": "075c82c1-3fb1-50a6-977a-781d41affb0f",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00191978,
+        "rank": 9
+      },
+      {
+        "point_id": "a7dbbdfa-6472-55a5-ba92-9a2d5740b9c9",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00220502,
+        "rank": 10
+      },
+      {
+        "point_id": "5c91f6ba-b16d-5947-a9ef-08e8f124d442",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00240594,
+        "rank": 11
+      },
+      {
+        "point_id": "8c1b76e9-5247-590c-9718-786fc3c128a0",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.0025535,
+        "rank": 12
+      },
+      {
+        "point_id": "1d8b882b-7208-5fa7-899a-5085ec356e9f",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.0026105,
+        "rank": 13
+      },
+      {
+        "point_id": "1a994e8f-d6b1-55da-a7b9-13c6d8f8eef7",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00284808,
+        "rank": 14
+      },
+      {
+        "point_id": "1ed86b15-3521-5744-82f5-28c096abe735",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00289941,
+        "rank": 15
+      },
+      {
+        "point_id": "cafbc552-acea-5b33-84a8-35e12b9b2b34",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00294869,
+        "rank": 16
+      },
+      {
+        "point_id": "432a8bd7-f8ac-5361-9c10-47fb908e0fec",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00296492,
+        "rank": 17
+      },
+      {
+        "point_id": "696db27b-33c4-5123-87ff-97d8d3251f6d",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00297212,
+        "rank": 18
+      },
+      {
+        "point_id": "e349f06b-8ba2-5f83-9973-4fbd98e89bf5",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02990324,
+        "rank": 19
+      },
+      {
+        "point_id": "2857571d-f653-5fdf-b913-69da2c0f8446",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02990683,
+        "rank": 20
+      },
+      {
+        "point_id": "5d556a6a-9ad7-5f42-98ba-c2b41ce87d37",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02991325,
+        "rank": 21
+      },
+      {
+        "point_id": "c48ba8d9-8b92-5dd2-8cdf-2a4f00eebf54",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.0299249,
+        "rank": 22
+      },
+      {
+        "point_id": "d0d54cde-2964-5670-9ad2-4fd80982ecb3",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02992608,
+        "rank": 23
+      },
+      {
+        "point_id": "81c4c051-c7b8-5b67-9a8b-10224c5aaa65",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02992879,
+        "rank": 24
+      },
+      {
+        "point_id": "8dba1e73-1a74-5295-b337-94c5000e0c71",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02994604,
+        "rank": 25
+      },
+      {
+        "point_id": "07cb64b1-0ae7-5650-971d-25342c7f81fe",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02995838,
+        "rank": 26
+      },
+      {
+        "point_id": "8c3a5877-20e1-57fa-9775-e36588f12deb",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02996867,
+        "rank": 27
+      },
+      {
+        "point_id": "c39b07c7-9a44-5ac5-b90d-3b69978dd75d",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.029974,
+        "rank": 28
+      },
+      {
+        "point_id": "c6543196-ed3b-527f-9959-fe1e770f424b",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02997869,
+        "rank": 29
+      },
+      {
+        "point_id": "45c4297b-3a2d-5ec7-8d0f-d9568a327553",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.02998167,
+        "rank": 30
+      }
+    ],
+    "selected_context": [
+      {
+        "block_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0",
+        "heading": null,
+        "text": "Context: What is Amazon Elastic Container Service? Function: reference Text: Tip: Join our upcoming container workshop series to learn best practices for Amazon ECS and AWS Fargate. Click here to sign up.",
+        "score": 0.30561479,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "aws",
+            "fargate",
+            "what"
+          ],
+          "anchor_terms": [
+            "fargate"
+          ],
+          "query_phrases": [
+            "aws fargate",
+            "is aws fargate"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [
+            "welcome"
+          ],
+          "candidate_calibration_used": true
+        }
+      }
+    ],
+    "citations": [
+      {
+        "block_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0",
+        "heading": null
+      }
+    ],
+    "warnings": []
+  },
+  "context_bundle": {
+    "retrieved_documents": [
+      {
+        "block_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0",
+        "heading": null,
+        "text": "Context: What is Amazon Elastic Container Service? Function: reference Text: Tip: Join our upcoming container workshop series to learn best practices for Amazon ECS and AWS Fargate. Click here to sign up.",
+        "score": 0.30561479,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "aws",
+            "fargate",
+            "what"
+          ],
+          "anchor_terms": [
+            "fargate"
+          ],
+          "query_phrases": [
+            "aws fargate",
+            "is aws fargate"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [
+            "welcome"
+          ],
+          "candidate_calibration_used": true
+        }
+      }
+    ],
+    "retrieved_memory": [],
+    "working_memory": [],
+    "conversation_summary": null,
+    "provenance_map": {}
+  },
+  "disable_long_term_memory": true,
+  "disable_memory_write": true
+}

@@ -1,0 +1,341 @@
+[graph]
+recursion_limit = 32
+max_corrective_retries = 1
+include_debug_metadata = true
+
+[request]
+default_mode = "hybrid_rrf"
+default_top_k = 12
+max_top_k = 50
+
+[query]
+min_chars = 2
+max_chars = 4096
+low_information_max_terms = 2
+too_short_max_chars = 8
+too_long_min_chars = 2048
+max_extracted_terms = 24
+max_rewritten_queries = 3
+
+[memory]
+enabled = true
+max_chat_turns = 8
+max_user_turns = 4
+max_assistant_turns = 4
+preserve_recent_turns = 4
+
+[embedding]
+provider = "local"
+vector_size = 1024
+normalize_vectors = true
+max_query_tokens = 512
+timeout_seconds = 30
+max_retries = 2
+
+[dense]
+enabled = true
+top_k = 32
+score_threshold = 0.0
+
+[sparse]
+enabled = true
+top_k = 32
+score_threshold = 0.0
+
+[fusion]
+enabled = true
+strategy = "rrf"
+rrf_k = 60
+fused_top_k = 40
+
+[structure]
+enabled = true
+sibling_window = 1
+parent_window = 1
+child_window = 2
+max_expanded_candidates = 60
+
+[reranking]
+enabled = true
+provider = "local"
+input_top_k = 40
+output_top_k = 16
+timeout_seconds = 45
+max_retries = 1
+
+[grading]
+min_high_confidence_score = 0.78
+min_medium_confidence_score = 0.55
+retry_below_confidence = "medium"
+retry_when_no_candidates = true
+
+[context]
+max_context_blocks = 8
+max_total_tokens = 6000
+max_block_tokens = 1200
+reserve_tokens_for_answer = 1200
+deduplicate_by_chunk_id = true
+deduplicate_by_text_hash = true
+
+[semantic_cache]
+enabled = false
+provider = "local"
+vector_size = 1024
+similarity_threshold = 0.92
+ttl_seconds = 86400
+
+[timeouts]
+dense_retrieval_seconds = 20
+sparse_retrieval_seconds = 20
+fusion_seconds = 5
+structure_expansion_seconds = 15
+context_packing_seconds = 10
+
+[observability]
+emit_events = true
+include_trace = true
+include_candidate_debug = false
+include_payload_debug = false
+
+[vector_store.qdrant]
+collection_name = "rag_chunks_bge_m3_v2"
+dense_vector_name = "dense"
+sparse_vector_name = "sparse"
+
+[retrievers.dense]
+limit_multiplier = 6
+score_threshold = 0.0
+with_payload = true
+with_vectors = false
+
+[retrievers.sparse]
+limit_multiplier = 6
+score_threshold = 0.0
+with_payload = true
+with_vectors = false
+
+[fusion.rrf]
+k = 60
+dense_weight = 1.0
+sparse_weight = 1.0
+limit_multiplier = 6
+
+[reranker]
+active = "cross_encoder"
+fallback = "score"
+
+[reranker.score]
+enabled = true
+max_candidates = 50
+normalize_scores = false
+
+[context_packer.default]
+max_blocks = 5
+min_rerank_score = 0.0
+deduplicate = true
+allow_empty = true
+
+[reranker.cross_encoder]
+enabled = true
+backend = "sentence_transformers"
+model_env = "RERANKER_MODEL"
+max_candidates = 50
+batch_size = 8
+normalize_scores = true
+fallback_to_score = true
+
+[expansion.linked]
+enabled = true
+max_seed_candidates = 10
+max_links_per_seed = 5
+max_chunks_per_link = 6
+deduplicate = true
+with_payload = true
+with_vectors = false
+
+[adaptive.scope_relaxation]
+enabled = true
+max_relaxation_steps = 3
+require_escalate_k_first = true
+
+relaxation_order = [
+  "date",
+  "document_type",
+  "section_id",
+  "heading_path",
+  "ir_id",
+  "parser_doc_id",
+  "job_id",
+  "source_id",
+]
+
+date_filter_keys = [
+  "date",
+  "date_from",
+  "date_to",
+  "start_date",
+  "end_date",
+  "created_at",
+  "updated_at",
+  "published_at",
+  "modified_at",
+  "year",
+  "date_range",
+]
+
+document_type_filter_keys = [
+  "doc_type",
+  "document_type",
+  "file_type",
+  "file_ext",
+  "mime_type",
+  "parser_family",
+]
+
+
+[adaptive.signals]
+max_metadata_keys = 64
+max_metadata_terms = 64
+min_long_token_chars = 12
+include_term_metadata = true
+lowercase_corpus_tokens = true
+
+
+[adaptive.signals.entity_recency]
+enabled = true
+half_life_turns = 2.0
+
+
+[adaptive.confidence.chat_dependent]
+source_coverage_delta = 0.12
+score_gap_delta = -0.07
+entropy_delta = -0.05
+
+
+[adaptive.confidence.structural_multi_hop]
+exact_coverage_delta = 0.14
+score_gap_delta = -0.08
+candidate_presence_delta = -0.03
+source_coverage_delta = -0.03
+
+
+[adaptive.confidence.entity_coverage]
+base_weight = 0.20
+recency_multiplier = 0.35
+entity_only_min_weight = 0.60
+
+
+[adaptive.evidence_verification]
+enabled = true
+max_candidates = 5
+max_candidate_chars = 2500
+grounding_threshold = 0.65
+failed_verification_penalty = 0.35
+
+
+[adaptive.cross_turn_redundancy]
+enabled = true
+history_turns = 3
+minimum_repeat_count = 3
+penalty = 0.04
+disable_for_drill_down = true
+
+
+[reranker.query_aware_calibration]
+enabled = true
+focus_coverage_weight = 0.018
+title_coverage_weight = 0.022
+title_compactness_weight = 0.012
+phrase_in_title_bonus = 0.018
+phrase_in_text_bonus = 0.010
+
+broad_query_max_focus_terms = 3
+specialization_threshold = 0.70
+title_compactness_threshold = 0.35
+specialization_penalty = 0.012
+
+high_specialization_threshold = 0.85
+high_specialization_penalty = 0.008
+
+code_marker_threshold = 2
+code_penalty = 0.010
+short_chunk_chars = 120
+short_chunk_penalty = 0.008
+zero_focus_penalty = 0.018
+
+minimum_adjustment = -0.035
+maximum_adjustment = 0.055
+
+[adaptive.cost]
+memory_lookup_ms = 12.0
+sparse_search_ms = 45.0
+dense_search_ms = 95.0
+fuse_ms = 4.0
+
+score_rerank_base_ms = 3.0
+score_rerank_per_candidate_ms = 0.08
+
+ce_rerank_base_ms = 90.0
+ce_rerank_per_candidate_ms = 8.0
+
+linked_expand_base_ms = 35.0
+linked_expand_per_seed_ms = 20.0
+linked_expand_per_link_hint_ms = 8.0
+
+escalate_k_ms = 30.0
+escalate_dense_ms = 95.0
+
+verify_evidence_base_ms = 4.0
+verify_evidence_per_candidate_ms = 0.2
+
+pack_context_base_ms = 5.0
+pack_context_per_candidate_ms = 0.1
+
+stop_ms = 0.0
+fallback_no_answer_ms = 0.0
+min_action_cost_ms = 1.0
+
+[adaptive.gain]
+sparse_base_gain = 0.72
+dense_base_gain = 0.68
+memory_base_gain = 0.70
+
+fuse_base_gain = 0.42
+score_rerank_base_gain = 0.18
+ce_rerank_base_gain = 0.52
+linked_expand_base_gain = 0.35
+
+verify_evidence_base_gain = 0.28
+pack_context_base_gain = 0.95
+
+high_confidence_stop_threshold = 0.78
+medium_confidence_threshold = 0.55
+
+strong_score_gap_threshold = 0.22
+flat_score_gap_threshold = 0.08
+entropy_high_threshold = 0.82
+
+min_gain = 0.0
+max_gain = 1.0
+
+[adaptive.policy]
+max_evaluations = 64
+max_hops = 6
+min_action_score = 0.001
+high_confidence_stop_threshold = 0.78
+min_confidence_to_pack = 0.55
+allow_repeat_actions = false
+allow_pack_without_verification = true
+prefer_stop_after_context_packed = true
+
+
+[adaptive.confidence]
+score_gap_weight = 0.34
+exact_coverage_weight = 0.26
+source_coverage_weight = 0.18
+candidate_presence_weight = 0.12
+entropy_weight = 0.10
+
+high_entropy_penalty = 0.18
+low_corpus_affinity_penalty = 0.18
+no_candidate_penalty = 0.45

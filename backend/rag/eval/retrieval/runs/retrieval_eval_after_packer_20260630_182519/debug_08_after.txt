@@ -1,0 +1,404 @@
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.3872157548038299, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.020537541193469653})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b4
+text: Context: Schedule your containers on Amazon ECS Function: reference Text: option: Scheduled tasks | when to use: A scheduled task is suitable when you have tasks to run at set intervals in your cluster, you can use EventBridge Scheduler to create a schedule. You can run tasks for a backup operation or a log scan. The EventBridge Scheduler schedule that you create can run one or more tasks in your cluster at specified times. Your scheduled event can be set to a specific interval (run every {{N}} 
+
+--- context 2 ---
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b1
+text: Context: Schedule your containers on Amazon ECS Function: explanation Text: Amazon ECS provides a service scheduler for long-running tasks and applications. It also provides the ability to run standalone tasks or scheduled tasks for batch jobs or single run tasks. You can specify the task placement strategies and constraints for running tasks that best meet your needs. For example, you can specify whether tasks run across multiple Availability Zones or within a single Availability Zone. And, opt
+
+--- context 3 ---
+source_id: aws-fargate
+chunk_id: doc_e57ded6cc07f6574:s4_platform_versions:b2
+text: Context: Architect for AWS Fargate for Amazon ECS Heading: Platform versions Function: explanation Text: If a security issue is found that affects an existing platform version, AWS creates a new patched revision of the platform version and retires tasks running on the vulnerable revision. In some cases, you may be notified that your tasks on Fargate have been scheduled for retirement. For more information, see Task retirement and maintenance for AWS Fargate on Amazon ECS.
+
+--- context 4 ---
+source_id: task-definitions
+chunk_id: doc_dde073b9ac8f9474:s0_amazon_ecs_task_definitions:b16
+text: Context: Amazon ECS task definitions Function: explanation Text: An Amazon ECS service runs and maintains your desired number of tasks simultaneously in an Amazon ECS cluster. How it works is that, if any of your tasks fail or stop for any reason, the Amazon ECS service scheduler launches another instance based on your task definition. It does this to replace it and thereby maintain your desired number of tasks in the service.
+
+--- context 5 ---
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b0
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: To use Managed Daemons, first register a daemon task definition. A daemon task definition is a template that describes the containers that form a daemon. After you register a daemon task definition, create a daemon and associate it with a cluster and one or more Amazon ECS Managed Instances capacity providers. Amazon ECS then ensures that exactly one daemon task runs on every Amazon EC2 instance pro
+
+Debug candidates
+----------------
+query_terms: amazon, ecs, how, scheduled, task, work
+anchor_terms: amazon, ecs, scheduled, task
+anchor_phrases: amazon ecs, scheduled task, scheduled task amazon, task amazon, task amazon ecs
+
+--- candidate 1 ---
+selected: yes
+rank: 1
+rerank_score: 0.29327464
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b4
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 1.00
+anchor_phrase_hits: amazon ecs, scheduled task
+text: Context: Schedule your containers on Amazon ECS Function: reference Text: option: Scheduled tasks | when to use: A scheduled task is suitable when you have tasks to run at set intervals in your cluster, you can use EventBridge Scheduler to create a schedule. You can run tasks for a backup operation or a log scan. The EventBridge Scheduler schedule that you create can run one or more tasks in your cluster at specified times. Your scheduled event can be set to a specific interval (run every {{N}} 
+
+--- candidate 2 ---
+selected: yes
+rank: 2
+rerank_score: 0.2872515
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b1
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 1.00
+anchor_phrase_hits: amazon ecs, scheduled task
+text: Context: Schedule your containers on Amazon ECS Function: explanation Text: Amazon ECS provides a service scheduler for long-running tasks and applications. It also provides the ability to run standalone tasks or scheduled tasks for batch jobs or single run tasks. You can specify the task placement strategies and constraints for running tasks that best meet your needs. For example, you can specify whether tasks run across multiple Availability Zones or within a single Availability Zone. And, opt
+
+--- candidate 3 ---
+selected: yes
+rank: 3
+rerank_score: 0.2725656
+source_id: task-definitions
+chunk_id: doc_dde073b9ac8f9474:s0_amazon_ecs_task_definitions:b16
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS task definitions Function: explanation Text: An Amazon ECS service runs and maintains your desired number of tasks simultaneously in an Amazon ECS cluster. How it works is that, if any of your tasks fail or stop for any reason, the Amazon ECS service scheduler launches another instance based on your task definition. It does this to replace it and thereby maintain your desired number of tasks in the service.
+
+--- candidate 4 ---
+selected: no
+rank: 4
+rerank_score: 0.2575637
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b2
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Schedule your containers on Amazon ECS Function: reference Text: option: Service | when to use: The service scheduler is suitable for long running stateless services and applications. The service scheduler optionally also makes sure that tasks are registered against an Elastic Load Balancing load balancer. You can update your services that are maintained by the service scheduler. This might include deploying a new task definition or changing the number of desired tasks that are running.
+
+--- candidate 5 ---
+selected: no
+rank: 5
+rerank_score: 0.24180135
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b0
+heading: ()
+query_overlap: 0.33
+anchor_overlap: 0.50
+anchor_phrase_hits: amazon ecs
+text: Context: Schedule your containers on Amazon ECS Function: explanation Text: Amazon Elastic Container Service (Amazon ECS) is a shared state, optimistic concurrency system that provides flexible scheduling capabilities for your containerized workloads. The Amazon ECS schedulers use the same cluster state information as the Amazon ECS API to make appropriate placement decisions.
+
+--- candidate 6 ---
+selected: no
+rank: 6
+rerank_score: 0.22522356
+source_id: task-definitions
+chunk_id: doc_dde073b9ac8f9474:s0_amazon_ecs_task_definitions:b15
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS task definitions Function: explanation Text: A task is the instantiation of a task definition within a cluster. After you create a task definition for your application within Amazon ECS, you can specify the number of tasks to run on your cluster.
+
+--- candidate 7 ---
+selected: no
+rank: 7
+rerank_score: 0.22430836
+source_id: task-definitions
+chunk_id: doc_dde073b9ac8f9474:s0_amazon_ecs_task_definitions:b0
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS task definitions Function: explanation Text: A task definition is a blueprint for your application. It is a text file in JSON format that describes the parameters and one or more containers that form your application.
+
+--- candidate 8 ---
+selected: no
+rank: 8
+rerank_score: 0.21474715
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b3
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Schedule your containers on Amazon ECS Function: reference Text: option: Standalone task | when to use: A standalone task is suitable for processes such as batch jobs that perform work and then stop. For example, you can have a process call RunTask when work comes into a queue. The task pulls work from the queue, performs the work, and then exits. Using RunTask, you can allow the default task placement strategy to distribute tasks randomly across your cluster. This minimizes the chances
+
+--- candidate 9 ---
+selected: no
+rank: 9
+rerank_score: 0.20921232
+source_id: clusters
+chunk_id: doc_584e9f744ea27b0b:s0_amazon_ecs_clusters:b0
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters Function: explanation Text: An Amazon ECS cluster is a logical grouping of tasks or services that provides the infrastructure capacity for your containerized applications. When creating a cluster, you choose from the three primary infrastructure types, each optimized for different use cases and operational requirements.
+
+--- candidate 10 ---
+selected: no
+rank: 10
+rerank_score: 0.2079044
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s2_considerations:b5
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters for external instances Heading: Considerations Function: explanation Text: When an external instance is registered to a cluster, the `ecs.capability.external` attribute is associated with the instance. This attribute identifies the instance as an external instance. You can add custom attributes to your external instances to use as a task placement constraint. For more information, see Custom attributes.
+
+--- candidate 11 ---
+selected: yes
+rank: 11
+rerank_score: 0.20700216
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b0
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: To use Managed Daemons, first register a daemon task definition. A daemon task definition is a template that describes the containers that form a daemon. After you register a daemon task definition, create a daemon and associate it with a cluster and one or more Amazon ECS Managed Instances capacity providers. Amazon ECS then ensures that exactly one daemon task runs on every Amazon EC2 instance pro
+
+--- candidate 12 ---
+selected: no
+rank: 12
+rerank_score: 0.20624655
+source_id: getting-started
+chunk_id: doc_1b5e884cb09d63ba:s0_learn_how_to_create_and_use_amazon_ecs_resources:b5
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Learn how to create and use Amazon ECS resources Function: explanation Text: Learn how to create a task for Amazon ECS Managed Instances with the AWS CLI
+
+--- candidate 13 ---
+selected: no
+rank: 13
+rerank_score: 0.20433539
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b3
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: When you update a daemon to a new task definition revision, Amazon ECS performs a rolling deployment across all instances in the associated capacity providers. During the deployment, Amazon ECS drains a configurable percentage of instances simultaneously, provisions replacement instances with the updated daemon, and replaces your Amazon ECS service tasks automatically. Amazon ECS provides built-in c
+
+--- candidate 14 ---
+selected: no
+rank: 14
+rerank_score: 0.20428611
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b1
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: Daemons do not launch instances independently. When you run an application task on a Amazon ECS Managed Instances capacity provider, Amazon ECS provisions an Amazon EC2 instance, starts the daemon task first, and only then transitions the application task to `RUNNING`. This ordering guarantees that cross-cutting functions like logging, tracing, and metrics collection are operational before your appl
+
+--- candidate 15 ---
+selected: no
+rank: 15
+rerank_score: 0.2042708
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b2
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: Daemons are essential for instance health. If a daemon task stops, Amazon ECS automatically drains and replaces that container instance. This auto-repair behavior ensures reliable daemon coverage across all instances without manual intervention.
+
+Debug candidates
+----------------
+query_terms: amazon, ecs, how, scheduled, task, work
+anchor_terms: amazon, ecs, scheduled, task
+anchor_phrases: amazon ecs, scheduled task, scheduled task amazon, task amazon, task amazon ecs
+
+--- candidate 1 ---
+selected: yes
+rank: 1
+rerank_score: 0.29327464
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b4
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 1.00
+anchor_phrase_hits: amazon ecs, scheduled task
+text: Context: Schedule your containers on Amazon ECS Function: reference Text: option: Scheduled tasks | when to use: A scheduled task is suitable when you have tasks to run at set intervals in your cluster, you can use EventBridge Scheduler to create a schedule. You can run tasks for a backup operation or a log scan. The EventBridge Scheduler schedule that you create can run one or more tasks in your cluster at specified times. Your scheduled event can be set to a specific interval (run every {{N}} 
+
+--- candidate 2 ---
+selected: yes
+rank: 2
+rerank_score: 0.2872515
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b1
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 1.00
+anchor_phrase_hits: amazon ecs, scheduled task
+text: Context: Schedule your containers on Amazon ECS Function: explanation Text: Amazon ECS provides a service scheduler for long-running tasks and applications. It also provides the ability to run standalone tasks or scheduled tasks for batch jobs or single run tasks. You can specify the task placement strategies and constraints for running tasks that best meet your needs. For example, you can specify whether tasks run across multiple Availability Zones or within a single Availability Zone. And, opt
+
+--- candidate 3 ---
+selected: yes
+rank: 3
+rerank_score: 0.2725656
+source_id: task-definitions
+chunk_id: doc_dde073b9ac8f9474:s0_amazon_ecs_task_definitions:b16
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS task definitions Function: explanation Text: An Amazon ECS service runs and maintains your desired number of tasks simultaneously in an Amazon ECS cluster. How it works is that, if any of your tasks fail or stop for any reason, the Amazon ECS service scheduler launches another instance based on your task definition. It does this to replace it and thereby maintain your desired number of tasks in the service.
+
+--- candidate 4 ---
+selected: no
+rank: 4
+rerank_score: 0.2575637
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b2
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Schedule your containers on Amazon ECS Function: reference Text: option: Service | when to use: The service scheduler is suitable for long running stateless services and applications. The service scheduler optionally also makes sure that tasks are registered against an Elastic Load Balancing load balancer. You can update your services that are maintained by the service scheduler. This might include deploying a new task definition or changing the number of desired tasks that are running.
+
+--- candidate 5 ---
+selected: no
+rank: 5
+rerank_score: 0.24180135
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b0
+heading: ()
+query_overlap: 0.33
+anchor_overlap: 0.50
+anchor_phrase_hits: amazon ecs
+text: Context: Schedule your containers on Amazon ECS Function: explanation Text: Amazon Elastic Container Service (Amazon ECS) is a shared state, optimistic concurrency system that provides flexible scheduling capabilities for your containerized workloads. The Amazon ECS schedulers use the same cluster state information as the Amazon ECS API to make appropriate placement decisions.
+
+--- candidate 6 ---
+selected: no
+rank: 6
+rerank_score: 0.22522356
+source_id: task-definitions
+chunk_id: doc_dde073b9ac8f9474:s0_amazon_ecs_task_definitions:b15
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS task definitions Function: explanation Text: A task is the instantiation of a task definition within a cluster. After you create a task definition for your application within Amazon ECS, you can specify the number of tasks to run on your cluster.
+
+--- candidate 7 ---
+selected: no
+rank: 7
+rerank_score: 0.22430836
+source_id: task-definitions
+chunk_id: doc_dde073b9ac8f9474:s0_amazon_ecs_task_definitions:b0
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS task definitions Function: explanation Text: A task definition is a blueprint for your application. It is a text file in JSON format that describes the parameters and one or more containers that form your application.
+
+--- candidate 8 ---
+selected: no
+rank: 8
+rerank_score: 0.21474715
+source_id: schedule-your-containers
+chunk_id: doc_35797af29912f292:s0_schedule_your_containers_on_amazon_ecs:b3
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Schedule your containers on Amazon ECS Function: reference Text: option: Standalone task | when to use: A standalone task is suitable for processes such as batch jobs that perform work and then stop. For example, you can have a process call RunTask when work comes into a queue. The task pulls work from the queue, performs the work, and then exits. Using RunTask, you can allow the default task placement strategy to distribute tasks randomly across your cluster. This minimizes the chances
+
+--- candidate 9 ---
+selected: no
+rank: 9
+rerank_score: 0.20921232
+source_id: clusters
+chunk_id: doc_584e9f744ea27b0b:s0_amazon_ecs_clusters:b0
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters Function: explanation Text: An Amazon ECS cluster is a logical grouping of tasks or services that provides the infrastructure capacity for your containerized applications. When creating a cluster, you choose from the three primary infrastructure types, each optimized for different use cases and operational requirements.
+
+--- candidate 10 ---
+selected: no
+rank: 10
+rerank_score: 0.2079044
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s2_considerations:b5
+heading: ()
+query_overlap: 0.50
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS clusters for external instances Heading: Considerations Function: explanation Text: When an external instance is registered to a cluster, the `ecs.capability.external` attribute is associated with the instance. This attribute identifies the instance as an external instance. You can add custom attributes to your external instances to use as a task placement constraint. For more information, see Custom attributes.
+
+--- candidate 11 ---
+selected: yes
+rank: 11
+rerank_score: 0.20700216
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b0
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: To use Managed Daemons, first register a daemon task definition. A daemon task definition is a template that describes the containers that form a daemon. After you register a daemon task definition, create a daemon and associate it with a cluster and one or more Amazon ECS Managed Instances capacity providers. Amazon ECS then ensures that exactly one daemon task runs on every Amazon EC2 instance pro
+
+--- candidate 12 ---
+selected: no
+rank: 12
+rerank_score: 0.20624655
+source_id: getting-started
+chunk_id: doc_1b5e884cb09d63ba:s0_learn_how_to_create_and_use_amazon_ecs_resources:b5
+heading: ()
+query_overlap: 0.67
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Learn how to create and use Amazon ECS resources Function: explanation Text: Learn how to create a task for Amazon ECS Managed Instances with the AWS CLI
+
+--- candidate 13 ---
+selected: no
+rank: 13
+rerank_score: 0.20433539
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b3
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: When you update a daemon to a new task definition revision, Amazon ECS performs a rolling deployment across all instances in the associated capacity providers. During the deployment, Amazon ECS drains a configurable percentage of instances simultaneously, provisions replacement instances with the updated daemon, and replaces your Amazon ECS service tasks automatically. Amazon ECS provides built-in c
+
+--- candidate 14 ---
+selected: no
+rank: 14
+rerank_score: 0.20428611
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b1
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: Daemons do not launch instances independently. When you run an application task on a Amazon ECS Managed Instances capacity provider, Amazon ECS provisions an Amazon EC2 instance, starts the daemon task first, and only then transitions the application task to `RUNNING`. This ordering guarantees that cross-cutting functions like logging, tracing, and metrics collection are operational before your appl
+
+--- candidate 15 ---
+selected: no
+rank: 15
+rerank_score: 0.2042708
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b2
+heading: ()
+query_overlap: 0.83
+anchor_overlap: 0.75
+anchor_phrase_hits: amazon ecs
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: Daemons are essential for instance health. If a daemon task stops, Amazon ECS automatically drains and replaces that container instance. This auto-repair behavior ensures reliable daemon coverage across all instances without manual intervention.

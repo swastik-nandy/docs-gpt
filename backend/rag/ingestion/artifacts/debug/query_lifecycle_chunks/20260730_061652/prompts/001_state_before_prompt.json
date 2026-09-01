@@ -1,0 +1,864 @@
+{
+  "tenant_id": "tnt_local_000000000001",
+  "user_id": "usr_local_000000000001",
+  "conversation_id": "cnv_demo_1785372413_e8c41ffe",
+  "turn_id": "9c7cf3e9-728f-4ffd-9462-f2ed96b9ebdc",
+  "current_user_message": "pricing for not managing infrastructure",
+  "raw_user_message": "do i need to pay extra if i dont manage infra",
+  "retrieval_query": "pricing for not managing infrastructure",
+  "turn_plan": {
+    "action": "document_question",
+    "needs_document_retrieval": true,
+    "retrieval_query": "pricing for not managing infrastructure",
+    "answer_scope": "knowledge_base",
+    "allow_conversation_answer": false,
+    "needs_clarification": false,
+    "uses_previous_turns": false,
+    "confidence": 0.9,
+    "reason": "The user is asking a specific technical/billing question regarding infrastructure management, which likely requires checking the product's pricing documentation.",
+    "metadata": {
+      "planner_provider": "google_genai",
+      "planner_model": "gemma-4-26b-a4b-it",
+      "planner_finish_reason": "FinishReason.STOP",
+      "planner_fallback_used": false,
+      "recent_user_message_available": false,
+      "recent_assistant_message_available": false
+    }
+  },
+  "recent_turns": [],
+  "conversation_summary": null,
+  "retrieved_memory": [],
+  "retrieval_state": {
+    "query": "pricing for not managing infrastructure",
+    "rewritten_query": "pricing for not managing infrastructure",
+    "retrieval_trace_id": "ee42087a-9443-4b9b-b972-694b8fa742fe",
+    "stateful_retrieval": {
+      "enabled": true,
+      "raw_query": "pricing for not managing infrastructure",
+      "resolved_query": "pricing for not managing infrastructure",
+      "query_changed": false,
+      "needed_resolution": false,
+      "resolved_entity": null,
+      "strategy": "no_referential_marker",
+      "confidence": 1.0,
+      "metadata": {
+        "resolution_enabled": true
+      },
+      "conversation_context": {
+        "conversation_id": "cnv_demo_1785372413_e8c41ffe",
+        "recent_turn_count": 1,
+        "recent_entity_count": 0,
+        "has_summary": false,
+        "working_memory_count": 0
+      }
+    },
+    "retrieval_metadata": {
+      "backend": "adaptive_graph",
+      "action_count": 5,
+      "snapshot_count": 1,
+      "confidence": 0.544180335936119,
+      "confidence_reason": "value=0.544; score_gap=0.1806606427645235; exact_coverage=0.500; source_coverage=1.000",
+      "query_signals": {
+        "normalized_query": "pricing for not managing infrastructure",
+        "token_count": 5,
+        "lexical_specificity": 0.14800000000000002,
+        "is_exactish": false,
+        "is_structural_or_multi_hop": false,
+        "is_chat_dependent": false,
+        "likely_needs_memory": false,
+        "has_chat_history": true,
+        "has_session_context": false
+      },
+      "actions": [
+        {
+          "action": "sparse_search",
+          "status": "succeeded",
+          "hop": 0,
+          "reason": "selected highest gain/cost action: sparse_search; score=0.016724",
+          "latency_ms": 10454.462686000625,
+          "input_count": 0,
+          "output_count": 30,
+          "materially_changed": true,
+          "error": null,
+          "before_count": 0,
+          "after_count": 30,
+          "estimated_gain": 0.75256,
+          "estimated_cost_ms": 45.0,
+          "decision_score": 0.016723555555555554,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [],
+          "confidence": 0.0
+        },
+        {
+          "action": "score_rerank",
+          "status": "succeeded",
+          "hop": 1,
+          "reason": "selected highest gain/cost action: score_rerank; score=0.051852",
+          "latency_ms": 1.9613900003605522,
+          "input_count": 30,
+          "output_count": 30,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.28,
+          "estimated_cost_ms": 5.4,
+          "decision_score": 0.05185185185185185,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [
+            "sparse_search"
+          ],
+          "confidence": 0.26980663213895895
+        },
+        {
+          "action": "ce_rerank",
+          "status": "succeeded",
+          "hop": 2,
+          "reason": "forced CE rerank before context packing: flat top candidate scores; score_gap=0.0351",
+          "latency_ms": 9509.52467899333,
+          "input_count": 30,
+          "output_count": 30,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.9,
+          "estimated_cost_ms": 330.0,
+          "decision_score": 0.0027272727272727275,
+          "policy": "greedy_gain_cost_with_ce_gate",
+          "forced": true,
+          "trigger": "flat top candidate scores; score_gap=0.0351",
+          "completed_actions": [
+            "score_rerank",
+            "sparse_search"
+          ],
+          "confidence": 0.2635361512806311,
+          "score_gap": 0.035099388366351084,
+          "score_entropy": 0.9839764076392823,
+          "reranked_count": 30
+        },
+        {
+          "action": "pack_context",
+          "status": "succeeded",
+          "hop": 3,
+          "reason": "selected highest gain/cost action: pack_context; score=0.118750",
+          "latency_ms": 8.710617999895476,
+          "input_count": 30,
+          "output_count": 5,
+          "materially_changed": false,
+          "error": null,
+          "before_count": 30,
+          "after_count": 30,
+          "estimated_gain": 0.95,
+          "estimated_cost_ms": 8.0,
+          "decision_score": 0.11875,
+          "policy": "greedy_gain_cost",
+          "completed_actions": [
+            "ce_rerank",
+            "score_rerank",
+            "sparse_search"
+          ],
+          "confidence": 0.544180335936119
+        },
+        {
+          "action": "stop",
+          "status": "skipped",
+          "hop": 4,
+          "reason": "context already packed",
+          "latency_ms": null,
+          "input_count": null,
+          "output_count": null,
+          "materially_changed": null,
+          "error": null,
+          "terminal": true,
+          "score": 1.0
+        }
+      ],
+      "source": "generation_retrieval_node",
+      "turn_id": "9c7cf3e9-728f-4ffd-9462-f2ed96b9ebdc",
+      "raw_user_message": "do i need to pay extra if i dont manage infra",
+      "current_user_message": "do i need to pay extra if i dont manage infra",
+      "planned_retrieval_query": "pricing for not managing infrastructure",
+      "retrieval_query": "pricing for not managing infrastructure",
+      "effective_top_k": 5,
+      "stateful_retrieval": {
+        "enabled": true,
+        "raw_query": "pricing for not managing infrastructure",
+        "resolved_query": "pricing for not managing infrastructure",
+        "query_changed": false,
+        "needed_resolution": false,
+        "resolved_entity": null,
+        "strategy": "no_referential_marker",
+        "confidence": 1.0,
+        "metadata": {
+          "resolution_enabled": true
+        },
+        "conversation_context": {
+          "conversation_id": "cnv_demo_1785372413_e8c41ffe",
+          "recent_turn_count": 1,
+          "recent_entity_count": 0,
+          "has_summary": false,
+          "working_memory_count": 0
+        }
+      },
+      "raw_query": "pricing for not managing infrastructure",
+      "resolved_query": "pricing for not managing infrastructure",
+      "query_changed": false,
+      "resolution_strategy": "no_referential_marker",
+      "langgraph_runtime": true,
+      "elapsed_ms": 20088.978,
+      "graph_runtime": {
+        "recursion_limit": 16,
+        "node_trace_count": 5
+      },
+      "retrieval_trace_id": "ee42087a-9443-4b9b-b972-694b8fa742fe"
+    },
+    "candidates": [
+      {
+        "point_id": "16d667d3-59c9-561e-b7e5-f87fbad71039",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.56609596,
+        "rank": 1
+      },
+      {
+        "point_id": "0ce114c7-b252-5168-a9b1-66b425c6aef3",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.4638247,
+        "rank": 2
+      },
+      {
+        "point_id": "6692466c-7ac2-5fe6-8bdb-27f1342ed1b1",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01081838,
+        "rank": 3
+      },
+      {
+        "point_id": "d5a51069-ce66-5f0f-950a-9344f207c067",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01080592,
+        "rank": 4
+      },
+      {
+        "point_id": "0b1ae216-1a8a-5722-ad13-5b0a5f217595",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.01078612,
+        "rank": 5
+      },
+      {
+        "point_id": "d1b01459-7185-55e3-8313-1ada52900739",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": 0.0014599,
+        "rank": 6
+      },
+      {
+        "point_id": "c1364a42-a305-52fc-ae0b-db05c8cf90c6",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00292271,
+        "rank": 7
+      },
+      {
+        "point_id": "d2960185-a8bc-51a2-9cbb-8db560182815",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00338691,
+        "rank": 8
+      },
+      {
+        "point_id": "c80256b1-ce2c-5891-8087-237887f01501",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00338849,
+        "rank": 9
+      },
+      {
+        "point_id": "2fc9ab2f-0258-5915-8c9f-39a1ffc8d430",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00339385,
+        "rank": 10
+      },
+      {
+        "point_id": "1ebb0c92-596e-57d9-b3e7-6e068c0912ba",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.0034039,
+        "rank": 11
+      },
+      {
+        "point_id": "a8f19a01-d020-5351-ade9-9c38e8699a29",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00341341,
+        "rank": 12
+      },
+      {
+        "point_id": "e8116d82-f3df-5f48-b147-6b44ceee5208",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00343072,
+        "rank": 13
+      },
+      {
+        "point_id": "7fe75093-8a26-5368-9066-24b7791f1b82",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00345394,
+        "rank": 14
+      },
+      {
+        "point_id": "adbdc8b4-7656-510c-80de-067a07d62731",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00346371,
+        "rank": 15
+      },
+      {
+        "point_id": "8ee1ec9c-4984-555a-8ad9-03235c452f28",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00346836,
+        "rank": 16
+      },
+      {
+        "point_id": "81c4c051-c7b8-5b67-9a8b-10224c5aaa65",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.003472,
+        "rank": 17
+      },
+      {
+        "point_id": "01bb9bed-e94f-55ae-817a-905a1a3f70a3",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00347293,
+        "rank": 18
+      },
+      {
+        "point_id": "c48ba8d9-8b92-5dd2-8cdf-2a4f00eebf54",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00347516,
+        "rank": 19
+      },
+      {
+        "point_id": "4051687a-3fd5-5030-bcc9-af0daa266e66",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.0034754,
+        "rank": 20
+      },
+      {
+        "point_id": "79235e07-8d9f-506f-adca-13b81b39b0bb",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00347759,
+        "rank": 21
+      },
+      {
+        "point_id": "b57df84c-1e26-5ff1-97bc-d88cd0ebb7e1",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00347792,
+        "rank": 22
+      },
+      {
+        "point_id": "94d2d562-0b59-5637-8d4d-7074ba15010e",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00347905,
+        "rank": 23
+      },
+      {
+        "point_id": "45c4297b-3a2d-5ec7-8d0f-d9568a327553",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00348014,
+        "rank": 24
+      },
+      {
+        "point_id": "86732d9c-de1c-50b5-bc7c-b6863f42f8fa",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00348254,
+        "rank": 25
+      },
+      {
+        "point_id": "c5b46154-81c4-5be7-b155-a7c7bc7edd8e",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00348298,
+        "rank": 26
+      },
+      {
+        "point_id": "696db27b-33c4-5123-87ff-97d8d3251f6d",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00348309,
+        "rank": 27
+      },
+      {
+        "point_id": "010aa04f-1485-5136-a740-a67ac2850ab7",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00348321,
+        "rank": 28
+      },
+      {
+        "point_id": "70bf8e0c-3cad-5119-a0d5-e18d49dc50fc",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00348389,
+        "rank": 29
+      },
+      {
+        "point_id": "daef071d-ea08-5b1c-a7e6-fba5c683b49d",
+        "source_id": null,
+        "chunk_id": null,
+        "score": null,
+        "rerank_score": -0.00348395,
+        "rank": 30
+      }
+    ],
+    "selected_context": [
+      {
+        "block_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6",
+        "heading": null,
+        "text": "Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: explanation Text: Fargate Serverless compute - Pay only for the resources your tasks use without managing any infrastructure. Ideal for variable workloads and getting started quickly. Use when:",
+        "score": 0.56609596,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      },
+      {
+        "block_id": "doc_584e9f744ea27b0b:s4_capacity_providers:b7",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s4_capacity_providers:b7",
+        "heading": null,
+        "text": "Context: Amazon ECS clusters Heading: Capacity providers Function: explanation Text: Fargate capacity providers Serverless compute where you pay only for the resources your tasks use without managing any infrastructure. You just need to associate the pre-defined capacity providers (Fargate and Fargate Spot) with the cluster.",
+        "score": 0.4638247,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      },
+      {
+        "block_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16",
+        "heading": null,
+        "text": "Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: reference Text: Note: Amazon ECS Managed Instances is the recommended choice for most new workloads as it provides the best combination of performance, cost optimization, and operational simplicity while allowing AWS to handle infrastructure management tasks.",
+        "score": 0.0014599,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      },
+      {
+        "block_id": "doc_29370e71a8e71dba:s4_pricing:b2",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s4_pricing:b2",
+        "heading": null,
+        "text": "Context: What is Amazon Elastic Container Service? Heading: Pricing Function: explanation Text: AWS Fargate pricing – Pricing information for Fargate.",
+        "score": 0.01081838,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      },
+      {
+        "block_id": "doc_29370e71a8e71dba:s4_pricing:b0",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s4_pricing:b0",
+        "heading": null,
+        "text": "Context: What is Amazon Elastic Container Service? Heading: Pricing Function: explanation Text: Amazon ECS pricing depends on the capacity option you choose for your containers.",
+        "score": 0.01080592,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      }
+    ],
+    "citations": [
+      {
+        "block_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6",
+        "heading": null
+      },
+      {
+        "block_id": "doc_584e9f744ea27b0b:s4_capacity_providers:b7",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s4_capacity_providers:b7",
+        "heading": null
+      },
+      {
+        "block_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16",
+        "heading": null
+      },
+      {
+        "block_id": "doc_29370e71a8e71dba:s4_pricing:b2",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s4_pricing:b2",
+        "heading": null
+      },
+      {
+        "block_id": "doc_29370e71a8e71dba:s4_pricing:b0",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s4_pricing:b0",
+        "heading": null
+      }
+    ],
+    "warnings": []
+  },
+  "context_bundle": {
+    "retrieved_documents": [
+      {
+        "block_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6",
+        "heading": null,
+        "text": "Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: explanation Text: Fargate Serverless compute - Pay only for the resources your tasks use without managing any infrastructure. Ideal for variable workloads and getting started quickly. Use when:",
+        "score": 0.56609596,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      },
+      {
+        "block_id": "doc_584e9f744ea27b0b:s4_capacity_providers:b7",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s4_capacity_providers:b7",
+        "heading": null,
+        "text": "Context: Amazon ECS clusters Heading: Capacity providers Function: explanation Text: Fargate capacity providers Serverless compute where you pay only for the resources your tasks use without managing any infrastructure. You just need to associate the pre-defined capacity providers (Fargate and Fargate Spot) with the cluster.",
+        "score": 0.4638247,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      },
+      {
+        "block_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16",
+        "source_id": "clusters",
+        "chunk_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16",
+        "heading": null,
+        "text": "Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: reference Text: Note: Amazon ECS Managed Instances is the recommended choice for most new workloads as it provides the best combination of performance, cost optimization, and operational simplicity while allowing AWS to handle infrastructure management tasks.",
+        "score": 0.0014599,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      },
+      {
+        "block_id": "doc_29370e71a8e71dba:s4_pricing:b2",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s4_pricing:b2",
+        "heading": null,
+        "text": "Context: What is Amazon Elastic Container Service? Heading: Pricing Function: explanation Text: AWS Fargate pricing – Pricing information for Fargate.",
+        "score": 0.01081838,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      },
+      {
+        "block_id": "doc_29370e71a8e71dba:s4_pricing:b0",
+        "source_id": "welcome",
+        "chunk_id": "doc_29370e71a8e71dba:s4_pricing:b0",
+        "heading": null,
+        "text": "Context: What is Amazon Elastic Container Service? Heading: Pricing Function: explanation Text: Amazon ECS pricing depends on the capacity option you choose for your containers.",
+        "score": 0.01080592,
+        "metadata": {
+          "query_analysis_used": true,
+          "focus_terms": [
+            "infrastructure",
+            "manag",
+            "not",
+            "pric"
+          ],
+          "anchor_terms": [
+            "infrastructure",
+            "managing",
+            "pricing"
+          ],
+          "query_phrases": [
+            "for not managing",
+            "managing infrastructure",
+            "not managing",
+            "not managing infrastructure",
+            "pricing for",
+            "pricing for not"
+          ],
+          "source_focus_enabled": true,
+          "broad_source_diversity_enabled": false,
+          "followup_query": true,
+          "dominant_sources": [],
+          "candidate_calibration_used": true,
+          "answer_need": "general"
+        }
+      }
+    ],
+    "retrieved_memory": [],
+    "working_memory": [],
+    "conversation_summary": null,
+    "provenance_map": {}
+  },
+  "disable_long_term_memory": true,
+  "disable_memory_write": true
+}

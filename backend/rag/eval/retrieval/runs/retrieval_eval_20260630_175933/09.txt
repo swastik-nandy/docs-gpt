@@ -1,0 +1,34 @@
+QUERY: how do I monitor Amazon ECS with CloudWatch and CloudTrail
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.38129255502121756, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.002253865827116745})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b3
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: When you update a daemon to a new task definition revision, Amazon ECS performs a rolling deployment across all instances in the associated capacity providers. During the deployment, Amazon ECS drains a configurable percentage of instances simultaneously, provisions replacement instances with the updated daemon, and replaces your Amazon ECS service tasks automatically. Amazon ECS provides built-in c
+
+--- context 2 ---
+source_id: getting-started
+chunk_id: doc_1b5e884cb09d63ba:s0_learn_how_to_create_and_use_amazon_ecs_resources:b5
+text: Context: Learn how to create and use Amazon ECS resources Function: explanation Text: Learn how to create a task for Amazon ECS Managed Instances with the AWS CLI
+
+--- context 3 ---
+source_id: getting-started
+chunk_id: doc_1b5e884cb09d63ba:s0_learn_how_to_create_and_use_amazon_ecs_resources:b2
+text: Context: Learn how to create and use Amazon ECS resources Function: instruction Text: Set up
+
+--- context 4 ---
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b2
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Logs Monitor, store, and access the log files from the containers in your Amazon ECS tasks by specifying the `awslogs` log driver in your task definitions. For more information, see Using the awslogs driver. You can also monitor, store, and access the operating system and Amazon ECS container agent log files from your Amazon ECS container instances. This method for accessing logs can
+
+--- context 5 ---
+source_id: monitoring
+chunk_id: doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b4
+text: Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: AWS CloudTrail Logs CloudTrail provides a record of actions taken by a user, role, or an AWS service in Amazon ECS. Using the information collected by CloudTrail, you can determine the request that was made to Amazon ECS, the IP address from which the request was made, who made the request, when it was made, and additional details. For more information, see Log Amazon ECS API calls using AWS CloudTrai

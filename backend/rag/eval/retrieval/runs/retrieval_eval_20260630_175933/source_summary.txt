@@ -1,0 +1,135 @@
+
+============================================================
+QUERY: what is AWS Fargate
+sources:
+  - aws-fargate
+  - aws-fargate
+  - aws-fargate
+  - welcome
+  - aws-fargate
+
+============================================================
+QUERY: what network mode must Fargate tasks use
+sources:
+  - architect-your-solution
+  - aws-fargate
+  - aws-fargate
+  - aws-fargate
+  - ecs-anywhere
+
+============================================================
+QUERY: what are the infrastructure types for Amazon ECS clusters
+sources:
+  - clusters
+  - clusters
+  - clusters
+  - ecs-anywhere
+  - ecs-anywhere
+
+============================================================
+QUERY: when should I use ECS Anywhere
+sources:
+  - ecs-anywhere
+  - ecs-anywhere
+  - ecs-anywhere
+  - ecs-anywhere
+  - welcome
+
+============================================================
+QUERY: how do I troubleshoot ECS Anywhere errors
+sources:
+  - troubleshooting
+  - troubleshooting
+  - ecs-anywhere
+  - troubleshooting
+  - troubleshooting
+
+============================================================
+QUERY: what operating systems are supported by ECS Anywhere
+sources:
+  - ecs-anywhere
+  - ecs-anywhere
+  - ecs-anywhere
+  - ecs-anywhere
+  - ecs-anywhere
+
+============================================================
+QUERY: what is an ECS task definition
+sources:
+  - task-definitions
+  - task-definitions
+  - task-definitions
+  - task-definitions
+  - task-definitions
+
+============================================================
+QUERY: how do scheduled tasks work in Amazon ECS
+sources:
+  - schedule-your-containers
+  - task-definitions
+  - task-definitions
+  - task-definitions
+  - managed-daemons
+
+============================================================
+QUERY: how do I monitor Amazon ECS with CloudWatch and CloudTrail
+sources:
+  - managed-daemons
+  - getting-started
+  - getting-started
+  - monitoring
+  - monitoring
+
+============================================================
+QUERY: how do tags work in Amazon ECS and should I store sensitive data in tags
+sources:
+  - tagging-resources
+  - tagging-resources
+  - tagging-resources
+  - tagging-resources
+  - tagging-resources
+
+============================================================
+QUERY: what are Amazon ECS service quotas
+sources:
+  - service-quotas
+  - service-quotas
+  - service-quotas
+  - welcome
+  - welcome
+
+============================================================
+QUERY: what are Amazon ECS managed daemons
+sources:
+  - managed-daemons
+  - managed-daemons
+  - managed-daemons
+  - managed-daemons
+  - managed-daemons
+
+============================================================
+QUERY: how should I architect my application for Amazon ECS
+sources:
+  - architect-your-solution
+  - architect-your-solution
+  - architect-your-solution
+  - managed-daemons
+  - getting-started
+
+============================================================
+QUERY: what are ECS capacity providers
+sources:
+  - clusters
+  - clusters
+  - clusters
+  - aws-fargate
+  - aws-fargate
+
+============================================================
+QUERY: how do I troubleshoot stopped task errors in ECS
+sources:
+  - troubleshooting
+  - troubleshooting
+  - troubleshooting
+  - troubleshooting
+  - troubleshooting

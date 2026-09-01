@@ -1,0 +1,38 @@
+CURRENT USER MESSAGE:
+what is aws fargate
+
+ANSWER MODE:
+answer_scope=knowledge_base; retrieval_required=true; action=document_question; retrieval_query=what is aws fargate
+
+RECENT CONVERSATION:
+None
+
+RETRIEVED DOCUMENTS:
+[doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0] title=untitled source_id=welcomechunk_id=doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0score=0.30561479
+Context: What is Amazon Elastic Container Service? Function: reference Text: Tip: Join our upcoming container workshop series to learn best practices for Amazon ECS and AWS Fargate. Click here to sign up.
+
+RETRIEVED MEMORY:
+None
+
+PROVENANCE:
+None
+
+Write only the final answer for the user.
+
+Rules:
+- Do not mention ANSWER MODE.
+- Do not mention the turn plan.
+- Do not explain any routing or planner decision.
+- Do not reveal internal reasoning.
+- If answer_scope=knowledge_base, answer from retrieved documents only.
+- If answer_scope=general_conversation, chat normally.
+- If answer_scope=assistant_profile, answer using fixed Docs-GPT identity.
+
+SETUP / CONFIGURATION ANSWER RULE:
+- If the user asks how to configure, set up, deploy, create, or run something, look for all retrieved chunks that describe setup pieces.
+- Prefer a helpful grounded sequence over a narrow refusal.
+- Good structure:
+  1. Direct answer: “Yes, the docs show the main pieces.”
+  2. Grounded setup path from retrieved chunks.
+  3. What is missing, only if something important is missing.
+- Never say “no step-by-step guide” if the retrieved documents include relevant setup requirements, parameters, walkthroughs, task/service concepts, or getting-started material.

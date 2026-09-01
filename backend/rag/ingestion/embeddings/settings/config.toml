@@ -1,0 +1,96 @@
+# -------------------------- SCHEMA --------------------------
+
+[schema]
+version = "embedding_payload_v2"
+
+
+# -------------------------- ARTIFACTS --------------------------
+
+[artifacts]
+chunked_root = "rag/ingestion/artifacts/chunked"
+indexed_root = "rag/ingestion/artifacts/indexed"
+
+
+# -------------------------- EMBEDDINGS --------------------------
+# .env may override:
+#   EMBEDDING_MODEL
+#   SPARSE_EMBEDDING_MODEL
+#
+# For this setup both must be BAAI/bge-m3 because BGEM3FlagModel
+# produces dense + sparse from the same model.
+
+[embedding]
+model_name = "BAAI/bge-m3"
+sparse_model_name = "BAAI/bge-m3"
+
+device = "cuda:0"
+batch_size = 1
+dense_vector_size = 1024
+normalize_embeddings = true
+
+document_prefix = ""
+query_prefix = ""
+trust_remote_code = false
+
+use_fp16 = true
+max_length = 8192
+
+enable_sparse = true
+sparse_min_abs_value = 0.0
+sparse_max_nonzero = 256
+return_colbert_vecs = false
+
+
+# -------------------------- QDRANT --------------------------
+# .env may override:
+#   QDRANT_URL
+#   QDRANT_API_KEY
+
+[qdrant]
+collection_name = "rag_chunks_bge_m3_v2"
+
+mode = "remote"
+url = "http://localhost:6333"
+api_key = ""
+
+timeout_seconds = 30
+prefer_grpc = false
+
+distance = "Cosine"
+recreate_collection = false
+create_payload_indexes = true
+upsert_batch_size = 64
+
+dense_vector_name = "dense"
+sparse_vector_name = "sparse"
+enable_sparse_vectors = true
+
+hnsw_m = 16
+hnsw_ef_construct = 128
+hnsw_full_scan_threshold = 10000
+
+dense_on_disk = false
+sparse_on_disk = false
+
+hybrid_prefetch_limit = 50
+hybrid_fusion = "RRF"
+
+
+# -------------------------- INDEXING WORKER --------------------------
+
+[indexing]
+poll_interval_seconds = 5.0
+idle_jitter_seconds = 0.75
+run_once = false
+continue_on_error = true
+max_jobs_per_iteration = 10
+max_files_per_job = 500
+
+
+# -------------------------- MARKERS --------------------------
+
+[markers]
+done = "_DONE"
+failed = "_FAILED"
+indexed = "_INDEXED"
+index_failed = "_INDEX_FAILED"

@@ -1,0 +1,41 @@
+CURRENT USER MESSAGE:
+cost of not managing infrastructure, managed service pricing, infrastructure management fees
+
+ANSWER MODE:
+answer_scope=knowledge_base; retrieval_required=true; action=document_question; retrieval_query=cost of not managing infrastructure, managed service pricing, infrastructure management fees
+
+RECENT CONVERSATION:
+None
+
+RETRIEVED DOCUMENTS:
+[doc_29370e71a8e71dba:s1_terminology_and_components:b7] title=untitled source_id=welcomechunk_id=doc_29370e71a8e71dba:s1_terminology_and_components:b7score=0.01263592
+Context: What is Amazon Elastic Container Service? Heading: Terminology and components Function: explanation Text: Amazon ECS Managed Instances is a compute option for Amazon ECS that enables you to run containerized workloads on a range of Amazon EC2 instance types while offloading infrastructure management to AWS. With Amazon ECS Managed Instances, you can access specific compute capabilities such as GPU acceleration, specific CPU architectures, high network performance, and specialized instances types, while AWS handles provisioning, patching, scaling, and maintenance of the underlying infrastructure.
+
+[doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16] title=untitled source_id=clusterschunk_id=doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16score=0.00471153
+Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: reference Text: Note: Amazon ECS Managed Instances is the recommended choice for most new workloads as it provides the best combination of performance, cost optimization, and operational simplicity while allowing AWS to handle infrastructure management tasks.
+
+RETRIEVED MEMORY:
+None
+
+PROVENANCE:
+None
+
+Write only the final answer for the user.
+
+Rules:
+- Do not mention ANSWER MODE.
+- Do not mention the turn plan.
+- Do not explain any routing or planner decision.
+- Do not reveal internal reasoning.
+- If answer_scope=knowledge_base, answer from retrieved documents only.
+- If answer_scope=general_conversation, chat normally.
+- If answer_scope=assistant_profile, answer using fixed Docs-GPT identity.
+
+SETUP / CONFIGURATION ANSWER RULE:
+- If the user asks how to configure, set up, deploy, create, or run something, look for all retrieved chunks that describe setup pieces.
+- Prefer a helpful grounded sequence over a narrow refusal.
+- Good structure:
+  1. Direct answer: “Yes, the docs show the main pieces.”
+  2. Grounded setup path from retrieved chunks.
+  3. What is missing, only if something important is missing.
+- Never say “no step-by-step guide” if the retrieved documents include relevant setup requirements, parameters, walkthroughs, task/service concepts, or getting-started material.

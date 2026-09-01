@@ -1,0 +1,14 @@
+[packed_spine]
+target_fragment_bytes = 1048576
+max_fragment_bytes = 2097152
+max_estimated_tokens = 256000
+max_spine_nodes = 256
+max_heading_count = 256
+max_heading_depth_variance = 3
+never_cross_h1 = true
+
+enforce_safe_boundaries = true
+protect_code_fences = true
+protect_html_blocks = true
+protect_mdx_components = true
+protect_tables = true

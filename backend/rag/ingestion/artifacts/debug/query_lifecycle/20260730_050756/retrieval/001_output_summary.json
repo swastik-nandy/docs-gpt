@@ -1,0 +1,747 @@
+{
+  "keys": [
+    "context_blocks",
+    "decision",
+    "errors",
+    "metadata",
+    "normalized_query",
+    "request",
+    "reranked_candidates",
+    "trace",
+    "warnings"
+  ],
+  "normalized_query": {
+    "original_query": "what is aws fargate",
+    "normalized_query": "what is aws fargate",
+    "intent": "unknown",
+    "defects": [],
+    "rewritten_queries": [
+      {
+        "query": "fargate",
+        "reason": "query_processing_semantic_variant",
+        "weight": 1.0,
+        "metadata": {
+          "source": "query_processing"
+        }
+      }
+    ],
+    "extracted_terms": [],
+    "extracted_filters": [],
+    "hypothetical_answer": null,
+    "requires_memory": false,
+    "metadata": {
+      "planner": "adaptive",
+      "query_analysis": {
+        "raw_query": "what is aws fargate",
+        "normalized_query": "what is aws fargate",
+        "intent": "unknown",
+        "defects": [],
+        "query_terms": [
+          "fargate",
+          "aws",
+          "what",
+          "is"
+        ],
+        "weighted_terms": [
+          {
+            "text": "fargate",
+            "weight": 1.35,
+            "features": [
+              "long"
+            ]
+          },
+          {
+            "text": "aws",
+            "weight": 0.65,
+            "features": [
+              "short_lower"
+            ]
+          },
+          {
+            "text": "what",
+            "weight": 0.25,
+            "features": [
+              "function"
+            ]
+          },
+          {
+            "text": "is",
+            "weight": 0.05,
+            "features": [
+              "function",
+              "short_lower"
+            ]
+          }
+        ],
+        "anchor_terms": [
+          "fargate"
+        ],
+        "focus_terms": [
+          "fargate"
+        ],
+        "entity_terms": [],
+        "exact_terms": [],
+        "source_hints": [],
+        "phrase_terms": [
+          "aws fargate",
+          "is aws fargate"
+        ],
+        "semantic_queries": [
+          "what is aws fargate",
+          "fargate"
+        ],
+        "referential_marker_count": 0,
+        "token_count": 4,
+        "unique_token_ratio": 1.0,
+        "avg_token_length": 4.0,
+        "lexical_specificity": 0.25,
+        "entity_density": 0.0,
+        "code_signal_density": 0.0,
+        "exact_signal_density": 0.0,
+        "structural_shape": "statement",
+        "confidence": 0.67,
+        "requires_memory": false,
+        "reasoning": [
+          "structural_shape=statement",
+          "focus_terms=1",
+          "exact_terms=0",
+          "entity_density=0.0",
+          "lexical_specificity=0.25",
+          "confidence=0.67"
+        ],
+        "metadata": {
+          "source": "generic_statistical_query_analysis",
+          "version": "v1",
+          "uses_domain_terms": false,
+          "uses_action_dictionary": false
+        }
+      },
+      "generic": true
+    }
+  },
+  "decision": {
+    "is_sufficient": true,
+    "confidence": "medium",
+    "confidence_score": 0.7002358609868938,
+    "reason": "context already packed",
+    "should_rewrite": false,
+    "rewrite_reason": null,
+    "metadata": {
+      "backend": "adaptive",
+      "final_action": "stop",
+      "exact_coverage": 0.5,
+      "source_coverage": 1.0,
+      "score_gap": 0.6954500111714411
+    }
+  },
+  "metadata": {
+    "backend": "adaptive_graph",
+    "action_count": 5,
+    "snapshot_count": 1,
+    "confidence": 0.7002358609868938,
+    "confidence_reason": "value=0.700; score_gap=0.6954500111714411; exact_coverage=0.500; source_coverage=1.000",
+    "query_signals": {
+      "normalized_query": "what is aws fargate",
+      "token_count": 4,
+      "lexical_specificity": 0.08,
+      "is_exactish": false,
+      "is_structural_or_multi_hop": false,
+      "is_chat_dependent": false,
+      "likely_needs_memory": false,
+      "has_chat_history": true,
+      "has_session_context": false
+    },
+    "actions": [
+      {
+        "action": "sparse_search",
+        "status": "succeeded",
+        "hop": 0,
+        "reason": "selected highest gain/cost action: sparse_search; score=0.016391",
+        "latency_ms": 9367.335376002302,
+        "input_count": 0,
+        "output_count": 30,
+        "materially_changed": true,
+        "error": null,
+        "before_count": 0,
+        "after_count": 30,
+        "estimated_gain": 0.7375999999999999,
+        "estimated_cost_ms": 45.0,
+        "decision_score": 0.01639111111111111,
+        "policy": "greedy_gain_cost",
+        "completed_actions": [],
+        "confidence": 0.0
+      },
+      {
+        "action": "score_rerank",
+        "status": "succeeded",
+        "hop": 1,
+        "reason": "selected highest gain/cost action: score_rerank; score=0.037037",
+        "latency_ms": 2.6761150002130307,
+        "input_count": 30,
+        "output_count": 30,
+        "materially_changed": false,
+        "error": null,
+        "before_count": 30,
+        "after_count": 30,
+        "estimated_gain": 0.2,
+        "estimated_cost_ms": 5.4,
+        "decision_score": 0.037037037037037035,
+        "policy": "greedy_gain_cost",
+        "completed_actions": [
+          "sparse_search"
+        ],
+        "confidence": 0.36257837726519576
+      },
+      {
+        "action": "ce_rerank",
+        "status": "succeeded",
+        "hop": 2,
+        "reason": "forced CE rerank before context packing: high candidate score entropy; entropy=0.9434",
+        "latency_ms": 9387.31376099895,
+        "input_count": 30,
+        "output_count": 30,
+        "materially_changed": false,
+        "error": null,
+        "before_count": 30,
+        "after_count": 30,
+        "estimated_gain": 0.4600000000000001,
+        "estimated_cost_ms": 330.0,
+        "decision_score": 0.0013939393939393942,
+        "policy": "greedy_gain_cost_with_ce_gate",
+        "forced": true,
+        "trigger": "high candidate score entropy; entropy=0.9434",
+        "completed_actions": [
+          "score_rerank",
+          "sparse_search"
+        ],
+        "confidence": 0.3671710075631443,
+        "score_gap": 0.32797941381968887,
+        "score_entropy": 0.9434199313554991,
+        "reranked_count": 30
+      },
+      {
+        "action": "pack_context",
+        "status": "succeeded",
+        "hop": 3,
+        "reason": "selected highest gain/cost action: pack_context; score=0.118750",
+        "latency_ms": 7.602561003295705,
+        "input_count": 30,
+        "output_count": 1,
+        "materially_changed": false,
+        "error": null,
+        "before_count": 30,
+        "after_count": 30,
+        "estimated_gain": 0.95,
+        "estimated_cost_ms": 8.0,
+        "decision_score": 0.11875,
+        "policy": "greedy_gain_cost",
+        "completed_actions": [
+          "ce_rerank",
+          "score_rerank",
+          "sparse_search"
+        ],
+        "confidence": 0.7002358609868938
+      },
+      {
+        "action": "stop",
+        "status": "skipped",
+        "hop": 4,
+        "reason": "context already packed",
+        "latency_ms": null,
+        "input_count": null,
+        "output_count": null,
+        "materially_changed": null,
+        "error": null,
+        "terminal": true,
+        "score": 1.0
+      }
+    ],
+    "source": "generation_retrieval_node",
+    "turn_id": "8fa82f1e-56af-4dd0-9e91-f4f98c748242",
+    "raw_user_message": "what is aws fargate",
+    "current_user_message": "what is aws fargate",
+    "planned_retrieval_query": "what is aws fargate",
+    "retrieval_query": "what is aws fargate",
+    "effective_top_k": 5,
+    "stateful_retrieval": {
+      "enabled": true,
+      "raw_query": "what is aws fargate",
+      "resolved_query": "what is aws fargate",
+      "query_changed": false,
+      "needed_resolution": false,
+      "resolved_entity": null,
+      "strategy": "no_referential_marker",
+      "confidence": 1.0,
+      "metadata": {
+        "resolution_enabled": true
+      },
+      "conversation_context": {
+        "conversation_id": "cnv_demo_1785368278_b2ddd773",
+        "recent_turn_count": 1,
+        "recent_entity_count": 0,
+        "has_summary": false,
+        "working_memory_count": 0
+      }
+    },
+    "raw_query": "what is aws fargate",
+    "resolved_query": "what is aws fargate",
+    "query_changed": false,
+    "resolution_strategy": "no_referential_marker",
+    "langgraph_runtime": true,
+    "elapsed_ms": 18876.77,
+    "graph_runtime": {
+      "recursion_limit": 16,
+      "node_trace_count": 5
+    },
+    "retrieval_trace_id": "c84e93d5-bd98-455c-b4ae-c2e5570613c4"
+  },
+  "trace_count": 5,
+  "warning_count": 0,
+  "error_count": 0,
+  "reranked_count": 30,
+  "context_block_count": 1,
+  "warnings": [],
+  "errors": [],
+  "trace": [
+    {
+      "stage": "sparse_retrieved",
+      "message": "Adaptive action sparse_search: succeeded",
+      "metadata": {
+        "action": "sparse_search",
+        "status": "succeeded",
+        "hop": 0,
+        "reason": "selected highest gain/cost action: sparse_search; score=0.016391",
+        "latency_ms": 9367.335376002302,
+        "input_count": 0,
+        "output_count": 30,
+        "materially_changed": true,
+        "error": null,
+        "before_count": 0,
+        "after_count": 30,
+        "estimated_gain": 0.7375999999999999,
+        "estimated_cost_ms": 45.0,
+        "decision_score": 0.01639111111111111,
+        "policy": "greedy_gain_cost",
+        "completed_actions": [],
+        "confidence": 0.0
+      }
+    },
+    {
+      "stage": "reranked",
+      "message": "Adaptive action score_rerank: succeeded",
+      "metadata": {
+        "action": "score_rerank",
+        "status": "succeeded",
+        "hop": 1,
+        "reason": "selected highest gain/cost action: score_rerank; score=0.037037",
+        "latency_ms": 2.6761150002130307,
+        "input_count": 30,
+        "output_count": 30,
+        "materially_changed": false,
+        "error": null,
+        "before_count": 30,
+        "after_count": 30,
+        "estimated_gain": 0.2,
+        "estimated_cost_ms": 5.4,
+        "decision_score": 0.037037037037037035,
+        "policy": "greedy_gain_cost",
+        "completed_actions": [
+          "sparse_search"
+        ],
+        "confidence": 0.36257837726519576
+      }
+    },
+    {
+      "stage": "reranked",
+      "message": "Adaptive action ce_rerank: succeeded",
+      "metadata": {
+        "action": "ce_rerank",
+        "status": "succeeded",
+        "hop": 2,
+        "reason": "forced CE rerank before context packing: high candidate score entropy; entropy=0.9434",
+        "latency_ms": 9387.31376099895,
+        "input_count": 30,
+        "output_count": 30,
+        "materially_changed": false,
+        "error": null,
+        "before_count": 30,
+        "after_count": 30,
+        "estimated_gain": 0.4600000000000001,
+        "estimated_cost_ms": 330.0,
+        "decision_score": 0.0013939393939393942,
+        "policy": "greedy_gain_cost_with_ce_gate",
+        "forced": true,
+        "trigger": "high candidate score entropy; entropy=0.9434",
+        "completed_actions": [
+          "score_rerank",
+          "sparse_search"
+        ],
+        "confidence": 0.3671710075631443,
+        "score_gap": 0.32797941381968887,
+        "score_entropy": 0.9434199313554991,
+        "reranked_count": 30
+      }
+    },
+    {
+      "stage": "context_packed",
+      "message": "Adaptive action pack_context: succeeded",
+      "metadata": {
+        "action": "pack_context",
+        "status": "succeeded",
+        "hop": 3,
+        "reason": "selected highest gain/cost action: pack_context; score=0.118750",
+        "latency_ms": 7.602561003295705,
+        "input_count": 30,
+        "output_count": 1,
+        "materially_changed": false,
+        "error": null,
+        "before_count": 30,
+        "after_count": 30,
+        "estimated_gain": 0.95,
+        "estimated_cost_ms": 8.0,
+        "decision_score": 0.11875,
+        "policy": "greedy_gain_cost",
+        "completed_actions": [
+          "ce_rerank",
+          "score_rerank",
+          "sparse_search"
+        ],
+        "confidence": 0.7002358609868938
+      }
+    },
+    {
+      "stage": "completed",
+      "message": "Adaptive action stop: skipped",
+      "metadata": {
+        "action": "stop",
+        "status": "skipped",
+        "hop": 4,
+        "reason": "context already packed",
+        "latency_ms": null,
+        "input_count": null,
+        "output_count": null,
+        "materially_changed": null,
+        "error": null,
+        "terminal": true,
+        "score": 1.0
+      }
+    }
+  ],
+  "top_reranked_preview": [
+    {
+      "index": 1,
+      "rank": 1,
+      "score": null,
+      "rerank_score": 1.00349631,
+      "original_score": 0.019706555,
+      "confidence": null,
+      "chunk_id": "doc_29370e71a8e71dba:s1_terminology_and_components:b9",
+      "point_id": "59335ad7-9c02-50d0-a81f-73f5254b4885",
+      "source_id": "welcome",
+      "heading": "Terminology and components",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Heading: Terminology and components Function: explanation Text: Serverless in the AWS cloud Fargate is a serverless, pay-as-you-go compute engine. With Fargate you don't need to manage servers, handle capacity planning, or isolate container workloads for security."
+    },
+    {
+      "index": 2,
+      "rank": 2,
+      "score": null,
+      "rerank_score": 0.30561479,
+      "original_score": 0.014366068,
+      "confidence": null,
+      "chunk_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0",
+      "point_id": "71e96985-5125-577e-89c5-4e5fb5f877e5",
+      "source_id": "welcome",
+      "heading": "What is Amazon Elastic Container Service?",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Function: reference Text: Tip: Join our upcoming container workshop series to learn best practices for Amazon ECS and AWS Fargate. Click here to sign up."
+    },
+    {
+      "index": 3,
+      "rank": 3,
+      "score": null,
+      "rerank_score": 0.07680549,
+      "original_score": 0.084623694,
+      "confidence": null,
+      "chunk_id": "doc_584e9f744ea27b0b:s4_capacity_providers:b7",
+      "point_id": "0ce114c7-b252-5168-a9b1-66b425c6aef3",
+      "source_id": "clusters",
+      "heading": "Capacity providers",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/clusters.md",
+      "text_preview": "Context: Amazon ECS clusters Heading: Capacity providers Function: explanation Text: Fargate capacity providers Serverless compute where you pay only for the resources your tasks use without managing any infrastructure. You just need to associate the pre-defined capacity providers (Fargate and Fargate Spot) with the cluster."
+    },
+    {
+      "index": 4,
+      "rank": 4,
+      "score": null,
+      "rerank_score": -0.00048462,
+      "original_score": 0.022643216,
+      "confidence": null,
+      "chunk_id": "doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b6",
+      "point_id": "d61f0a1e-5d18-5b3a-8e30-c0fc1ffa0b2d",
+      "source_id": "monitoring",
+      "heading": "Logging and Monitoring in Amazon Elastic Container Service",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/monitoring.md",
+      "text_preview": "Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: AWS Compute Optimizer AWS Compute Optimizer is a service that analyzes the configuration and utilization metrics of your AWS resources. It reports whether your resources are optimal, and generates optimization recommendations to reduce the cost and improve the performance of your workloads. For more information, see AWS Compute Optimizer recommendations for Amazon ECS."
+    },
+    {
+      "index": 5,
+      "rank": 5,
+      "score": null,
+      "rerank_score": -0.00085834,
+      "original_score": 0.014165238,
+      "confidence": null,
+      "chunk_id": "doc_767746ac3d8492ea:s0_security_in_amazon_elastic_container_service:b2",
+      "point_id": "8ee1ec9c-4984-555a-8ad9-03235c452f28",
+      "source_id": "security",
+      "heading": "Security in Amazon Elastic Container Service",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/security.md",
+      "text_preview": "Context: Security in Amazon Elastic Container Service Function: explanation Text: Security of the cloud – AWS is responsible for protecting the infrastructure that runs AWS services in the AWS Cloud. AWS also provides you with services that you can use securely. Third-party auditors regularly test and verify the effectiveness of our security as part of the AWS compliance programs. To learn about the compliance programs that apply to Amazon Elastic Container Service, see AWS Services in Scope by Compliance Program."
+    },
+    {
+      "index": 6,
+      "rank": 6,
+      "score": null,
+      "rerank_score": -0.00088203,
+      "original_score": 0.053468063,
+      "confidence": null,
+      "chunk_id": "doc_b4671344ab3344a2:s3_networking:b13",
+      "point_id": "a524fdc6-c9a0-5b68-ab83-fba1a5edad23",
+      "source_id": "ecs-anywhere",
+      "heading": "Networking",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/ecs-anywhere.md",
+      "text_preview": "Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: `ec2messages.{{region}}.amazonaws.com` — This is the service endpoint that AWS Systems Manager uses to communicate between the Systems Manager agent and the Systems Manager service in the cloud."
+    },
+    {
+      "index": 7,
+      "rank": 7,
+      "score": null,
+      "rerank_score": -0.00137952,
+      "original_score": 0.023979325,
+      "confidence": null,
+      "chunk_id": "doc_767746ac3d8492ea:s0_security_in_amazon_elastic_container_service:b1",
+      "point_id": "314c0d66-5370-548c-9797-155eae59fc39",
+      "source_id": "security",
+      "heading": "Security in Amazon Elastic Container Service",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/security.md",
+      "text_preview": "Context: Security in Amazon Elastic Container Service Function: explanation Text: Security is a shared responsibility between AWS and you. The shared responsibility model describes this as security of the cloud and security in the cloud:"
+    },
+    {
+      "index": 8,
+      "rank": 8,
+      "score": null,
+      "rerank_score": -0.00161073,
+      "original_score": 0.057852797,
+      "confidence": null,
+      "chunk_id": "doc_b4671344ab3344a2:s3_networking:b12",
+      "point_id": "46a86642-abb0-5a75-9071-e18434b4c3cc",
+      "source_id": "ecs-anywhere",
+      "heading": "Networking",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/ecs-anywhere.md",
+      "text_preview": "Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: `ssm.{{region}}.amazonaws.com` — This is the service endpoint for AWS Systems Manager."
+    },
+    {
+      "index": 9,
+      "rank": 9,
+      "score": null,
+      "rerank_score": -0.00191978,
+      "original_score": 0.03062617,
+      "confidence": null,
+      "chunk_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b1",
+      "point_id": "075c82c1-3fb1-50a6-977a-781d41affb0f",
+      "source_id": "welcome",
+      "heading": "What is Amazon Elastic Container Service?",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Function: explanation Text: Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications. As a fully managed service, Amazon ECS comes with AWS configuration and operational best practices built-in. It's integrated with both AWS tools, such as Amazon Elastic Container Registry, and third-party tools, such as Docker. This integration makes it easier for teams to focus on building the applications, not the environment. You can run and scale your container workloads across AWS Regions in the cloud, and on-premises, without the complexity of managing a control plane."
+    },
+    {
+      "index": 10,
+      "rank": 10,
+      "score": null,
+      "rerank_score": -0.00220502,
+      "original_score": 0.014981948,
+      "confidence": null,
+      "chunk_id": "doc_29370e71a8e71dba:s3_provisioning:b2",
+      "point_id": "a7dbbdfa-6472-55a5-ba92-9a2d5740b9c9",
+      "source_id": "welcome",
+      "heading": "Provisioning",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Heading: Provisioning Function: explanation Text: AWS Command Line Interface (AWS CLI) — Provides commands for a broad set of AWS services, including Amazon ECS. It's supported on Windows, Mac, and Linux. For more information, see AWS Command Line Interface."
+    },
+    {
+      "index": 11,
+      "rank": 11,
+      "score": null,
+      "rerank_score": -0.00240594,
+      "original_score": 0.014084905,
+      "confidence": null,
+      "chunk_id": "doc_29370e71a8e71dba:s3_provisioning:b3",
+      "point_id": "5c91f6ba-b16d-5947-a9ef-08e8f124d442",
+      "source_id": "welcome",
+      "heading": "Provisioning",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Heading: Provisioning Function: explanation Text: AWS SDKs — Provides language-specific APIs and takes care of many of the connection details. These include calculating signatures, handling request retries, and error handling. For more information, see AWS SDKs."
+    },
+    {
+      "index": 12,
+      "rank": 12,
+      "score": null,
+      "rerank_score": -0.0025535,
+      "original_score": 0.022920102,
+      "confidence": null,
+      "chunk_id": "doc_6f5d8fbb49dadbc4:s0_amazon_ecs_service_quotas:b1",
+      "point_id": "8c1b76e9-5247-590c-9718-786fc3c128a0",
+      "source_id": "service-quotas",
+      "heading": "Amazon ECS service quotas",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/service-quotas.md",
+      "text_preview": "Context: Amazon ECS service quotas Function: explanation Text: The Service Quotas console is a central location where you can view and manage your quotas for AWS services, and request a quota increase for many of the resources that you use. Use the quota information that we provide to manage your resources. Plan to request any quota increases in advance of the time that you'll need them."
+    },
+    {
+      "index": 13,
+      "rank": 13,
+      "score": null,
+      "rerank_score": -0.0026105,
+      "original_score": 0.02257675,
+      "confidence": null,
+      "chunk_id": "doc_9a19f2043f23661e:s1_how_resources_are_tagged:b10",
+      "point_id": "1d8b882b-7208-5fa7-899a-5085ec356e9f",
+      "source_id": "tagging-resources",
+      "heading": "How resources are tagged",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/tagging-resources.md",
+      "text_preview": "Context: Tagging Amazon ECS resources Heading: How resources are tagged Function: reference Text: resource: Amazon ECS clusters | supports tags: Yes | supports tag propagation: No | tags automatically added by the console: Key: aws:cloudformation:logical-idValue: `ECSCluster`Key: aws:cloudformation:stack-id<br />Value: `arn:aws:cloudformation:{{arn}}`<br />Key: `aws:cloudformation:stack-name`<br />Value: `ECS-Console-V2-Cluster-{{EXAMPLE}}`"
+    },
+    {
+      "index": 14,
+      "rank": 14,
+      "score": null,
+      "rerank_score": -0.00284808,
+      "original_score": 0.024926107,
+      "confidence": null,
+      "chunk_id": "doc_248c63ba4237f6df:s0_logging_and_monitoring_in_amazon_elastic_container_service:b2",
+      "point_id": "1a994e8f-d6b1-55da-a7b9-13c6d8f8eef7",
+      "source_id": "monitoring",
+      "heading": "Logging and Monitoring in Amazon Elastic Container Service",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/monitoring.md",
+      "text_preview": "Context: Logging and Monitoring in Amazon Elastic Container Service Function: explanation Text: Amazon CloudWatch Logs Monitor, store, and access the log files from the containers in your Amazon ECS tasks by specifying the `awslogs` log driver in your task definitions. For more information, see Using the awslogs driver. You can also monitor, store, and access the operating system and Amazon ECS container agent log files from your Amazon ECS container instances. This method for accessing logs can be used for containers using EC2.."
+    },
+    {
+      "index": 15,
+      "rank": 15,
+      "score": null,
+      "rerank_score": -0.00289941,
+      "original_score": 0.048481178,
+      "confidence": null,
+      "chunk_id": "doc_b4671344ab3344a2:s3_networking:b14",
+      "point_id": "1ed86b15-3521-5744-82f5-28c096abe735",
+      "source_id": "ecs-anywhere",
+      "heading": "Networking",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/ecs-anywhere.md",
+      "text_preview": "Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: `ssmmessages.{{region}}.amazonaws.com` — This is the service endpoint that is required to create and delete session channels with the Session Manager service in the cloud."
+    },
+    {
+      "index": 16,
+      "rank": 16,
+      "score": null,
+      "rerank_score": -0.00294869,
+      "original_score": 0.05384603,
+      "confidence": null,
+      "chunk_id": "doc_b4671344ab3344a2:s3_networking:b10",
+      "point_id": "cafbc552-acea-5b33-84a8-35e12b9b2b34",
+      "source_id": "ecs-anywhere",
+      "heading": "Networking",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/ecs-anywhere.md",
+      "text_preview": "Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: `ecs-t-*.{{region}}.amazonaws.com` — This endpoint is used to manage task and container metrics."
+    },
+    {
+      "index": 17,
+      "rank": 17,
+      "score": null,
+      "rerank_score": -0.00296492,
+      "original_score": 0.057648852,
+      "confidence": null,
+      "chunk_id": "doc_b4671344ab3344a2:s3_networking:b11",
+      "point_id": "432a8bd7-f8ac-5361-9c10-47fb908e0fec",
+      "source_id": "ecs-anywhere",
+      "heading": "Networking",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/ecs-anywhere.md",
+      "text_preview": "Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: `ecs.{{region}}.amazonaws.com` — This is the service endpoint for Amazon ECS."
+    },
+    {
+      "index": 18,
+      "rank": 18,
+      "score": null,
+      "rerank_score": -0.00297212,
+      "original_score": 0.052876677,
+      "confidence": null,
+      "chunk_id": "doc_b4671344ab3344a2:s3_networking:b9",
+      "point_id": "696db27b-33c4-5123-87ff-97d8d3251f6d",
+      "source_id": "ecs-anywhere",
+      "heading": "Networking",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/ecs-anywhere.md",
+      "text_preview": "Context: Amazon ECS clusters for external instances > Considerations Heading: Networking Function: explanation Text: `ecs-a-*.{{region}}.amazonaws.com` — This endpoint is used when managing tasks."
+    },
+    {
+      "index": 19,
+      "rank": 19,
+      "score": null,
+      "rerank_score": -0.02990324,
+      "original_score": 0.014486566,
+      "confidence": null,
+      "chunk_id": "doc_29370e71a8e71dba:s2_features:b3",
+      "point_id": "e349f06b-8ba2-5f83-9973-4fbd98e89bf5",
+      "source_id": "welcome",
+      "heading": "Features",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Heading: Features Function: explanation Text: Task An application such as a batch job that performs work, and then stops."
+    },
+    {
+      "index": 20,
+      "rank": 20,
+      "score": null,
+      "rerank_score": -0.02990683,
+      "original_score": 0.014379457,
+      "confidence": null,
+      "chunk_id": "doc_29370e71a8e71dba:s2_features:b1",
+      "point_id": "2857571d-f653-5fdf-b913-69da2c0f8446",
+      "source_id": "welcome",
+      "heading": "Features",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Heading: Features Function: explanation Text: Task definition The blueprint for the application."
+    }
+  ],
+  "context_blocks_preview": [
+    {
+      "index": 1,
+      "context_id": null,
+      "block_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b0",
+      "chunk_id": null,
+      "source_id": null,
+      "source": null,
+      "heading": null,
+      "score": 0.30561479,
+      "text_preview": "Context: What is Amazon Elastic Container Service? Function: reference Text: Tip: Join our upcoming container workshop series to learn best practices for Amazon ECS and AWS Fargate. Click here to sign up.",
+      "metadata": {
+        "query_analysis_used": true,
+        "focus_terms": [
+          "aws",
+          "fargate",
+          "what"
+        ],
+        "anchor_terms": [
+          "fargate"
+        ],
+        "query_phrases": [
+          "aws fargate",
+          "is aws fargate"
+        ],
+        "source_focus_enabled": true,
+        "broad_source_diversity_enabled": false,
+        "followup_query": true,
+        "dominant_sources": [
+          "welcome"
+        ],
+        "candidate_calibration_used": true
+      }
+    }
+  ]
+}

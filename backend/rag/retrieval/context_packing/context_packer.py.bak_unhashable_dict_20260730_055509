@@ -1,0 +1,1815 @@
+from __future__ import annotations
+
+import math
+import re
+from dataclasses import dataclass
+from typing import Any, Mapping, Sequence
+
+from rag.retrieval.config.runtime import (
+    RetrievalRuntimeConfig,
+    load_retrieval_runtime_config,
+)
+from rag.retrieval.contracts.candidates import RerankedCandidate
+from rag.retrieval.contracts.context import ContextBlock
+from rag.retrieval.contracts.query import NormalizedQuery
+from rag.retrieval.contracts.request import RetrievalRequest
+from rag.retrieval.query_processing.analysis import query_analysis_from_metadata
+from rag.retrieval.answerability import (
+    ANSWER_NEED_GENERAL,
+    assess_candidate_answerability,
+    classify_answer_need,
+)
+
+
+Payload = dict[str, Any]
+
+
+@dataclass(frozen=True)
+class ContextPackerConfig:
+    max_blocks: int = 8
+    min_rerank_score: float | None = 0.0
+    deduplicate: bool = True
+    allow_empty: bool = True
+
+    max_blocks_per_section: int = 1
+    max_blocks_per_source: int = 3
+
+    # Generic query/candidate alignment controls.
+    enable_diversity: bool = True
+    enable_anchor_alignment: bool = True
+    anchor_miss_penalty: float = 3.0
+    weak_query_coverage_penalty: float = 1.5
+
+    # Generic specificity controls. These are dynamic, not doc-specific.
+    enable_specificity_weighting: bool = True
+    specificity_weight: float = 0.55
+    phrase_match_bonus: float = 0.35
+    heading_match_bonus: float = 0.45
+    required_intent_penalty: float = 1.25
+    entity_only_phrase_penalty: float = 0.85
+    strong_alignment_threshold: float = 0.65
+
+    # Generic focus filtering. This prevents poison-fill when top_k is larger
+    # than the number of genuinely relevant chunks.
+    enable_focus_filter: bool = True
+    focus_term_min_weight: float = 1.15
+    allow_weak_fill: bool = False
+
+    # Generic source focus prior.
+    # If one source repeatedly contains focused evidence for the query, avoid
+    # mixing in weak incidental matches from low-support sources.
+    enable_source_focus_prior: bool = True
+    source_focus_min_support: int = 3
+    source_focus_dominance_ratio: float = 0.55
+
+    @classmethod
+    def from_runtime_config(
+        cls,
+        runtime_config: RetrievalRuntimeConfig,
+    ) -> ContextPackerConfig:
+        context_config = runtime_config.context_packer
+
+        config = cls(
+            max_blocks=context_config.max_blocks,
+            min_rerank_score=context_config.min_rerank_score,
+            deduplicate=context_config.deduplicate,
+            allow_empty=context_config.allow_empty,
+            max_blocks_per_section=getattr(
+                context_config,
+                "max_blocks_per_section",
+                1,
+            ),
+            max_blocks_per_source=getattr(
+                context_config,
+                "max_blocks_per_source",
+                3,
+            ),
+            enable_diversity=getattr(
+                context_config,
+                "enable_diversity",
+                True,
+            ),
+            enable_anchor_alignment=getattr(
+                context_config,
+                "enable_anchor_alignment",
+                True,
+            ),
+            anchor_miss_penalty=getattr(
+                context_config,
+                "anchor_miss_penalty",
+                3.0,
+            ),
+            weak_query_coverage_penalty=getattr(
+                context_config,
+                "weak_query_coverage_penalty",
+                1.5,
+            ),
+            enable_specificity_weighting=getattr(
+                context_config,
+                "enable_specificity_weighting",
+                True,
+            ),
+            specificity_weight=getattr(
+                context_config,
+                "specificity_weight",
+                0.55,
+            ),
+            phrase_match_bonus=getattr(
+                context_config,
+                "phrase_match_bonus",
+                0.35,
+            ),
+            heading_match_bonus=getattr(
+                context_config,
+                "heading_match_bonus",
+                0.45,
+            ),
+            required_intent_penalty=getattr(
+                context_config,
+                "required_intent_penalty",
+                1.25,
+            ),
+            entity_only_phrase_penalty=getattr(
+                context_config,
+                "entity_only_phrase_penalty",
+                0.85,
+            ),
+            strong_alignment_threshold=getattr(
+                context_config,
+                "strong_alignment_threshold",
+                0.65,
+            ),
+            enable_focus_filter=getattr(
+                context_config,
+                "enable_focus_filter",
+                True,
+            ),
+            focus_term_min_weight=getattr(
+                context_config,
+                "focus_term_min_weight",
+                1.15,
+            ),
+            allow_weak_fill=getattr(
+                context_config,
+                "allow_weak_fill",
+                False,
+            ),
+            enable_source_focus_prior=getattr(
+                context_config,
+                "enable_source_focus_prior",
+                True,
+            ),
+            source_focus_min_support=getattr(
+                context_config,
+                "source_focus_min_support",
+                3,
+            ),
+            source_focus_dominance_ratio=getattr(
+                context_config,
+                "source_focus_dominance_ratio",
+                0.55,
+            ),
+        )
+        config.validate()
+
+        return config
+
+    def validate(self) -> None:
+        if self.max_blocks <= 0:
+            raise ValueError("max_blocks must be greater than zero.")
+
+        if self.min_rerank_score is not None and self.min_rerank_score < 0:
+            raise ValueError("min_rerank_score cannot be negative.")
+
+        if self.max_blocks_per_section < 0:
+            raise ValueError("max_blocks_per_section cannot be negative.")
+
+        if self.max_blocks_per_source < 0:
+            raise ValueError("max_blocks_per_source cannot be negative.")
+
+        if self.anchor_miss_penalty < 0:
+            raise ValueError("anchor_miss_penalty cannot be negative.")
+
+        if self.weak_query_coverage_penalty < 0:
+            raise ValueError("weak_query_coverage_penalty cannot be negative.")
+
+        if not isinstance(self.deduplicate, bool):
+            raise ValueError("deduplicate must be boolean.")
+
+        if not isinstance(self.allow_empty, bool):
+            raise ValueError("allow_empty must be boolean.")
+
+        if not isinstance(self.enable_diversity, bool):
+            raise ValueError("enable_diversity must be boolean.")
+
+        if not isinstance(self.enable_anchor_alignment, bool):
+            raise ValueError("enable_anchor_alignment must be boolean.")
+
+        if not isinstance(self.enable_specificity_weighting, bool):
+            raise ValueError("enable_specificity_weighting must be boolean.")
+
+        if self.specificity_weight < 0:
+            raise ValueError("specificity_weight cannot be negative.")
+
+        if self.phrase_match_bonus < 0:
+            raise ValueError("phrase_match_bonus cannot be negative.")
+
+        if self.heading_match_bonus < 0:
+            raise ValueError("heading_match_bonus cannot be negative.")
+
+        if self.required_intent_penalty < 0:
+            raise ValueError("required_intent_penalty cannot be negative.")
+
+        if self.entity_only_phrase_penalty < 0:
+            raise ValueError("entity_only_phrase_penalty cannot be negative.")
+
+        if self.strong_alignment_threshold < 0:
+            raise ValueError("strong_alignment_threshold cannot be negative.")
+
+        if not isinstance(self.enable_focus_filter, bool):
+            raise ValueError("enable_focus_filter must be boolean.")
+
+        if self.focus_term_min_weight < 0:
+            raise ValueError("focus_term_min_weight cannot be negative.")
+
+        if not isinstance(self.allow_weak_fill, bool):
+            raise ValueError("allow_weak_fill must be boolean.")
+
+        if not isinstance(self.enable_source_focus_prior, bool):
+            raise ValueError("enable_source_focus_prior must be boolean.")
+
+        if self.source_focus_min_support < 1:
+            raise ValueError("source_focus_min_support must be at least one.")
+
+        if self.source_focus_dominance_ratio < 0:
+            raise ValueError("source_focus_dominance_ratio cannot be negative.")
+
+
+class DefaultContextPacker:
+    """
+    Converts reranked retrieval candidates into generation-ready context blocks.
+
+    This packer is domain-agnostic. It does not know about AWS, ECS, Docker,
+    Qdrant, or any specific document family.
+
+    It adds two generic safeguards after reranking:
+    1. Diversity: avoid filling context with repeated chunks from one section.
+    2. Anchor alignment: for queries with a topic/entity anchor, avoid chunks
+       that match only generic intent words but miss the actual topic.
+    """
+
+    def __init__(
+        self,
+        config: ContextPackerConfig | None = None,
+        *,
+        runtime_config: RetrievalRuntimeConfig | None = None,
+    ) -> None:
+        resolved_runtime = runtime_config or load_retrieval_runtime_config()
+        self.config = config or ContextPackerConfig.from_runtime_config(
+            resolved_runtime,
+        )
+        self.config.validate()
+
+    async def pack(
+        self,
+        *,
+        request: RetrievalRequest,
+        normalized_query: NormalizedQuery,
+        reranked_candidates: Sequence[RerankedCandidate],
+    ) -> Sequence[ContextBlock]:
+        request.validate()
+        normalized_query.validate()
+
+        for candidate in reranked_candidates:
+            candidate.validate()
+
+        query_text = _query_text(
+            request=request,
+            normalized_query=normalized_query,
+        )
+
+        analysis = query_analysis_from_metadata(normalized_query.metadata)
+
+        if analysis is not None:
+            query_terms = set(analysis.query_terms)
+            anchor_terms = set(analysis.anchor_terms)
+            required_intent_terms = set()
+            query_phrases = set(analysis.phrase_terms)
+            focus_terms = _context_focus_terms(
+                normalized_query=normalized_query,
+                analysis=analysis,
+            )
+            term_weights = {
+                term.text: float(term.weight)
+                for term in analysis.weighted_terms
+            }
+
+            for term in query_terms:
+                term_weights.setdefault(term, 1.0)
+        else:
+            query_terms = _important_terms(query_text)
+            anchor_terms = _anchor_terms(query_terms)
+            required_intent_terms = _required_intent_terms(query_terms)
+            term_weights = _query_term_weights(
+                query_terms=query_terms,
+                candidates=reranked_candidates,
+            )
+            query_phrases = _anchor_phrases(
+                query_text,
+                term_weights=term_weights,
+            )
+            focus_terms = _focus_terms(
+                query_text=query_text,
+                query_terms=query_terms,
+                anchor_terms=anchor_terms,
+                required_intent_terms=required_intent_terms,
+                term_weights=term_weights,
+                min_weight=self.config.focus_term_min_weight,
+            )
+        answer_need = classify_answer_need(query_text)
+        source_focus_enabled = self.config.enable_source_focus_prior
+        broad_source_diversity_enabled = _should_interleave_sources(
+            analysis=analysis,
+            request=request,
+            candidates=reranked_candidates,
+        )
+        followup_query = _is_followup_or_stateful_query(
+            request=request,
+            normalized_query=normalized_query,
+        )
+
+        if followup_query:
+            broad_source_diversity_enabled = False
+
+        if broad_source_diversity_enabled:
+            source_focus_enabled = False
+
+        dominant_sources = _dominant_focus_sources(
+            candidates=reranked_candidates,
+            focus_terms=focus_terms,
+            required_intent_terms=required_intent_terms,
+            query_phrases=query_phrases,
+            enabled=source_focus_enabled,
+            min_support=self.config.source_focus_min_support,
+            dominance_ratio=self.config.source_focus_dominance_ratio,
+        )
+
+        ordered = sorted(
+            reranked_candidates,
+            key=lambda item: (
+                -self._selection_score(
+                    item,
+                    query_terms=query_terms,
+                    anchor_terms=anchor_terms,
+                    query_phrases=query_phrases,
+                    term_weights=term_weights,
+                    required_intent_terms=required_intent_terms,
+                ),
+                int(item.rank),
+                -float(item.rerank_score),
+                _candidate_identity(item),
+            ),
+        )
+
+        if broad_source_diversity_enabled:
+            ordered = _interleave_by_source(ordered)
+
+        ordered = _answerability_reorder(
+            candidates=ordered,
+            query_text=query_text,
+            answer_need=answer_need,
+        )
+
+        selected: list[RerankedCandidate] = []
+        deferred: list[RerankedCandidate] = []
+        seen: set[str] = set()
+        section_counts: dict[str, int] = {}
+        source_counts: dict[str, int] = {}
+
+        for candidate in ordered:
+            if not self._passes_min_score(candidate):
+                continue
+
+            accepted = self._try_select(
+                candidate,
+                selected=selected,
+                deferred=deferred,
+                seen=seen,
+                section_counts=section_counts,
+                source_counts=source_counts,
+                query_terms=query_terms,
+                anchor_terms=anchor_terms,
+                query_phrases=query_phrases,
+                term_weights=term_weights,
+                required_intent_terms=required_intent_terms,
+                focus_terms=focus_terms,
+                dominant_sources=dominant_sources,
+                relax_diversity=False,
+            )
+
+            if accepted and len(selected) >= self.config.max_blocks:
+                break
+
+        # If strict diversity produced too few blocks, optionally fill from
+        # deferred items. Keep this off for generation-quality retrieval because
+        # fewer clean blocks are better than noisy top_k padding.
+        if self.config.allow_weak_fill and len(selected) < self.config.max_blocks:
+            for candidate in deferred:
+                accepted = self._try_select(
+                    candidate,
+                    selected=selected,
+                    deferred=[],
+                    seen=seen,
+                    section_counts=section_counts,
+                    source_counts=source_counts,
+                    query_terms=query_terms,
+                    anchor_terms=anchor_terms,
+                    query_phrases=query_phrases,
+                    term_weights=term_weights,
+                    required_intent_terms=required_intent_terms,
+                    focus_terms=focus_terms,
+                    dominant_sources=dominant_sources,
+                    relax_diversity=True,
+                )
+
+                if accepted and len(selected) >= self.config.max_blocks:
+                    break
+
+        selected = _answerability_filter_selected(
+            candidates=selected,
+            query_text=query_text,
+            answer_need=answer_need,
+        )
+
+        if not selected and reranked_candidates and answer_need == ANSWER_NEED_GENERAL:
+            selected = _fallback_select_context_candidates(
+                candidates=ordered,
+                max_blocks=self.config.max_blocks,
+                deduplicate=self.config.deduplicate,
+                min_rerank_score=self.config.min_rerank_score,
+            )
+
+        if not selected and not self.config.allow_empty:
+            raise ValueError("context packer produced no context blocks.")
+
+        packer_metadata = {
+            "query_analysis_used": analysis is not None,
+            "focus_terms": sorted(focus_terms),
+            "anchor_terms": sorted(anchor_terms),
+            "query_phrases": sorted(query_phrases),
+            "source_focus_enabled": source_focus_enabled,
+            "broad_source_diversity_enabled": broad_source_diversity_enabled,
+            "followup_query": followup_query,
+            "dominant_sources": sorted(dominant_sources),
+            "candidate_calibration_used": analysis is not None,
+            "answer_need": answer_need,
+        }
+
+        blocks = tuple(
+            ContextBlock.from_reranked_candidate(
+                candidate,
+                metadata=packer_metadata,
+            )
+            for candidate in selected
+        )
+
+        for block in blocks:
+            block.validate()
+
+        return blocks
+
+    def _passes_min_score(self, candidate: RerankedCandidate) -> bool:
+        if self.config.min_rerank_score is None:
+            return True
+
+        return candidate.rerank_score >= self.config.min_rerank_score
+
+    def _selection_score(
+        self,
+        candidate: RerankedCandidate,
+        *,
+        query_terms: set[str],
+        anchor_terms: set[str],
+        query_phrases: set[str],
+        term_weights: Mapping[str, float],
+        required_intent_terms: set[str],
+    ) -> float:
+        base_score = float(candidate.rerank_score)
+
+        if not query_terms:
+            return base_score
+
+        candidate_terms = _candidate_terms(candidate)
+        search_text = _candidate_search_text(candidate)
+
+        specificity_score = _weighted_overlap_ratio(
+            query_terms,
+            candidate_terms,
+            term_weights,
+        )
+        heading_score = _weighted_overlap_ratio(
+            query_terms,
+            _important_terms(_heading_text(candidate)),
+            term_weights,
+        )
+        phrase_score = _phrase_overlap_ratio(query_phrases, search_text)
+        intent_overlap = _overlap_ratio(required_intent_terms, candidate_terms)
+
+        generic_penalty = self._generic_penalty(
+            candidate,
+            query_terms=query_terms,
+            anchor_terms=anchor_terms,
+        )
+
+        intent_penalty = 0.0
+        if required_intent_terms:
+            if intent_overlap <= 0.0:
+                intent_penalty += self.config.required_intent_penalty
+            elif intent_overlap < 0.5:
+                intent_penalty += self.config.required_intent_penalty * 0.5
+
+            if phrase_score > 0.0 and intent_overlap <= 0.0:
+                intent_penalty += self.config.entity_only_phrase_penalty
+
+        if not self.config.enable_specificity_weighting:
+            return base_score - generic_penalty - intent_penalty
+
+        return (
+            base_score
+            + (self.config.specificity_weight * specificity_score)
+            + (self.config.phrase_match_bonus * phrase_score)
+            + (self.config.heading_match_bonus * heading_score)
+            - generic_penalty
+            - intent_penalty
+        )
+
+    def _generic_penalty(
+        self,
+        candidate: RerankedCandidate,
+        *,
+        query_terms: set[str],
+        anchor_terms: set[str],
+    ) -> float:
+        if not query_terms:
+            return 0.0
+
+        candidate_terms = _candidate_terms(candidate)
+
+        if not candidate_terms:
+            return 0.0
+
+        penalty = 0.0
+
+        if self.config.enable_anchor_alignment and anchor_terms:
+            anchor_overlap = _overlap_ratio(anchor_terms, candidate_terms)
+
+            # If the candidate matches generic query intent but misses the topic
+            # anchor, demote it. Example:
+            # query: "troubleshoot X errors"
+            # bad candidate: generic troubleshooting errors without X.
+            if anchor_overlap <= 0.0:
+                penalty += self.config.anchor_miss_penalty
+            elif anchor_overlap < 0.5:
+                penalty += self.config.anchor_miss_penalty * 0.5
+
+        query_overlap = _overlap_ratio(query_terms, candidate_terms)
+        if query_overlap < 0.25:
+            penalty += self.config.weak_query_coverage_penalty
+
+        return penalty
+
+    def _try_select(
+        self,
+        candidate: RerankedCandidate,
+        *,
+        selected: list[RerankedCandidate],
+        deferred: list[RerankedCandidate],
+        seen: set[str],
+        section_counts: dict[str, int],
+        source_counts: dict[str, int],
+        query_terms: set[str],
+        anchor_terms: set[str],
+        query_phrases: set[str],
+        term_weights: Mapping[str, float],
+        required_intent_terms: set[str],
+        focus_terms: set[str],
+        dominant_sources: set[str],
+        relax_diversity: bool,
+    ) -> bool:
+        identity = _candidate_identity(candidate)
+
+        if self.config.deduplicate and identity in seen:
+            return False
+
+        section_key = _section_key(candidate)
+        source_key = _source_key(candidate)
+
+        if dominant_sources and source_key not in dominant_sources:
+            return False
+
+        candidate_terms = _candidate_terms(candidate)
+        search_text = _candidate_search_text(candidate)
+        weighted_overlap = _weighted_overlap_ratio(
+            query_terms,
+            candidate_terms,
+            term_weights,
+        )
+        anchor_overlap = _overlap_ratio(anchor_terms, candidate_terms)
+        phrase_overlap = _phrase_overlap_ratio(query_phrases, search_text)
+        intent_overlap = _overlap_ratio(required_intent_terms, candidate_terms)
+        intent_compatible = not required_intent_terms or intent_overlap > 0.0
+        focus_overlap = _overlap_ratio(focus_terms, candidate_terms)
+        phrase_compatible = not query_phrases or phrase_overlap > 0.0
+        focus_compatible = not focus_terms or focus_overlap > 0.0
+
+        if self.config.enable_focus_filter:
+            if required_intent_terms:
+                # Intent query: candidate must match both the operation intent
+                # and the focused topic/entity.
+                # Example: "troubleshoot X errors" must match troubleshoot/error
+                # and X, not only generic troubleshooting or only X.
+                if not intent_compatible or not focus_compatible:
+                    return False
+            elif query_phrases:
+                # Non-intent phrase query: prefer exact phrase alignment.
+                # Example: "scheduled tasks" should not accept "scheduled for retirement".
+                if not phrase_compatible:
+                    return False
+            elif not focus_compatible:
+                return False
+
+        strong_alignment = intent_compatible and focus_compatible and (
+            weighted_overlap >= self.config.strong_alignment_threshold
+            or phrase_overlap > 0.0
+            or focus_overlap > 0.0
+        )
+
+        if self.config.enable_diversity and not relax_diversity:
+            if self.config.max_blocks_per_source > 0:
+                source_count = source_counts.get(source_key, 0)
+                if source_count >= self.config.max_blocks_per_source:
+                    deferred.append(candidate)
+                    return False
+
+            if self.config.max_blocks_per_section > 0:
+                section_count = section_counts.get(section_key, 0)
+                if section_count >= self.config.max_blocks_per_section:
+                    # Repeated chunks from the same section are allowed only
+                    # when the candidate itself strongly matches the query.
+                    # This keeps "scheduled tasks" follow-up chunks, but blocks
+                    # generic filler from unrelated nearby text.
+                    section_terms = _important_terms(_heading_text(candidate))
+                    section_overlap = _overlap_ratio(query_terms, section_terms)
+
+                    if not strong_alignment and section_overlap < 0.5:
+                        deferred.append(candidate)
+                        return False
+
+        seen.add(identity)
+        selected.append(candidate)
+        section_counts[section_key] = section_counts.get(section_key, 0) + 1
+        source_counts[source_key] = source_counts.get(source_key, 0) + 1
+
+        return True
+
+
+def _fallback_select_context_candidates(
+    *,
+    candidates: Sequence[RerankedCandidate],
+    max_blocks: int,
+    deduplicate: bool,
+    min_rerank_score: float | None,
+) -> list[RerankedCandidate]:
+    selected: list[RerankedCandidate] = []
+    seen: set[str] = set()
+
+    for candidate in candidates:
+        if len(selected) >= max_blocks:
+            break
+
+        if min_rerank_score is not None and candidate.rerank_score < min_rerank_score:
+            continue
+
+        identity = _candidate_identity(candidate)
+        if deduplicate and identity in seen:
+            continue
+
+        text = _candidate_text(candidate)
+        if not text.strip():
+            continue
+
+        selected.append(candidate)
+        seen.add(identity)
+
+    return selected
+
+
+_REFERENTIAL_QUERY_TERMS = {
+    "it",
+    "its",
+    "itself",
+    "that",
+    "this",
+    "they",
+    "them",
+    "their",
+    "those",
+    "these",
+    "same",
+    "above",
+    "previous",
+    "earlier",
+}
+
+
+def _context_focus_terms(
+    *,
+    normalized_query: NormalizedQuery,
+    analysis: Any,
+) -> set[str]:
+    """
+    Defensive focus-term repair for conversational retrieval.
+
+    Query analysis may treat the resolved entity as focus, but the user's
+    current turn often carries the intent. Keep both softly.
+    """
+    terms: set[str] = {
+        _normalize_token(str(term))
+        for term in (getattr(analysis, "focus_terms", ()) or ())
+        if _normalize_token(str(term))
+    }
+
+    metadata = dict(getattr(normalized_query, "metadata", {}) or {})
+    stateful = metadata.get("stateful_retrieval") or {}
+
+    raw_query = str(
+        stateful.get("raw_query")
+        or getattr(normalized_query, "original_query", "")
+        or ""
+    )
+    resolved_query = str(
+        stateful.get("resolved_query")
+        or getattr(normalized_query, "normalized_query", "")
+        or ""
+    )
+
+    terms.update(_important_terms(raw_query))
+
+    raw_blob = f" {raw_query.lower()} "
+    for term in getattr(analysis, "anchor_terms", ()) or ():
+        token = _normalize_token(str(term))
+        if token and f" {token} " in raw_blob:
+            terms.add(token)
+
+    # Include resolved terms too, but raw/current-turn terms are the main rescue.
+    terms.update(_important_terms(resolved_query))
+
+    return {term for term in terms if term}
+
+
+def _is_followup_or_stateful_query(
+    *,
+    request: RetrievalRequest,
+    normalized_query: NormalizedQuery,
+) -> bool:
+    metadata = {}
+    metadata.update(dict(getattr(request, "metadata", {}) or {}))
+    metadata.update(dict(getattr(normalized_query, "metadata", {}) or {}))
+
+    stateful = metadata.get("stateful_retrieval") or {}
+    if isinstance(stateful, Mapping):
+        if (
+            stateful.get("needed_resolution")
+            or stateful.get("query_changed")
+            or stateful.get("resolved_entity")
+            or stateful.get("strategy")
+        ):
+            return True
+
+    if getattr(normalized_query, "is_chat_dependent", False):
+        return True
+
+    if getattr(normalized_query, "requires_memory", False):
+        return True
+
+    raw_text = " ".join(
+        str(value or "")
+        for value in (
+            getattr(request, "query", ""),
+            getattr(normalized_query, "original_query", ""),
+            getattr(normalized_query, "normalized_query", ""),
+        )
+    ).lower()
+
+    raw_tokens = set(re.findall(r"[a-z][a-z0-9_-]*", raw_text))
+    return bool(raw_tokens & _REFERENTIAL_QUERY_TERMS)
+
+
+def _calibrated_candidate_score(
+    *,
+    candidate: RerankedCandidate,
+    analysis: Any | None,
+    base_score: float,
+) -> float:
+    """
+    Generic broad-query calibration.
+
+    This does not know about AWS, ECS, daemons, Qdrant, or any vendor/domain.
+    It only looks at query-analysis terms and candidate text/heading/source shape.
+    """
+    if analysis is None:
+        return base_score
+
+    focus_terms = tuple(getattr(analysis, "focus_terms", ()) or ())
+    anchor_terms = tuple(getattr(analysis, "anchor_terms", ()) or ())
+    exact_terms = tuple(getattr(analysis, "exact_terms", ()) or ())
+    source_hints = tuple(getattr(analysis, "source_hints", ()) or ())
+
+    # Exact/source-specific queries should trust normal reranking more.
+    if exact_terms or source_hints:
+        return base_score
+
+    if not focus_terms:
+        return base_score
+
+    text = _candidate_text(candidate).lower()
+    heading = str(getattr(candidate.candidate, "heading", "") or "").lower()
+    source = _source_key(candidate).lower()
+
+    focus = {term.lower() for term in focus_terms if str(term).strip()}
+    anchors = {term.lower() for term in anchor_terms if str(term).strip()}
+
+    if not focus:
+        return base_score
+
+    heading_focus_hits = sum(1 for term in focus if term in heading)
+    text_focus_hits = sum(1 for term in focus if term in text)
+    source_focus_hits = sum(1 for term in focus if term in source)
+    anchor_hits = sum(1 for term in anchors if term in text)
+
+    focus_coverage = text_focus_hits / max(1, len(focus))
+    heading_coverage = heading_focus_hits / max(1, len(focus))
+    source_coverage = source_focus_hits / max(1, len(focus))
+
+    calibrated = float(base_score)
+
+    # Broad-topic chunks should strongly cover the core focus terms.
+    calibrated += 0.055 * focus_coverage
+    calibrated += 0.045 * heading_coverage
+    calibrated += 0.020 * source_coverage
+
+    # Exact focus phrase, e.g. "amazon ecs", should help, but generically.
+    focus_phrase = " ".join(term for term in focus_terms if str(term).strip()).lower()
+    if focus_phrase and focus_phrase in text:
+        calibrated += 0.035
+
+    if focus_phrase and focus_phrase in heading:
+        calibrated += 0.045
+
+    # Anchors are useful, but weaker than focus terms.
+    calibrated += min(0.025, 0.006 * anchor_hits)
+
+    # Prefer explanatory/overview chunks for broad questions, using only
+    # generic chunk-shape metadata/text labels.
+    payload = getattr(candidate.candidate, "payload", {}) or {}
+    chunk_type = str(payload.get("chunk_type") or payload.get("type") or "").lower()
+    subtype = str(payload.get("subtype") or "").lower()
+    function = str(payload.get("function") or payload.get("Function") or "").lower()
+
+    shape_blob = " ".join((chunk_type, subtype, function, text[:160])).lower()
+
+    if any(label in shape_blob for label in ("overview", "introduction", "explanation", "concept")):
+        calibrated += 0.025
+
+    # For broad questions, avoid letting narrow command/code-only chunks climb
+    # above overview chunks merely because they share one secondary token.
+    code_markers = text.count("$ ") + text.count("```") + text.count(" --")
+    if code_markers >= 2 and focus_coverage < 1.0:
+        calibrated -= 0.030
+
+    # If a candidate barely covers focus terms, it should not win broad context.
+    if focus_coverage <= 0.0:
+        calibrated -= 0.060
+    elif focus_coverage < 1.0 and len(focus) >= 2:
+        calibrated -= 0.020
+
+    return calibrated
+
+
+def _calibrated_selection_score(
+    *,
+    candidate: RerankedCandidate,
+    analysis: Any | None,
+    query_terms: set[str],
+    anchor_terms: set[str],
+    required_intent_terms: set[str],
+    term_weights: Mapping[str, float],
+    query_phrases: set[str],
+) -> float:
+    base = _selection_score(
+        candidate=candidate,
+        query_terms=query_terms,
+        anchor_terms=anchor_terms,
+        required_intent_terms=required_intent_terms,
+        term_weights=term_weights,
+        query_phrases=query_phrases,
+    )
+    return _calibrated_candidate_score(
+        candidate=candidate,
+        analysis=analysis,
+        base_score=base,
+    )
+
+
+def _should_interleave_sources(
+    *,
+    analysis: Any | None,
+    request: RetrievalRequest,
+    candidates: Sequence[RerankedCandidate],
+) -> bool:
+    """
+    Generic source-diversity gate.
+
+    Enable source interleaving only when the query is broad and unconstrained.
+    Do not use this for exact/file/source-specific questions, because those
+    should be allowed to concentrate evidence in the requested source.
+    """
+    if analysis is None:
+        return False
+
+    if len(candidates) < 2:
+        return False
+
+    if getattr(analysis, "exact_terms", ()):
+        return False
+
+    if getattr(analysis, "source_hints", ()):
+        return False
+
+    constraints = request.source_constraints
+
+    # job_id is allowed because it usually scopes one ingestion/corpus.
+    # Explicit source/document/section constraints mean the user or caller
+    # intentionally narrowed the retrieval surface.
+    if (
+        constraints.source_id
+        or constraints.parser_doc_id
+        or constraints.section_id
+        or constraints.ir_id
+        or constraints.heading_path
+        or constraints.payload_filters
+    ):
+        return False
+
+    source_keys = {
+        _source_key(candidate)
+        for candidate in candidates
+        if _source_key(candidate) != "unknown_source"
+    }
+
+    if len(source_keys) < 2:
+        return False
+
+    focus_terms = tuple(getattr(analysis, "focus_terms", ()) or ())
+    if not focus_terms:
+        return False
+
+    return True
+
+
+def _interleave_by_source(
+    candidates: Sequence[RerankedCandidate],
+) -> list[RerankedCandidate]:
+    """
+    Preserve reranker quality while avoiding one-source context collapse.
+
+    Input order is already score-sorted. We bucket by source in that order,
+    then take one candidate per source per round.
+    """
+    buckets: dict[str, list[RerankedCandidate]] = {}
+    source_order: list[str] = []
+
+    for candidate in candidates:
+        source = _source_key(candidate)
+        if source not in buckets:
+            buckets[source] = []
+            source_order.append(source)
+
+        buckets[source].append(candidate)
+
+    interleaved: list[RerankedCandidate] = []
+
+    while any(buckets.values()):
+        for source in source_order:
+            bucket = buckets[source]
+            if bucket:
+                interleaved.append(bucket.pop(0))
+
+    return interleaved
+
+
+def _candidate_identity(candidate: RerankedCandidate) -> str:
+    retrieval_candidate = candidate.candidate
+
+    for attr_name in (
+        "chunk_id",
+        "point_id",
+        "source_id",
+        "parser_doc_id",
+        "section_id",
+    ):
+        value = _clean_optional(getattr(retrieval_candidate, attr_name, None))
+        if value:
+            return value
+
+    ref = getattr(retrieval_candidate, "ref", None)
+    if ref is not None:
+        for attr_name in (
+            "chunk_id",
+            "point_id",
+            "source_id",
+            "parser_doc_id",
+            "section_id",
+        ):
+            value = _clean_optional(getattr(ref, attr_name, None))
+            if value:
+                return value
+
+    payload = _candidate_payload(candidate)
+    for key in (
+        "chunk_id",
+        "point_id",
+        "source_id",
+        "parser_doc_id",
+        "section_id",
+        "file_path",
+        "file_name",
+    ):
+        value = _clean_optional(payload.get(key))
+        if value:
+            return value
+
+    text = _clean_optional(getattr(retrieval_candidate, "text", None))
+    if text:
+        return text[:200]
+
+    return str(id(candidate))
+
+
+def _source_key(candidate: RerankedCandidate) -> str:
+    for key in (
+        "source_id",
+        "source",
+        "source_path",
+        "file_path",
+        "file_name",
+        "parser_doc_id",
+    ):
+        value = _candidate_value(candidate, key)
+        if value:
+            return value
+
+    return "unknown_source"
+
+
+def _section_key(candidate: RerankedCandidate) -> str:
+    for key in (
+        "section_id",
+        "heading_path",
+        "heading",
+        "context",
+    ):
+        value = _candidate_value(candidate, key)
+        if value:
+            return value.lower()
+
+    chunk_id = _candidate_value(candidate, "chunk_id")
+    if chunk_id:
+        if ":b" in chunk_id:
+            return chunk_id.rsplit(":b", 1)[0].lower()
+        return chunk_id.lower()
+
+    return _source_key(candidate).lower()
+
+
+def _heading_text(candidate: RerankedCandidate) -> str:
+    parts: list[str] = []
+
+    for key in (
+        "heading_path",
+        "heading",
+        "context",
+        "section_id",
+        "chunk_id",
+    ):
+        value = _candidate_value(candidate, key)
+        if value:
+            parts.append(value)
+
+    return " ".join(parts).lower()
+
+
+def _candidate_text(candidate: RerankedCandidate) -> str:
+    retrieval_candidate = candidate.candidate
+
+    direct_text = _clean_optional(getattr(retrieval_candidate, "text", None))
+    if direct_text:
+        return direct_text.lower()
+
+    payload_text = _clean_optional(_candidate_payload(candidate).get("text"))
+    if payload_text:
+        return payload_text.lower()
+
+    return ""
+
+
+def _candidate_search_text(candidate: RerankedCandidate) -> str:
+    payload = _candidate_payload(candidate)
+
+    parts = [
+        _source_key(candidate),
+        _heading_text(candidate),
+        _candidate_text(candidate),
+    ]
+
+    for key in (
+        "chunk_type",
+        "subtype",
+        "function",
+        "source_family",
+        "topic",
+    ):
+        value = _clean_optional(payload.get(key))
+        if value:
+            parts.append(value)
+
+    return _normalize_search_text(" ".join(parts))
+
+
+def _candidate_terms(candidate: RerankedCandidate) -> set[str]:
+    payload = _candidate_payload(candidate)
+
+    parts = [
+        _source_key(candidate),
+        _heading_text(candidate),
+        _candidate_text(candidate),
+    ]
+
+    for key in (
+        "chunk_type",
+        "subtype",
+        "function",
+        "source_family",
+        "topic",
+    ):
+        value = _clean_optional(payload.get(key))
+        if value:
+            parts.append(value)
+
+    return _important_terms(" ".join(parts))
+
+
+def _candidate_value(candidate: RerankedCandidate, key: str) -> str | None:
+    retrieval_candidate = candidate.candidate
+
+    value = _clean_optional(getattr(retrieval_candidate, key, None))
+    if value:
+        return value
+
+    ref = getattr(retrieval_candidate, "ref", None)
+    if ref is not None:
+        value = _clean_optional(getattr(ref, key, None))
+        if value:
+            return value
+
+    payload = _candidate_payload(candidate)
+    return _clean_optional(payload.get(key))
+
+
+def _candidate_payload(candidate: RerankedCandidate) -> Payload:
+    retrieval_candidate = candidate.candidate
+
+    payload = getattr(retrieval_candidate, "payload", None)
+    if isinstance(payload, Mapping):
+        return dict(payload)
+
+    metadata = getattr(retrieval_candidate, "metadata", None)
+    if isinstance(metadata, Mapping):
+        nested_payload = metadata.get("payload")
+        if isinstance(nested_payload, Mapping):
+            return dict(nested_payload)
+
+        return dict(metadata)
+
+    return {}
+
+
+def _query_text(
+    *,
+    request: RetrievalRequest,
+    normalized_query: NormalizedQuery,
+) -> str:
+    parts: list[str] = []
+
+    for attr_name in (
+        "normalized_query",
+        "query",
+        "text",
+        "raw_query",
+        "original_query",
+    ):
+        value = _clean_optional(getattr(normalized_query, attr_name, None))
+        if value:
+            parts.append(value)
+
+    search_queries = getattr(normalized_query, "search_queries", None)
+    if search_queries:
+        parts.extend(str(item) for item in search_queries if str(item).strip())
+
+    request_query = _clean_optional(getattr(request, "query", None))
+    if request_query:
+        parts.append(request_query)
+
+    return " ".join(parts).lower()
+
+
+def _important_terms(text: str) -> set[str]:
+    return {
+        _normalize_token(term)
+        for term in re.findall(r"[a-z0-9][a-z0-9_-]{1,}", text.lower())
+        if _normalize_token(term)
+        and _normalize_token(term) not in _STOPWORDS
+    }
+
+
+def _anchor_terms(query_terms: set[str]) -> set[str]:
+    """
+    Extract likely topic/entity anchors from query terms.
+
+    This is intentionally domain-agnostic. It removes generic intent/action
+    terms and keeps the remaining terms as the topic that candidates must cover.
+    """
+    anchors = {
+        term
+        for term in query_terms
+        if term not in _GENERIC_INTENT_TERMS
+        and not term.isdigit()
+    }
+
+    # For very short queries, do not strip too aggressively.
+    if not anchors and query_terms:
+        return set(query_terms)
+
+    return anchors
+
+
+def _query_term_weights(
+    *,
+    query_terms: set[str],
+    candidates: Sequence[RerankedCandidate],
+) -> dict[str, float]:
+    if not query_terms:
+        return {}
+
+    candidate_term_sets = [_candidate_terms(candidate) for candidate in candidates]
+    candidate_count = max(1, len(candidate_term_sets))
+
+    weights: dict[str, float] = {}
+
+    for term in query_terms:
+        document_frequency = sum(
+            1
+            for candidate_terms in candidate_term_sets
+            if term in candidate_terms
+        )
+
+        # IDF-like weighting over the current candidate pool.
+        # Rare query terms become stronger. Common corpus glue terms become weak.
+        idf = math.log((candidate_count + 1) / (document_frequency + 1)) + 1.0
+
+        if term in _LOW_VALUE_QUERY_TERMS:
+            idf *= 0.20
+        elif term in _REQUIRED_INTENT_TERMS:
+            idf *= 0.85
+        elif term in _GENERIC_INTENT_TERMS:
+            idf *= 0.55
+
+        weights[term] = max(0.05, idf)
+
+    return weights
+
+
+def _weighted_overlap_ratio(
+    required_terms: set[str],
+    candidate_terms: set[str],
+    term_weights: Mapping[str, float],
+) -> float:
+    if not required_terms:
+        return 0.0
+
+    denominator = sum(term_weights.get(term, 1.0) for term in required_terms)
+    if denominator <= 0:
+        return 0.0
+
+    numerator = sum(
+        term_weights.get(term, 1.0)
+        for term in required_terms
+        if term in candidate_terms
+    )
+
+    return numerator / denominator
+
+
+def _required_intent_terms(query_terms: set[str]) -> set[str]:
+    return {
+        term
+        for term in query_terms
+        if term in _REQUIRED_INTENT_TERMS
+    }
+
+
+def _dominant_focus_sources(
+    *,
+    candidates: Sequence[RerankedCandidate],
+    focus_terms: set[str],
+    required_intent_terms: set[str],
+    query_phrases: set[str],
+    enabled: bool,
+    min_support: int,
+    dominance_ratio: float,
+) -> set[str]:
+    if not enabled or not focus_terms:
+        return set()
+
+    source_support: dict[str, int] = {}
+    source_focus_terms: dict[str, set[str]] = {}
+
+    for candidate in candidates:
+        candidate_terms = _candidate_terms(candidate)
+        source_key = _source_key(candidate)
+
+        matched_focus_terms = focus_terms & candidate_terms
+        if not matched_focus_terms:
+            continue
+
+        if required_intent_terms:
+            intent_overlap = _overlap_ratio(required_intent_terms, candidate_terms)
+            if intent_overlap <= 0.0:
+                continue
+
+        search_text = _candidate_search_text(candidate)
+        phrase_overlap = _phrase_overlap_ratio(query_phrases, search_text)
+
+        # For phrase-heavy queries, weak sources with only broad non-phrase hits
+        # should not become dominant.
+        if query_phrases and phrase_overlap <= 0.0 and len(matched_focus_terms) == 1:
+            continue
+
+        source_support[source_key] = source_support.get(source_key, 0) + 1
+        source_focus_terms.setdefault(source_key, set()).update(matched_focus_terms)
+
+    if not source_support:
+        return set()
+
+    max_support = max(source_support.values())
+    if max_support < min_support:
+        return set()
+
+    threshold = max(min_support, int(max_support * dominance_ratio))
+
+    dominant = {
+        source
+        for source, support in source_support.items()
+        if support >= threshold
+    }
+
+    if not dominant:
+        return set()
+
+    covered_focus_terms: set[str] = set()
+    for source in dominant:
+        covered_focus_terms.update(source_focus_terms.get(source, set()))
+
+    # Only lock to dominant sources if they cover the focused query anchors.
+    # Otherwise, preserve multi-source answers.
+    if focus_terms and not focus_terms.issubset(covered_focus_terms):
+        return set()
+
+    return dominant
+
+
+def _focus_terms(
+    *,
+    query_text: str,
+    query_terms: set[str],
+    anchor_terms: set[str],
+    required_intent_terms: set[str],
+    term_weights: Mapping[str, float],
+    min_weight: float,
+) -> set[str]:
+    candidates = {
+        term
+        for term in anchor_terms
+        if term not in _LOW_VALUE_QUERY_TERMS
+        and term not in _GENERIC_INTENT_TERMS
+        and term not in required_intent_terms
+        and not term.isdigit()
+    }
+
+    if not candidates:
+        candidates = {
+            term
+            for term in query_terms
+            if term not in _LOW_VALUE_QUERY_TERMS
+            and term not in _GENERIC_INTENT_TERMS
+            and term not in required_intent_terms
+            and not term.isdigit()
+        }
+
+    if not candidates:
+        return set()
+
+    connected = _connected_anchor_terms(query_text) & candidates
+    if connected:
+        # Preserve explicit paired/listed anchors:
+        # "X and Y", "X or Y", "X, Y".
+        # Example: CloudWatch and CloudTrail should keep both.
+        return connected
+
+    max_weight = max(term_weights.get(term, 0.0) for term in candidates)
+
+    # Keep distinctive anchors, but do not collapse too aggressively to one term.
+    # Broad corpus-glue terms usually fall below min_weight. Specific sibling
+    # anchors should survive even if one is slightly rarer than the other.
+    threshold = max(min_weight, max_weight * 0.55)
+
+    focus = {
+        term
+        for term in candidates
+        if term_weights.get(term, 0.0) >= threshold
+    }
+
+    if focus:
+        return focus
+
+    return {
+        max(
+            candidates,
+            key=lambda term: term_weights.get(term, 0.0),
+        )
+    }
+
+
+def _connected_anchor_terms(text: str) -> set[str]:
+    raw_tokens = [
+        _normalize_token(token)
+        for token in re.findall(r"[a-z0-9][a-z0-9_-]{1,}", text.lower())
+    ]
+
+    connected: set[str] = set()
+
+    for index, token in enumerate(raw_tokens):
+        if token not in {"and", "or"}:
+            continue
+
+        left = _nearest_focusable_token(raw_tokens[:index][::-1])
+        right = _nearest_focusable_token(raw_tokens[index + 1 :])
+
+        if left:
+            connected.add(left)
+
+        if right:
+            connected.add(right)
+
+    return connected
+
+
+def _nearest_focusable_token(tokens: Sequence[str]) -> str | None:
+    for token in tokens:
+        if (
+            token
+            and token not in _STOPWORDS
+            and token not in _LOW_VALUE_QUERY_TERMS
+            and token not in _GENERIC_INTENT_TERMS
+            and not token.isdigit()
+        ):
+            return token
+
+    return None
+
+
+def _anchor_phrases(
+    text: str,
+    *,
+    term_weights: Mapping[str, float] | None = None,
+) -> set[str]:
+    tokens = [
+        _normalize_token(token)
+        for token in re.findall(r"[a-z0-9][a-z0-9_-]{1,}", text.lower())
+    ]
+    tokens = [
+        token
+        for token in tokens
+        if token
+        and token not in _STOPWORDS
+        and token not in _GENERIC_INTENT_TERMS
+        and not token.isdigit()
+    ]
+
+    phrases: set[str] = set()
+
+    for size in (2, 3):
+        for index in range(0, max(0, len(tokens) - size + 1)):
+            phrase_terms = tokens[index : index + size]
+            phrase = " ".join(phrase_terms)
+            if not phrase:
+                continue
+
+            if term_weights:
+                average_weight = sum(
+                    term_weights.get(term, 1.0)
+                    for term in phrase_terms
+                ) / len(phrase_terms)
+
+                # Drop corpus-glue phrases like "amazon ecs" when both words
+                # are common across the candidate pool.
+                if average_weight < 1.15:
+                    continue
+
+            phrases.add(phrase)
+
+    return phrases
+
+
+def _phrase_overlap_ratio(
+    phrases: set[str],
+    search_text: str,
+) -> float:
+    if not phrases:
+        return 0.0
+
+    return sum(1 for phrase in phrases if phrase in search_text) / len(phrases)
+
+
+def _normalize_search_text(text: str) -> str:
+    return " ".join(
+        _normalize_token(token)
+        for token in re.findall(r"[a-z0-9][a-z0-9_-]{1,}", text.lower())
+        if _normalize_token(token)
+    )
+
+
+def _overlap_ratio(
+    required_terms: set[str],
+    candidate_terms: set[str],
+) -> float:
+    if not required_terms:
+        return 0.0
+
+    return len(required_terms & candidate_terms) / len(required_terms)
+
+
+def _normalize_token(token: str) -> str:
+    token = token.strip().lower()
+    token = token.replace("_", "-")
+
+    if token.endswith("ies") and len(token) > 4:
+        return token[:-3] + "y"
+
+    if token.endswith("ing") and len(token) > 5:
+        stem = token[:-3]
+        if len(stem) > 2 and stem[-1] == stem[-2]:
+            stem = stem[:-1]
+        return stem
+
+    if token.endswith("ed") and len(token) > 4:
+        stem = token[:-2]
+        if len(stem) > 2 and stem[-1] == stem[-2]:
+            stem = stem[:-1]
+        return stem
+
+    if token.endswith("s") and len(token) > 3:
+        return token[:-1]
+
+    return token
+
+
+def _clean_optional(value: Any) -> str | None:
+    if value is None:
+        return None
+
+    cleaned = str(value).strip()
+    return cleaned or None
+
+
+_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "by",
+    "can",
+    "do",
+    "does",
+    "for",
+    "from",
+    "have",
+    "i",
+    "in",
+    "is",
+    "it",
+    "its",
+    "me",
+    "my",
+    "of",
+    "on",
+    "or",
+    "that",
+    "the",
+    "their",
+    "this",
+    "to",
+    "was",
+    "we",
+    "with",
+    "you",
+    "your",
+}
+
+_LOW_VALUE_QUERY_TERMS = {
+    "how",
+    "what",
+    "when",
+    "where",
+    "why",
+    "which",
+    "should",
+    "can",
+    "do",
+    "does",
+    "work",
+    "working",
+    "use",
+    "used",
+}
+
+
+_REQUIRED_INTENT_TERMS = {
+    "configure",
+    "configuration",
+    "create",
+    "debug",
+    "error",
+    "failure",
+    "fix",
+    "install",
+    "issue",
+    "monitor",
+    "monitoring",
+    "problem",
+    "resolve",
+    "setup",
+    "trouble",
+    "troubleshoot",
+    "troubleshooting",
+}
+
+
+_GENERIC_INTENT_TERMS = {
+    "about",
+    "best",
+    "compare",
+    "comparison",
+    "configure",
+    "configuration",
+    "create",
+    "debug",
+    "define",
+    "definition",
+    "difference",
+    "error",
+    "explain",
+    "failure",
+    "fix",
+    "get",
+    "guide",
+    "help",
+    "how",
+    "install",
+    "issue",
+    "learn",
+    "list",
+    "mean",
+    "monitor",
+    "monitoring",
+    "overview",
+    "problem",
+    "purpose",
+    "recommend",
+    "recommendation",
+    "resolve",
+    "setup",
+    "should",
+    "step",
+    "support",
+    "supported",
+    "trouble",
+    "troubleshoot",
+    "troubleshooting",
+    "use",
+    "used",
+    "when",
+    "where",
+    "what",
+    "why",
+    "work",
+    "working",
+}
+
+
+def _answerability_reorder(
+    *,
+    candidates: Sequence[RerankedCandidate],
+    query_text: str,
+    answer_need: str,
+) -> list[RerankedCandidate]:
+    if answer_need == ANSWER_NEED_GENERAL:
+        return list(candidates)
+
+    decorated: list[tuple[float, int, int, RerankedCandidate]] = []
+
+    for index, candidate in enumerate(candidates):
+        assessment = assess_candidate_answerability(
+            query=query_text,
+            text=_candidate_search_text(candidate),
+            heading=_heading_text(candidate),
+            answer_need=answer_need,
+        )
+
+        # Lower tuple sorts first. Answer-bearing candidates float upward;
+        # mention-only candidates sink even if they share the entity phrase.
+        decorated.append(
+            (
+                -float(assessment.score),
+                1 if assessment.mention_only else 0,
+                index,
+                candidate,
+            )
+        )
+
+    decorated.sort(key=lambda item: (item[0], item[1], item[2]))
+    return [item[3] for item in decorated]
+
+
+def _answerability_filter_selected(
+    *,
+    candidates: Sequence[RerankedCandidate],
+    query_text: str,
+    answer_need: str,
+) -> list[RerankedCandidate]:
+    if answer_need == ANSWER_NEED_GENERAL:
+        return list(candidates)
+
+    assessed = [
+        (
+            candidate,
+            assess_candidate_answerability(
+                query=query_text,
+                text=_candidate_search_text(candidate),
+                heading=_heading_text(candidate),
+                answer_need=answer_need,
+            ),
+        )
+        for candidate in candidates
+    ]
+
+    answer_bearing = [
+        candidate
+        for candidate, assessment in assessed
+        if assessment.answer_bearing
+    ]
+
+    if answer_bearing:
+        # Keep answer-bearing chunks first. Keep non-mention-only supporting
+        # chunks after them, but never let a weak ad/link/tip be the only context.
+        supporting = [
+            candidate
+            for candidate, assessment in assessed
+            if not assessment.answer_bearing and not assessment.mention_only
+        ]
+        return list(dict.fromkeys([*answer_bearing, *supporting]))
+
+    non_mention_only = [
+        candidate
+        for candidate, assessment in assessed
+        if not assessment.mention_only
+    ]
+
+    # If all selected chunks only mention the entity but do not answer the
+    # requested task, return no context. The adaptive graph can then recover
+    # instead of feeding weak context into generation.
+    return non_mention_only
+

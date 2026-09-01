@@ -1,0 +1,34 @@
+QUERY: what are ECS capacity providers
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.3850326297604056, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.014349108176030995})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: clusters
+chunk_id: doc_584e9f744ea27b0b:s4_capacity_providers:b1
+text: Context: Amazon ECS clusters Heading: Capacity providers Function: explanation Text: Amazon ECS offers three types of capacity providers for your clusters:
+
+--- context 2 ---
+source_id: clusters
+chunk_id: doc_584e9f744ea27b0b:s4_capacity_providers:b2
+text: Context: Amazon ECS clusters Heading: Capacity providers Function: explanation Text: Amazon ECS Managed Instances capacity providers AWS fully manages the underlying Amazon EC2 instances, including provisioning, patching, scaling, and lifecycle management. This provides the optimal balance of performance, cost-effectiveness, and operational simplicity. Amazon ECS Managed Instances capacity providers automatically optimize instance selection and scaling based on your workload requirements. With A
+
+--- context 3 ---
+source_id: clusters
+chunk_id: doc_584e9f744ea27b0b:s4_capacity_providers:b9
+text: Context: Amazon ECS clusters Heading: Capacity providers Function: explanation Text: A cluster can contain a mix of tasks that are hosted on Amazon ECS Managed Instances, AWS Fargate, Amazon EC2 instances, or external instances. Tasks can run on Amazon ECS Managed Instances, Fargate or EC2 infrastructure as a launch type or a capacity provider strategy. If you use EC2 as a launch type, Amazon ECS doesn't track and scale the capacity of Amazon EC2 Auto Scaling groups.
+
+--- context 4 ---
+source_id: aws-fargate
+chunk_id: doc_e57ded6cc07f6574:s2_capacity_providers:b0
+text: Context: Architect for AWS Fargate for Amazon ECS Heading: Capacity providers Function: explanation Text: The following capacity providers are available:
+
+--- context 5 ---
+source_id: aws-fargate
+chunk_id: doc_e57ded6cc07f6574:s2_capacity_providers:b2
+text: Context: Architect for AWS Fargate for Amazon ECS Heading: Capacity providers Function: explanation Text: Fargate Spot - Run interruption tolerant Amazon ECS tasks at a discounted rate compared to the AWS Fargate price. Fargate Spot runs tasks on spare compute capacity. When AWS needs the capacity back, your tasks will be interrupted with a two-minute warning. For more information, see Amazon ECS clusters for Fargate.

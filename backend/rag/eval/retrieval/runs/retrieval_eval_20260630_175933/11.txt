@@ -1,0 +1,34 @@
+QUERY: what are Amazon ECS service quotas
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.38952996485100305, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.02704372817647583})
+errors: 0
+warnings: 0
+trace: 5
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: service-quotas
+chunk_id: doc_6f5d8fbb49dadbc4:s0_amazon_ecs_service_quotas:b3
+text: Context: Amazon ECS service quotas Function: explanation Text: Amazon ECS Managed Instances follow the Amazon EC2 quotas. For more information, see Amazon EC2 service quotas in the Amazon EC2 User Guide.
+
+--- context 2 ---
+source_id: service-quotas
+chunk_id: doc_6f5d8fbb49dadbc4:s0_amazon_ecs_service_quotas:b1
+text: Context: Amazon ECS service quotas Function: explanation Text: The Service Quotas console is a central location where you can view and manage your quotas for AWS services, and request a quota increase for many of the resources that you use. Use the quota information that we provide to manage your resources. Plan to request any quota increases in advance of the time that you'll need them.
+
+--- context 3 ---
+source_id: service-quotas
+chunk_id: doc_6f5d8fbb49dadbc4:s0_amazon_ecs_service_quotas:b0
+text: Context: Amazon ECS service quotas Function: explanation Text: When you create your AWS account, we set default quotas (also referred to as limits) on your AWS resources on a per-Region basis. If you attempt to exceed the quota for a resource, the request fails.
+
+--- context 4 ---
+source_id: welcome
+chunk_id: doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b1
+text: Context: What is Amazon Elastic Container Service? Function: explanation Text: Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications. As a fully managed service, Amazon ECS comes with AWS configuration and operational best practices built-in. It's integrated with both AWS tools, such as Amazon Elastic Container Registry, and third-party tools, such as Docker. This integration mak
+
+--- context 5 ---
+source_id: welcome
+chunk_id: doc_29370e71a8e71dba:s2_features:b7
+text: Context: What is Amazon Elastic Container Service? Heading: Features Function: explanation Text: Service Auto Scaling Amazon ECS increases or decreases the desired number of tasks in your service automatically.

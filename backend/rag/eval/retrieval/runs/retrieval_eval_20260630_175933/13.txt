@@ -1,0 +1,34 @@
+QUERY: how should I architect my application for Amazon ECS
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.43783324057241363, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.16957035733084821})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: architect-your-solution
+chunk_id: doc_f9253cbeee835c1b:s0_architect_your_application_for_amazon_ecs:b0
+text: Context: Architect your application for Amazon ECS Function: explanation Text: You architect your application by creating a task definition for your application. The task definition contains the parameters that define information about the application, including:
+
+--- context 2 ---
+source_id: architect-your-solution
+chunk_id: doc_f9253cbeee835c1b:s0_architect_your_application_for_amazon_ecs:b10
+text: Context: Architect your application for Amazon ECS Function: instruction Text: Use different IAM roles for each task definition family. Define each task definition with its own IAM role. Implement this practice along with providing each business component its own task definition family. By implementing both of these best practices, you can limit how much access each service has to resources in your AWS account. For example, you can give your authentication service access to connect to your passw
+
+--- context 3 ---
+source_id: architect-your-solution
+chunk_id: doc_f9253cbeee835c1b:s0_architect_your_application_for_amazon_ecs:b1
+text: Context: Architect your application for Amazon ECS Function: explanation Text: The capacity to use, which determines the infrastructure that your tasks are hosted on. When you use the EC2 capacity provider, you also choose the instance type. When you use the Amazon ECS Managed Instances capacity provider, you can provide instance requirements for Amazon ECS to manage compute capacity. For some instance types, such as GPU, you need to set specific parameters. For more information, see Amazon ECS 
+
+--- context 4 ---
+source_id: managed-daemons
+chunk_id: doc_4ed3f8327b6c3bda:s1_how_managed_daemons_work:b1
+text: Context: Amazon ECS Managed Daemons Heading: How Managed Daemons work Function: explanation Text: Daemons do not launch instances independently. When you run an application task on a Amazon ECS Managed Instances capacity provider, Amazon ECS provisions an Amazon EC2 instance, starts the daemon task first, and only then transitions the application task to `RUNNING`. This ordering guarantees that cross-cutting functions like logging, tracing, and metrics collection are operational before your appl
+
+--- context 5 ---
+source_id: getting-started
+chunk_id: doc_1b5e884cb09d63ba:s0_learn_how_to_create_and_use_amazon_ecs_resources:b5
+text: Context: Learn how to create and use Amazon ECS resources Function: explanation Text: Learn how to create a task for Amazon ECS Managed Instances with the AWS CLI

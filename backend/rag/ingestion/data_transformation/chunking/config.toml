@@ -1,0 +1,271 @@
+# Chunking owns retrieval-quality and semantic-splitting policy.
+# Model identity, tokenizer identity and the actual model max input length
+# come from rag.ingestion.embeddings configuration at runtime.
+
+
+[tokenization]
+
+enabled = true
+role = "dense"
+
+add_special_tokens = false
+
+require_local_assets = true
+require_exact_tokenizer = true
+
+allow_network = false
+allow_runtime_download = false
+allow_approximate_counting = false
+
+fail_if_unavailable = true
+
+
+[semantic_chunking]
+
+enabled = true
+
+minimum_chunk_tokens = 12
+preferred_chunk_tokens = 420
+strict_chunk_tokens = 560
+
+preserve_complete_sentences = true
+preserve_paragraph_boundaries = true
+preserve_ir_boundaries = true
+
+allow_complete_sentence_above_strict = true
+
+split_only_when_required = true
+
+
+[block_budget]
+
+enabled = true
+
+default_ratio = 1.0
+
+paragraph_ratio = 1.0
+blockquote_ratio = 0.95
+list_ratio = 0.95
+code_ratio = 1.0
+table_ratio = 0.90
+component_ratio = 0.90
+
+low_density_ratio = 1.0
+medium_density_ratio = 0.95
+high_density_ratio = 0.85
+
+minimum_ratio = 0.50
+
+
+[atomic_policy]
+
+enabled = true
+
+subtypes = ["code", "table", "list", "component"]
+
+preserve_within_hard_limit = true
+
+never_sentence_split = true
+never_word_split = true
+never_character_split = true
+
+quarantine_if_above_hard_limit = true
+
+
+[splittable_policy]
+
+enabled = true
+
+subtypes = [
+    "paragraph",
+    "blockquote",
+]
+
+sentence_boundary_only = true
+
+preserve_source_order = true
+preserve_blank_line_boundaries = true
+
+
+[sentence_splitting]
+
+enabled = true
+
+preserve_complete_sentences = true
+
+allow_sentence_above_preferred = true
+allow_sentence_above_strict = true
+
+allow_sentence_above_hard_limit = false
+
+word_fallback = false
+character_fallback = false
+
+preserve_terminal_punctuation = true
+preserve_internal_whitespace = true
+
+
+[hard_limit_policy]
+
+enabled = true
+
+# The numerical hard limit is resolved from the active embedding model.
+limit_source = "embedding_config"
+
+truncate = false
+drop = false
+
+quarantine = true
+
+allow_atomic_above_strict = true
+allow_sentence_above_strict = true
+
+allow_atomic_above_hard_limit = false
+allow_sentence_above_hard_limit = false
+
+fail_if_hard_limit_unknown = true
+
+
+[split_identity]
+
+enabled = true
+
+generate_unique_child_ids = true
+preserve_parent_chunk_id = true
+preserve_source_ir_id = true
+
+split_index_start = 1
+
+child_id_template = "{parent_id}:split{split_index}"
+
+
+[split_provenance]
+
+enabled = true
+
+copy_source_metadata = true
+
+record_parent_chunk_id = true
+record_source_ir_id = true
+
+record_split_index = true
+record_split_count = true
+
+record_original_token_count = true
+record_split_token_count = true
+
+record_split_reason = true
+
+
+[validation]
+
+enabled = true
+
+reject_empty_text = true
+reject_missing_identity = true
+
+validate_token_counts = true
+validate_split_identity = true
+validate_split_provenance = true
+
+enforce_model_hard_limit = true
+
+strict_limit_is_error = false
+hard_limit_is_error = true
+
+deduplicate = true
+deduplicate_by_ir_id = false
+
+
+[validation.lightweight]
+
+enabled = true
+
+run_before_embedding = true
+
+check_empty_text = true
+check_identity = true
+check_token_count = true
+check_hard_limit = true
+
+
+[text_deduplication]
+
+enabled = true
+
+scope = "document"
+
+exact_text_only = true
+
+normalize_outer_whitespace = true
+normalize_internal_whitespace = false
+
+case_sensitive = true
+
+preserve_distinct_split_children = true
+preserve_distinct_source_spans = true
+
+
+[retrieval_prefix_budget]
+
+enabled = true
+
+# This is only a conservative chunking reserve.
+# The embedding layer must still validate the exact final formatted passage
+# against the active model's real maximum input length.
+
+reserved_tokens = 128
+
+clamp_semantic_budget_to_model_limit = true
+
+never_reduce_below_minimum = true
+
+fail_if_effective_budget_non_positive = true
+
+
+[quality_diagnostics]
+
+enabled = true
+
+record_token_count = true
+record_preferred_limit = true
+record_strict_limit = true
+record_effective_hard_limit = true
+
+record_budget_ratio = true
+record_budget_density = true
+
+record_oversized_sentence = true
+record_oversized_atomic_block = true
+
+record_split_reason = true
+record_split_count = true
+
+record_tokenizer_model_id = true
+record_tokenizer_revision = true
+
+
+[quality_scoring]
+
+enabled = true
+
+minimum_score = 0.0
+maximum_score = 1.0
+
+base_score = 1.0
+
+under_minimum_penalty = 0.12
+above_preferred_penalty = 0.05
+above_strict_penalty = 0.15
+
+oversized_sentence_penalty = 0.08
+oversized_atomic_penalty = 0.10
+
+split_penalty = 0.03
+
+empty_context_penalty = 0.03
+missing_heading_penalty = 0.02
+
+source_provenance_bonus = 0.03
+local_scope_bonus = 0.03
+parent_context_bonus = 0.03

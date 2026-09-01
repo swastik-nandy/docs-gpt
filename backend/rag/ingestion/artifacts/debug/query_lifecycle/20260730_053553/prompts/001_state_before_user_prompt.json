@@ -1,0 +1,50 @@
+{
+  "tenant_id": "tnt_local_000000000001",
+  "user_id": "usr_local_000000000001",
+  "conversation_id": "cnv_demo_1785369954_af667aa5",
+  "turn_id": "f1b1ad79-53d0-4711-9cb2-af40a170e4ae",
+  "current_user_message": "/exit",
+  "raw_user_message": "/exit",
+  "retrieval_query": null,
+  "turn_plan": {
+    "action": "conversation_only",
+    "needs_document_retrieval": false,
+    "retrieval_query": null,
+    "answer_scope": "general_conversation",
+    "allow_conversation_answer": true,
+    "needs_clarification": false,
+    "uses_previous_turns": true,
+    "confidence": 0.52,
+    "reason": "Fallback treated message as general conversation because no knowledge-base signal was present.",
+    "metadata": {
+      "fallback": true,
+      "planner_provider": "system",
+      "planner_model": "fallback_turn_plan",
+      "planner_fallback_used": true,
+      "planner_error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "recent_user_message_available": true,
+      "recent_assistant_message_available": true
+    }
+  },
+  "recent_turns": [
+    {
+      "role": "user",
+      "content": "what is aws fargate"
+    },
+    {
+      "role": "assistant",
+      "content": "I don’t have enough supporting context in the current knowledge base to answer that specific question confidently."
+    }
+  ],
+  "conversation_summary": null,
+  "retrieved_memory": [],
+  "context_bundle": {
+    "retrieved_documents": [],
+    "retrieved_memory": [],
+    "working_memory": [],
+    "conversation_summary": null,
+    "provenance_map": {}
+  },
+  "disable_long_term_memory": true,
+  "disable_memory_write": true
+}

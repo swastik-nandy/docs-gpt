@@ -1,0 +1,50 @@
+[slots]
+primary = "LLM_1"
+fallback = "LLM_2"
+fast = "LLM_1"
+
+[slot_providers]
+primary = "google_genai"
+fallback = "groq"
+fast = "google_genai"
+[providers.google_genai]
+library = "google-genai"
+api_key_env = "GEMINI_API_KEY"
+timeout_seconds = 45
+api_version = "v1beta"
+model_patterns = ["^gemma-4-26b-a4b-it$", "^gemma-4-31b-it$", "^gemini-[0-9][a-z0-9.-]*$"]
+
+[providers.groq]
+library = "groq"
+api_key_env = "GROQ_API_KEY"
+timeout_seconds = 45
+model_patterns = ["^llama-3\\.3-70b-versatile$", "^llama-3\\.1-8b-instant$", "^meta-llama/[a-z0-9._/-]+$", "^openai/gpt-oss-[a-z0-9._/-]+$"]
+[roles.generation_primary]
+temperature = 0.4
+max_output_tokens = 2048
+slots = ["primary", "fallback"]
+
+[roles.generation_fallback]
+temperature = 0.4
+max_output_tokens = 2048
+slots = ["fallback", "primary"]
+
+[roles.query_rewrite]
+temperature = 0.0
+max_output_tokens = 512
+slots = ["fast"]
+
+[roles.memory_extraction]
+temperature = 0.0
+max_output_tokens = 512
+slots = ["fast"]
+
+[roles.groundedness_check]
+temperature = 0.0
+max_output_tokens = 1024
+slots = ["primary", "fallback"]
+
+[roles.turn_planning]
+temperature = 0.0
+max_output_tokens = 512
+slots = ["fast"]

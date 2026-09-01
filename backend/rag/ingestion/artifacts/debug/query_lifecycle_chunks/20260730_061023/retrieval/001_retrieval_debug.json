@@ -1,0 +1,411 @@
+{
+  "call_id": 1,
+  "query": "cost of not managing infrastructure, managed service pricing, infrastructure management fees",
+  "decision": {
+    "is_sufficient": true,
+    "confidence": "low",
+    "confidence_score": 0.3824461115865729,
+    "reason": "context already packed",
+    "should_rewrite": false,
+    "rewrite_reason": null,
+    "metadata": {
+      "backend": "adaptive",
+      "final_action": "stop",
+      "exact_coverage": 0.5,
+      "source_coverage": 1.0,
+      "score_gap": 0.345475989993026
+    }
+  },
+  "normalized_query": {
+    "original_query": "cost of not managing infrastructure, managed service pricing, infrastructure management fees",
+    "normalized_query": "cost of not managing infrastructure, managed service pricing, infrastructure management fees",
+    "intent": "unknown",
+    "defects": [],
+    "rewritten_queries": [
+      {
+        "query": "infrastructure managed management managing pricing service",
+        "reason": "query_processing_semantic_variant",
+        "weight": 1.0,
+        "metadata": {
+          "source": "query_processing"
+        }
+      }
+    ],
+    "extracted_terms": [],
+    "extracted_filters": [],
+    "hypothetical_answer": null,
+    "requires_memory": false,
+    "metadata": {
+      "planner": "adaptive",
+      "query_analysis": {
+        "raw_query": "cost of not managing infrastructure, managed service pricing, infrastructure management fees",
+        "normalized_query": "cost of not managing infrastructure, managed service pricing, infrastructure management fees",
+        "intent": "unknown",
+        "defects": [],
+        "query_terms": [
+          "infrastructure",
+          "managed",
+          "management",
+          "managing",
+          "pricing",
+          "service",
+          "cost",
+          "fees",
+          "not",
+          "of"
+        ],
+        "weighted_terms": [
+          {
+            "text": "infrastructure",
+            "weight": 1.35,
+            "features": [
+              "long"
+            ]
+          },
+          {
+            "text": "managed",
+            "weight": 1.35,
+            "features": [
+              "long"
+            ]
+          },
+          {
+            "text": "management",
+            "weight": 1.35,
+            "features": [
+              "long"
+            ]
+          },
+          {
+            "text": "managing",
+            "weight": 1.35,
+            "features": [
+              "long"
+            ]
+          },
+          {
+            "text": "pricing",
+            "weight": 1.35,
+            "features": [
+              "long"
+            ]
+          },
+          {
+            "text": "service",
+            "weight": 1.35,
+            "features": [
+              "long"
+            ]
+          },
+          {
+            "text": "cost",
+            "weight": 1.0,
+            "features": []
+          },
+          {
+            "text": "fees",
+            "weight": 1.0,
+            "features": []
+          },
+          {
+            "text": "not",
+            "weight": 0.65,
+            "features": [
+              "short_lower"
+            ]
+          },
+          {
+            "text": "of",
+            "weight": 0.05,
+            "features": [
+              "function",
+              "short_lower"
+            ]
+          }
+        ],
+        "anchor_terms": [
+          "infrastructure",
+          "managed",
+          "management",
+          "managing",
+          "pricing",
+          "service"
+        ],
+        "focus_terms": [
+          "infrastructure",
+          "managed",
+          "management",
+          "managing",
+          "pricing",
+          "service"
+        ],
+        "entity_terms": [],
+        "exact_terms": [],
+        "source_hints": [],
+        "phrase_terms": [
+          "not managing",
+          "managing infrastructure",
+          "infrastructure managed",
+          "managed service",
+          "service pricing",
+          "pricing infrastructure",
+          "infrastructure management",
+          "management fees",
+          "of not managing",
+          "not managing infrastructure",
+          "managing infrastructure managed",
+          "infrastructure managed service",
+          "managed service pricing",
+          "service pricing infrastructure",
+          "pricing infrastructure management",
+          "infrastructure management fees"
+        ],
+        "semantic_queries": [
+          "cost of not managing infrastructure, managed service pricing, infrastructure management fees",
+          "infrastructure managed management managing pricing service"
+        ],
+        "referential_marker_count": 0,
+        "token_count": 11,
+        "unique_token_ratio": 0.9091,
+        "avg_token_length": 7.2727,
+        "lexical_specificity": 0.5455,
+        "entity_density": 0.0,
+        "code_signal_density": 0.0,
+        "exact_signal_density": 0.0,
+        "structural_shape": "statement",
+        "confidence": 0.7055,
+        "requires_memory": false,
+        "reasoning": [
+          "structural_shape=statement",
+          "focus_terms=6",
+          "exact_terms=0",
+          "entity_density=0.0",
+          "lexical_specificity=0.5455",
+          "confidence=0.7055"
+        ],
+        "metadata": {
+          "source": "generic_statistical_query_analysis",
+          "version": "v1",
+          "uses_domain_terms": false,
+          "uses_action_dictionary": false
+        }
+      },
+      "generic": true
+    }
+  },
+  "counts": {
+    "reranked_count": 30,
+    "context_block_count": 2,
+    "action_count": 5,
+    "warning_count": 0,
+    "error_count": 0
+  },
+  "metadata_probe": {
+    "backend": "adaptive_graph",
+    "graph_hard_final_context_recovery": null,
+    "graph_final_context_recovery": null,
+    "answerability_candidate_mix": null
+  },
+  "actions": [
+    {
+      "action": "sparse_search",
+      "status": "succeeded",
+      "hop": 0,
+      "reason": "selected highest gain/cost action: sparse_search; score=0.016557",
+      "latency_ms": 10209.423791995505,
+      "input_count": 0,
+      "output_count": 30,
+      "materially_changed": true,
+      "error": null,
+      "before_count": 0,
+      "after_count": 30,
+      "estimated_gain": 0.74508,
+      "estimated_cost_ms": 45.0,
+      "decision_score": 0.016557333333333334,
+      "policy": "greedy_gain_cost",
+      "completed_actions": [],
+      "confidence": 0.0
+    },
+    {
+      "action": "score_rerank",
+      "status": "succeeded",
+      "hop": 1,
+      "reason": "selected highest gain/cost action: score_rerank; score=0.051852",
+      "latency_ms": 2.0287760053179227,
+      "input_count": 30,
+      "output_count": 30,
+      "materially_changed": false,
+      "error": null,
+      "before_count": 30,
+      "after_count": 30,
+      "estimated_gain": 0.28,
+      "estimated_cost_ms": 5.4,
+      "decision_score": 0.05185185185185185,
+      "policy": "greedy_gain_cost",
+      "completed_actions": [
+        "sparse_search"
+      ],
+      "confidence": 0.26794796263737974
+    },
+    {
+      "action": "ce_rerank",
+      "status": "succeeded",
+      "hop": 2,
+      "reason": "forced CE rerank before context packing: flat top candidate scores; score_gap=0.1291",
+      "latency_ms": 8625.931649999984,
+      "input_count": 30,
+      "output_count": 30,
+      "materially_changed": false,
+      "error": null,
+      "before_count": 30,
+      "after_count": 30,
+      "estimated_gain": 0.8,
+      "estimated_cost_ms": 330.0,
+      "decision_score": 0.0024242424242424242,
+      "policy": "greedy_gain_cost_with_ce_gate",
+      "forced": true,
+      "trigger": "flat top candidate scores; score_gap=0.1291",
+      "completed_actions": [
+        "score_rerank",
+        "sparse_search"
+      ],
+      "confidence": 0.2948686253043491,
+      "score_gap": 0.1291236913578832,
+      "score_entropy": 0.9903342975733119,
+      "reranked_count": 30
+    },
+    {
+      "action": "pack_context",
+      "status": "succeeded",
+      "hop": 3,
+      "reason": "selected highest gain/cost action: pack_context; score=0.118750",
+      "latency_ms": 10.261677001835778,
+      "input_count": 30,
+      "output_count": 2,
+      "materially_changed": false,
+      "error": null,
+      "before_count": 30,
+      "after_count": 30,
+      "estimated_gain": 0.95,
+      "estimated_cost_ms": 8.0,
+      "decision_score": 0.11875,
+      "policy": "greedy_gain_cost",
+      "completed_actions": [
+        "ce_rerank",
+        "score_rerank",
+        "sparse_search"
+      ],
+      "confidence": 0.3824461115865729
+    },
+    {
+      "action": "stop",
+      "status": "skipped",
+      "hop": 4,
+      "reason": "context already packed",
+      "latency_ms": null,
+      "input_count": null,
+      "output_count": null,
+      "materially_changed": null,
+      "error": null,
+      "terminal": true,
+      "score": 1.0
+    }
+  ],
+  "warnings": [],
+  "errors": [],
+  "top5_reranked_chunks": [
+    {
+      "index": 1,
+      "rank": 1,
+      "score": 0.05586504,
+      "rerank_score": 0.05586504,
+      "original_score": 0.047662318,
+      "chunk_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b6",
+      "source_id": "clusters",
+      "heading": "Choosing the right cluster type",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/clusters.md",
+      "function": "explanation",
+      "text_preview": "Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: explanation Text: Fargate Serverless compute - Pay only for the resources your tasks use without managing any infrastructure. Ideal for variable workloads and getting started quickly. Use when:"
+    },
+    {
+      "index": 2,
+      "rank": 2,
+      "score": 0.03656501,
+      "rerank_score": 0.03656501,
+      "original_score": 0.045945637,
+      "chunk_id": "doc_584e9f744ea27b0b:s4_capacity_providers:b7",
+      "source_id": "clusters",
+      "heading": "Capacity providers",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/clusters.md",
+      "function": "explanation",
+      "text_preview": "Context: Amazon ECS clusters Heading: Capacity providers Function: explanation Text: Fargate capacity providers Serverless compute where you pay only for the resources your tasks use without managing any infrastructure. You just need to associate the pre-defined capacity providers (Fargate and Fargate Spot) with the cluster."
+    },
+    {
+      "index": 3,
+      "rank": 3,
+      "score": 0.01263592,
+      "rerank_score": 0.01263592,
+      "original_score": 0.03821978,
+      "chunk_id": "doc_29370e71a8e71dba:s1_terminology_and_components:b7",
+      "source_id": "welcome",
+      "heading": "Terminology and components",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "function": "explanation",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Heading: Terminology and components Function: explanation Text: Amazon ECS Managed Instances is a compute option for Amazon ECS that enables you to run containerized workloads on a range of Amazon EC2 instance types while offloading infrastructure management to AWS. With Amazon ECS Managed Instances, you can access specific compute capabilities such as GPU acceleration, specific CPU architectures, high network performance, and specialized instances types, while AWS handles provisioning, patching, scaling, and maintenance of the underlying infrastructure."
+    },
+    {
+      "index": 4,
+      "rank": 4,
+      "score": 0.01129846,
+      "rerank_score": 0.01129846,
+      "original_score": 0.0472776,
+      "chunk_id": "doc_29370e71a8e71dba:s0_what_is_amazon_elastic_container_service:b1",
+      "source_id": "welcome",
+      "heading": "What is Amazon Elastic Container Service?",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "function": "explanation",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Function: explanation Text: Amazon Elastic Container Service (Amazon ECS) is a fully managed container orchestration service that helps you easily deploy, manage, and scale containerized applications. As a fully managed service, Amazon ECS comes with AWS configuration and operational best practices built-in. It's integrated with both AWS tools, such as Amazon Elastic Container Registry, and third-party tools, such as Docker. This integration makes it easier for teams to focus on building the applications, not the environment. You can run and scale your container workloads across AWS Regions in the cloud, and on-premises, without the complexity of managing a control plane."
+    },
+    {
+      "index": 5,
+      "rank": 5,
+      "score": 0.0112868,
+      "rerank_score": 0.0112868,
+      "original_score": 0.03685981,
+      "chunk_id": "doc_4ed3f8327b6c3bda:s0_amazon_ecs_managed_daemons:b0",
+      "source_id": "managed-daemons",
+      "heading": "Amazon ECS Managed Daemons",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/managed-daemons.md",
+      "function": "explanation",
+      "text_preview": "Context: Amazon ECS Managed Daemons Function: explanation Text: Amazon ECS Managed Daemons enable you to deploy and manage software agents, such as security, observability, and networking agents, across your container infrastructure on Amazon ECS Managed Instances. Managed Daemons decouple daemon lifecycle management from application operations. You can deploy, update, and monitor agents independently, without redeploying workloads or coordinating changes across services."
+    }
+  ],
+  "packed_context_chunks": [
+    {
+      "index": 1,
+      "rank": 3,
+      "score": 0.01263592,
+      "rerank_score": null,
+      "original_score": null,
+      "chunk_id": "doc_29370e71a8e71dba:s1_terminology_and_components:b7",
+      "source_id": "welcome",
+      "heading": "Terminology and components",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/welcome.md",
+      "function": "explanation",
+      "text_preview": "Context: What is Amazon Elastic Container Service? Heading: Terminology and components Function: explanation Text: Amazon ECS Managed Instances is a compute option for Amazon ECS that enables you to run containerized workloads on a range of Amazon EC2 instance types while offloading infrastructure management to AWS. With Amazon ECS Managed Instances, you can access specific compute capabilities such as GPU acceleration, specific CPU architectures, high network performance, and specialized instances types, while AWS handles provisioning, patching, scaling, and maintenance of the underlying infrastructure."
+    },
+    {
+      "index": 2,
+      "rank": 11,
+      "score": 0.00471153,
+      "rerank_score": null,
+      "original_score": null,
+      "chunk_id": "doc_584e9f744ea27b0b:s1_choosing_the_right_cluster_type:b16",
+      "source_id": "clusters",
+      "heading": "Choosing the right cluster type",
+      "source": "/home/swastik/Projects/EMBITEL/emb-docs-gpt/backend/rag/ingestion/artifacts/source/tnt_local_000000000001/dabc1a5a1901472eade4ecee12c6d846/files/clusters.md",
+      "function": "reference",
+      "text_preview": "Context: Amazon ECS clusters Heading: Choosing the right cluster type Function: reference Text: Note: Amazon ECS Managed Instances is the recommended choice for most new workloads as it provides the best combination of performance, cost optimization, and operational simplicity while allowing AWS to handle infrastructure management tasks."
+    }
+  ]
+}

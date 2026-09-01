@@ -1,0 +1,34 @@
+QUERY: what operating systems are supported by ECS Anywhere
+============================================================
+backend: adaptive_graph
+decision: RetrievalDecision(is_sufficient=True, confidence=<ConfidenceBand.LOW: 'low'>, confidence_score=0.43094347632466884, reason='context already packed', should_rewrite=False, rewrite_reason=None, metadata={'backend': 'adaptive', 'final_action': 'stop', 'exact_coverage': 1.0, 'source_coverage': 1.0, 'score_gap': 0.14660997645779816})
+errors: 0
+warnings: 0
+trace: 4
+reranked: 30
+context_blocks: 5
+
+--- context 1 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s1_supported_operating_systems_and_system_architectures:b4
+text: Context: Amazon ECS clusters for external instances Heading: Supported operating systems and system architectures Function: explanation Text: Beginning August 7 2026, the following operating systems are no longer supported by Amazon ECS Anywhere:
+
+--- context 2 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s1_supported_operating_systems_and_system_architectures:b3
+text: Context: Amazon ECS clusters for external instances Heading: Supported operating systems and system architectures Function: explanation Text: RHEL 9 — You must ensure that Docker is installed before you run the ECS Anywhere install script. For more information, see Install Docker Engine on RHEL in the Docker documentation.
+
+--- context 3 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s1_supported_operating_systems_and_system_architectures:b0
+text: Context: Amazon ECS clusters for external instances Heading: Supported operating systems and system architectures Function: explanation Text: The following is the list of supported operating systems. The `x86_64` and `ARM64` CPU architectures are supported.
+
+--- context 4 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s0_amazon_ecs_clusters_for_external_instances:b0
+text: Context: Amazon ECS clusters for external instances Function: explanation Text: Amazon ECS Anywhere provides support for registering an external instance such as an on-premises server or virtual machine (VM), to your Amazon ECS cluster. External instances are optimized for running applications that generate outbound traffic or process data. If your application requires inbound traffic, the lack of Elastic Load Balancing support makes running these workloads less efficient. Amazon ECS added a new
+
+--- context 5 ---
+source_id: ecs-anywhere
+chunk_id: doc_b4671344ab3344a2:s5_gmsa_with_ecs_anywhere:b1
+text: Context: Amazon ECS clusters for external instances > Considerations Heading: gMSA with ECS Anywhere Function: explanation Text: The following use cases were supported for ECS Anywhere when Windows was a supported operating system.

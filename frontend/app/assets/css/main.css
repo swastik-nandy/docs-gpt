@@ -1,0 +1,223 @@
+@import '@fontsource-variable/geist/wght.css';
+@import '@fontsource-variable/geist-mono/wght.css';
+
+
+/*------------------------DESIGN TOKENS-------------------------*/
+
+:root {
+  --font-sans: 'Geist Variable', sans-serif;
+  --font-mono: 'Geist Mono Variable', monospace;
+
+  --bg: #080c0b;
+  --bg-soft: #0a0f0e;
+  --surface-1: #0d1311;
+  --surface-2: #111917;
+  --surface-3: #16201d;
+  --surface-hover: #19251f;
+
+  --border: rgba(151, 190, 171, 0.11);
+  --border-strong: rgba(151, 190, 171, 0.18);
+
+  --text: #edf7f2;
+  --text-soft: #b4c5bc;
+  --text-muted: #718078;
+  --text-faint: #4e5b55;
+
+  --green: #36d399;
+  --green-bright: #5ee9b5;
+  --green-soft: #2bbf89;
+  --green-deep: #153c30;
+  --green-muted: #163329;
+
+  --danger: #fb7185;
+
+  --shadow-soft:
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 16px 48px rgba(0, 0, 0, 0.12);
+
+  --shadow-panel:
+    0 24px 80px rgba(0, 0, 0, 0.22);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --sidebar-width: 320px;
+
+  color-scheme: dark;
+}
+
+
+/*------------------------RESET-------------------------*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#__nuxt {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  background: var(--bg);
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 78% -15%,
+      rgba(45, 212, 163, 0.08),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at -10% 110%,
+      rgba(45, 212, 163, 0.04),
+      transparent 28%
+    ),
+    var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(94, 233, 181, 0.55);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(54, 211, 153, 0.25);
+  color: var(--text);
+}
+
+
+/*------------------------SCROLLBAR-------------------------*/
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(94, 233, 181, 0.16)
+    transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(94, 233, 181, 0.14);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(94, 233, 181, 0.24);
+}
+
+
+/*------------------------TYPOGRAPHY-------------------------*/
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.025em;
+}
+
+code,
+pre,
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+
+/*------------------------COMMON SURFACES-------------------------*/
+
+.surface {
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-soft);
+}
+
+.glass-surface {
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18, 27, 24, 0.92),
+      rgba(12, 18, 16, 0.92)
+    );
+  backdrop-filter: blur(18px);
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+
+/*------------------------UTILITY-------------------------*/
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+}
+
+
+/*------------------------MOTION-------------------------*/
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

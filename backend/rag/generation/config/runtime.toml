@@ -1,0 +1,8 @@
+[models]
+registry_path = "models.toml"
+
+[memory.qdrant]
+url = "http://localhost:6333"
+collection_name = "rag_memory_bge_m3_v1"
+vector_size = 1024
+timeout_seconds = 10

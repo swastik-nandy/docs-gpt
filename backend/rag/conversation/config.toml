@@ -1,0 +1,105 @@
+[database.conversation]
+enabled = true
+required = true
+connect_timeout = 3
+application_name = "emb_docs_gpt_conversation"
+
+
+[database.conversation.pool]
+min_size = 2
+max_size = 10
+acquire_timeout_seconds = 5.0
+startup_timeout_seconds = 10.0
+shutdown_timeout_seconds = 5.0
+max_waiting = 64
+max_lifetime_seconds = 1800.0
+max_idle_seconds = 300.0
+reconnect_timeout_seconds = 60.0
+worker_count = 3
+check_connection_on_acquire = true
+
+
+[stateful_retrieval]
+enabled = true
+turn_window_limit = 8
+entity_window_limit = 8
+
+
+[reference_resolution]
+enabled = true
+confidence_for_recent_entity_substitution = 0.78
+recent_turn_fallback_confidence_multiplier = 0.90
+max_recent_entities = 8
+max_recent_turns_for_fallback = 8
+
+
+[entity_extraction]
+enabled = true
+
+max_entities = 12
+minimum_entity_length = 2
+max_entity_length = 120
+max_proper_noun_tokens = 5
+max_acronym_length = 13
+
+extract_backtick_phrases = true
+extract_quoted_phrases = true
+extract_qualified_identifiers = true
+extract_acronyms = true
+extract_proper_nouns = true
+
+strip_leading_function_words = true
+reject_sentence_initial_single_token = true
+
+leading_function_words = [
+    "a",
+    "an",
+    "the",
+    "this",
+    "that",
+    "these",
+    "those",
+    "what",
+    "which",
+    "who",
+    "where",
+    "when",
+    "why",
+    "how",
+]
+
+standalone_non_entities = [
+    "i",
+    "you",
+    "he",
+    "she",
+    "it",
+    "we",
+    "they",
+    "me",
+    "him",
+    "her",
+    "us",
+    "them",
+    "my",
+    "your",
+    "his",
+    "its",
+    "our",
+    "their",
+    "same",
+    "previous",
+    "above",
+    "earlier",
+    "former",
+    "latter",
+]
+
+
+[entity_extraction.confidence]
+code_or_exact = 0.98
+quoted_phrase = 0.92
+identifier = 0.95
+acronym = 0.80
+proper_noun = 0.68
+unknown = 0.50

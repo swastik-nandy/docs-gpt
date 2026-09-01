@@ -1,0 +1,794 @@
+from __future__ import annotations
+
+import inspect
+from dataclasses import dataclass, replace
+from typing import Any
+
+from rag.retrieval.adaptive.actions import (
+    RetrievalAction,
+    RetrievalActionDecision,
+    RetrievalActionRecord,
+)
+from rag.retrieval.adaptive.confidence import (
+    ConfidenceEstimator,
+    StaticConfidenceEstimator,
+    apply_confidence_estimate,
+)
+from rag.retrieval.adaptive.policy import GreedyAdaptivePolicy
+from rag.retrieval.adaptive.signals import DefaultQuerySignalExtractor
+from rag.retrieval.adaptive.state import (
+    AdaptiveRetrievalState,
+    QuerySignals,
+    top_identity_set_changed,
+)
+from rag.retrieval.components import RetrievalComponents, create_retrieval_components
+from rag.retrieval.config.runtime import (
+    RetrievalRuntimeConfig,
+    load_retrieval_runtime_config,
+)
+from rag.retrieval.contracts.candidates import (
+    FusedCandidate,
+    RerankedCandidate,
+    RetrievalCandidate,
+)
+from rag.retrieval.contracts.context import ContextBlock
+from rag.retrieval.contracts.embeddings import QueryEmbedding
+from rag.retrieval.contracts.query import NormalizedQuery
+from rag.retrieval.contracts.request import RetrievalRequest
+from rag.retrieval.rerankers.score_reranker import ScoreReranker
+from rag.retrieval.rerankers.query_aware_calibrator import calibrate_reranked_candidates
+from rag.retrieval.answerability import classify_answer_need
+
+
+CandidateLike = RetrievalCandidate | FusedCandidate | RerankedCandidate
+
+
+@dataclass(frozen=True)
+class AdaptiveRetrievalEngineResult:
+    state: AdaptiveRetrievalState
+    final_decision: RetrievalActionDecision
+
+    @property
+    def request(self) -> RetrievalRequest:
+        return self.state.request
+
+    @property
+    def normalized_query(self) -> NormalizedQuery:
+        return self.state.normalized_query
+
+    @property
+    def query_signals(self) -> QuerySignals:
+        return self.state.query_signals
+
+    @property
+    def context_blocks(self) -> tuple[ContextBlock, ...]:
+        return self.state.context_blocks
+
+    @property
+    def has_context(self) -> bool:
+        return bool(self.state.context_blocks)
+
+    @property
+    def candidate_count(self) -> int:
+        return self.state.candidate_count
+
+    @property
+    def action_count(self) -> int:
+        return len(self.state.action_records)
+
+    def validate(self) -> None:
+        self.state.validate()
+        self.final_decision.validate()
+
+
+class AdaptiveRetrievalEngine:
+    """
+    Policy-driven retrieval controller.
+
+    This engine keeps the existing always-run RetrievalEngine as the baseline.
+    It executes one chosen action per hop, recomputes confidence, captures a
+    state snapshot, then chooses again until STOP/FALLBACK or max_hops.
+    """
+
+    def __init__(
+        self,
+        *,
+        components: RetrievalComponents | Any | None = None,
+        runtime_config: RetrievalRuntimeConfig | None = None,
+        policy: GreedyAdaptivePolicy | None = None,
+        signal_extractor: DefaultQuerySignalExtractor | None = None,
+        confidence_estimator: ConfidenceEstimator | None = None,
+        score_reranker: ScoreReranker | None = None,
+    ) -> None:
+        self.components = components or create_retrieval_components(
+            runtime_config=runtime_config,
+        )
+
+        self.runtime_config = runtime_config or getattr(
+            self.components,
+            "runtime_config",
+            None,
+        ) or load_retrieval_runtime_config()
+        self.runtime_config.validate()
+
+        self.policy = policy or GreedyAdaptivePolicy.from_runtime_config(
+            self.runtime_config,
+        )
+        self.signal_extractor = signal_extractor or DefaultQuerySignalExtractor()
+        self.confidence_estimator = confidence_estimator or (
+            StaticConfidenceEstimator.from_runtime_config(self.runtime_config)
+        )
+        self.score_reranker = score_reranker or ScoreReranker()
+
+    async def retrieve(
+        self,
+        *,
+        request: RetrievalRequest,
+        normalized_query: NormalizedQuery | None = None,
+    ) -> AdaptiveRetrievalEngineResult:
+        raise RuntimeError(
+            "Direct AdaptiveRetrievalEngine execution is disabled. "
+            "Use RetrievalService, which always runs the LangGraph runtime."
+        )
+
+        request.validate()
+
+        query_plan = None
+        if normalized_query is None:
+            processor = getattr(self.components, "query_processor", None)
+            if processor is not None:
+                query_plan = await processor.process(request)
+                query_plan.validate()
+
+        resolved_query = (
+            normalized_query
+            or (query_plan.normalized_query if query_plan is not None else None)
+            or self._normalize_query(request)
+        )
+        resolved_query.validate()
+
+        query_signals = self.signal_extractor.extract(
+            request=request,
+            normalized_query=resolved_query,
+        )
+        query_signals.validate()
+
+        state = AdaptiveRetrievalState.create(
+            request=request,
+            normalized_query=resolved_query,
+            query_signals=query_signals,
+            max_hops=self.policy.config.max_hops,
+            metadata={
+                "engine": "adaptive_retrieval_engine",
+                "runtime": "v0",
+            },
+        )
+
+        apply_confidence_estimate(state, self.confidence_estimator)
+
+        final_decision: RetrievalActionDecision | None = None
+
+        while True:
+            decision = self.policy.choose_next_action(state)
+            final_decision = decision
+
+            if decision.should_stop:
+                state.add_action_record(
+                    RetrievalActionRecord.skipped(
+                        action=decision.action,
+                        hop=state.hop,
+                        reason=decision.reason,
+                        metadata={
+                            "terminal": True,
+                            "score": decision.score,
+                        },
+                    )
+                )
+                state.capture_snapshot(
+                    metadata={
+                        "terminal_action": decision.action.value,
+                    }
+                )
+                break
+
+            if not state.can_continue:
+                break
+
+            await self._execute_decision(
+                state=state,
+                decision=decision,
+            )
+
+            apply_confidence_estimate(state, self.confidence_estimator)
+            state.capture_snapshot(
+                metadata={
+                    "decision": decision.action.value,
+                    "decision_score": decision.score,
+                }
+            )
+            state.increment_hop()
+
+        await self._ensure_final_context(state)
+        apply_confidence_estimate(state, self.confidence_estimator)
+
+        result = AdaptiveRetrievalEngineResult(
+            state=state,
+            final_decision=final_decision
+            or RetrievalActionDecision(
+                action=RetrievalAction.FALLBACK_NO_ANSWER,
+                reason="adaptive engine exited without a decision",
+            ),
+        )
+        result.validate()
+        return result
+
+    async def _ensure_final_context(self, state: AdaptiveRetrievalState) -> None:
+        """
+        Final safety pass after the adaptive loop.
+
+        The policy can retrieve, rerank, pack, then later mutate candidates
+        through dense/fuse/expand. Those mutations intentionally clear stale
+        context. If the loop then reaches max_hops, we may have useful final
+        candidates but no packed context. This method performs one final
+        rerank + pack attempt without changing Qdrant retrieval behavior.
+        """
+        if state.context_blocks:
+            return
+
+        if not state.has_candidates:
+            return
+
+        if not state.reranked_candidates:
+            started = RetrievalActionRecord.started(
+                action=RetrievalAction.SCORE_RERANK,
+                hop=state.hop,
+                reason="finalization rerank before context packing",
+                metadata={
+                    "finalization": True,
+                    "before_count": len(state.active_candidates()),
+                },
+            )
+
+            try:
+                input_count, output_count = await self._score_rerank(state)
+                after_count = len(state.active_candidates())
+
+                state.add_action_record(
+                    started.succeeded(
+                        input_count=input_count,
+                        output_count=output_count,
+                        materially_changed=True,
+                        metadata={
+                            "finalization": True,
+                            "after_count": after_count,
+                        },
+                    )
+                )
+            except Exception as exc:
+                state.add_action_record(
+                    started.failed(
+                        error=str(exc),
+                        metadata={
+                            "finalization": True,
+                            "exception_type": type(exc).__name__,
+                        },
+                    )
+                )
+                state.add_warning(f"finalization score_rerank failed: {exc}")
+                return
+
+        if not state.reranked_candidates or state.context_blocks:
+            return
+
+        started = RetrievalActionRecord.started(
+            action=RetrievalAction.PACK_CONTEXT,
+            hop=state.hop,
+            reason="finalization pack context after terminal retrieval actions",
+            metadata={
+                "finalization": True,
+                "before_count": len(state.reranked_candidates),
+            },
+        )
+
+        try:
+            input_count, output_count = await self._pack_context(state)
+
+            state.add_action_record(
+                started.succeeded(
+                    input_count=input_count,
+                    output_count=output_count,
+                    materially_changed=output_count > 0,
+                    metadata={
+                        "finalization": True,
+                        "after_count": len(state.context_blocks),
+                    },
+                )
+            )
+
+            if output_count <= 0:
+                state.add_warning(
+                    "finalization pack_context produced no context blocks."
+                )
+
+            state.capture_snapshot(
+                metadata={
+                    "decision": "final_context_recovery",
+                    "finalization": True,
+                    "context_count": len(state.context_blocks),
+                }
+            )
+
+        except Exception as exc:
+            state.add_action_record(
+                started.failed(
+                    error=str(exc),
+                    metadata={
+                        "finalization": True,
+                        "exception_type": type(exc).__name__,
+                    },
+                )
+            )
+            state.add_warning(f"finalization pack_context failed: {exc}")
+
+    async def _execute_decision(
+        self,
+        *,
+        state: AdaptiveRetrievalState,
+        decision: RetrievalActionDecision,
+    ) -> None:
+        before = state.active_candidates()
+
+        started = RetrievalActionRecord.started(
+            action=decision.action,
+            hop=state.hop,
+            reason=decision.reason,
+            metadata={
+                "decision_score": decision.score,
+                "estimated_gain": decision.estimated_gain,
+                "estimated_cost_ms": decision.estimated_cost_ms,
+            },
+        )
+
+        try:
+            input_count, output_count = await self._execute_action(
+                action=decision.action,
+                state=state,
+            )
+
+            after = state.active_candidates()
+
+            state.add_action_record(
+                started.succeeded(
+                    input_count=input_count,
+                    output_count=output_count,
+                    materially_changed=top_identity_set_changed(before, after),
+                    metadata={
+                        "before_count": len(before),
+                        "after_count": len(after),
+                    },
+                )
+            )
+
+        except Exception as exc:
+            state.add_action_record(
+                started.failed(
+                    error=str(exc),
+                    metadata={
+                        "exception_type": type(exc).__name__,
+                    },
+                )
+            )
+            state.add_error(f"{decision.action.value} failed: {exc}")
+
+    async def _execute_action(
+        self,
+        *,
+        action: RetrievalAction,
+        state: AdaptiveRetrievalState,
+    ) -> tuple[int, int]:
+        if action == RetrievalAction.MEMORY_LOOKUP:
+            return await self._memory_lookup(state)
+
+        if action == RetrievalAction.SPARSE_SEARCH:
+            return await self._sparse_search(state)
+
+        if action == RetrievalAction.DENSE_SEARCH:
+            return await self._dense_search(state)
+
+        if action == RetrievalAction.FUSE:
+            return await self._fuse(state)
+
+        if action == RetrievalAction.SCORE_RERANK:
+            return await self._score_rerank(state)
+
+        if action == RetrievalAction.CE_RERANK:
+            return await self._ce_rerank(state)
+
+        if action == RetrievalAction.LINKED_EXPAND:
+            return await self._linked_expand(state)
+
+        if action == RetrievalAction.ESCALATE_K:
+            return await self._escalate_k(state)
+
+        if action == RetrievalAction.ESCALATE_DENSE:
+            return await self._escalate_dense(state)
+
+        if action == RetrievalAction.VERIFY_EVIDENCE:
+            return await self._verify_evidence(state)
+
+        if action == RetrievalAction.PACK_CONTEXT:
+            return await self._pack_context(state)
+
+        raise ValueError(f"Unsupported adaptive action: {action.value}")
+
+    async def _memory_lookup(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        memory_tool = getattr(self.components, "memory_retriever", None)
+        if memory_tool is None:
+            state.memory_candidates = ()
+            state.add_warning("memory_lookup skipped because no memory_retriever exists.")
+            return (0, 0)
+
+        result = await _call_with_supported_kwargs(
+            memory_tool.retrieve,
+            request=state.request,
+            normalized_query=state.normalized_query,
+        )
+        state.memory_candidates = tuple(result or ())
+        return (0, len(state.memory_candidates))
+
+    async def _sparse_search(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        await self._ensure_query_embedding(state)
+
+        candidates = await self.components.sparse_retriever.retrieve(
+            request=state.request,
+            normalized_query=state.normalized_query,
+            query_embedding=state.query_embedding,
+        )
+        state.sparse_candidates = tuple(candidates)
+        self._clear_after_retrieval_change(state)
+        return (0, len(state.sparse_candidates))
+
+    async def _dense_search(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        await self._ensure_query_embedding(state)
+
+        candidates = await self.components.dense_retriever.retrieve(
+            request=state.request,
+            normalized_query=state.normalized_query,
+            query_embedding=state.query_embedding,
+        )
+        state.dense_candidates = tuple(candidates)
+        self._clear_after_retrieval_change(state)
+        return (0, len(state.dense_candidates))
+
+    async def _fuse(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        input_count = len(state.dense_candidates) + len(state.sparse_candidates)
+
+        fused = await self.components.fusion.fuse(
+            dense_candidates=state.dense_candidates,
+            sparse_candidates=state.sparse_candidates,
+            request=state.request,
+            normalized_query=state.normalized_query,
+        )
+        state.fused_candidates = tuple(fused)
+        self._clear_after_fusion_change(state)
+        return (input_count, len(state.fused_candidates))
+
+    async def _score_rerank(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        candidates = self._rerank_input(state)
+
+        reranked = await self.score_reranker.rerank(
+            candidates=candidates,
+            request=state.request,
+            normalized_query=state.normalized_query,
+        )
+        calibrated = calibrate_reranked_candidates(
+            request=state.request,
+            normalized_query=state.normalized_query,
+            candidates=reranked,
+        )
+        state.reranked_candidates = tuple(calibrated)
+        self._clear_after_rerank_change(state)
+        return (len(candidates), len(state.reranked_candidates))
+
+    async def _ce_rerank(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        candidates = self._rerank_input(state)
+
+        reranked = tuple(
+            await self.components.cross_encoder_reranker.rerank(
+                candidates=candidates,
+                request=state.request,
+                normalized_query=state.normalized_query,
+            )
+        )
+
+        if not reranked:
+            state.add_warning(
+                "ce_rerank produced no candidates; preserving existing reranked evidence."
+            )
+            return (len(candidates), len(state.reranked_candidates))
+
+        calibrated = calibrate_reranked_candidates(
+            request=state.request,
+            normalized_query=state.normalized_query,
+            candidates=reranked,
+        )
+        state.reranked_candidates = tuple(calibrated)
+        self._clear_after_rerank_change(state)
+        return (len(candidates), len(state.reranked_candidates))
+
+    async def _linked_expand(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        seeds = self._expansion_input(state)
+
+        structure_expander = getattr(self.components, "structure_expander", None)
+        if structure_expander is None:
+            state.add_warning("linked_expand skipped because no structure_expander exists.")
+            return (len(seeds), 0)
+
+        expanded = tuple(
+            await structure_expander.expand(
+                candidates=seeds,
+                request=state.request,
+                normalized_query=state.normalized_query,
+            )
+        )
+
+        if not expanded:
+            state.add_warning(
+                "linked_expand produced no candidates; preserving existing reranked/context evidence."
+            )
+            return (len(seeds), 0)
+
+        state.expanded_candidates = expanded
+        self._clear_after_expansion_change(state)
+        return (len(seeds), len(state.expanded_candidates))
+
+    async def _escalate_k(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        await self._ensure_query_embedding(state)
+
+        widened_request = replace(
+            state.request,
+            top_k=max(state.request.top_k + 1, state.request.top_k * 2),
+        )
+
+        dense_candidates = state.dense_candidates
+        sparse_candidates = state.sparse_candidates
+
+        if state.dense_candidates:
+            dense_candidates = tuple(
+                await self.components.dense_retriever.retrieve(
+                    request=widened_request,
+                    normalized_query=state.normalized_query,
+                    query_embedding=state.query_embedding,
+                )
+            )
+
+        if state.sparse_candidates:
+            sparse_candidates = tuple(
+                await self.components.sparse_retriever.retrieve(
+                    request=widened_request,
+                    normalized_query=state.normalized_query,
+                    query_embedding=state.query_embedding,
+                )
+            )
+
+        state.dense_candidates = tuple(dense_candidates)
+        state.sparse_candidates = tuple(sparse_candidates)
+        self._clear_after_retrieval_change(state)
+
+        output_count = len(state.dense_candidates) + len(state.sparse_candidates)
+        return (state.candidate_count, output_count)
+
+    async def _escalate_dense(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        return await self._dense_search(state)
+
+    async def _verify_evidence(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        before_count = len(state.active_candidates())
+        apply_confidence_estimate(state, self.confidence_estimator)
+        return (before_count, before_count)
+
+    async def _ensure_answerability_candidate_mix(
+        self,
+        state: AdaptiveRetrievalState,
+    ) -> None:
+        query_text = (
+            getattr(state.normalized_query, "normalized_query", None)
+            or getattr(state.normalized_query, "original_query", None)
+            or state.request.query
+        )
+        answer_need = classify_answer_need(str(query_text or ""))
+
+        if answer_need == "general":
+            return
+
+        changed = False
+        recovery_actions: list[str] = []
+
+        # Generic corrective step:
+        # task-like queries need semantic candidates before context packing.
+        # Otherwise sparse lexical matches can pack mention-only chunks.
+        if not state.dense_candidates:
+            await self._dense_search(state)
+            changed = True
+            recovery_actions.append("dense_search")
+
+        if state.sparse_candidates and state.dense_candidates and not state.fused_candidates:
+            await self._fuse(state)
+            changed = True
+            recovery_actions.append("fuse")
+
+        if changed or not state.reranked_candidates:
+            await self._score_rerank(state)
+            recovery_actions.append("score_rerank")
+
+        state.metadata["answerability_candidate_mix"] = {
+            "answer_need": answer_need,
+            "recovery_actions": recovery_actions,
+            "sparse_count": len(state.sparse_candidates),
+            "dense_count": len(state.dense_candidates),
+            "fused_count": len(state.fused_candidates),
+            "reranked_count": len(state.reranked_candidates),
+        }
+
+        if recovery_actions:
+            answerability_warnings = list(
+                state.metadata.get("answerability_warnings") or []
+            )
+            answerability_warnings.append(
+                "answerability recovery before context packing: "
+                + ", ".join(recovery_actions)
+                + f" for answer_need={answer_need}"
+            )
+            state.metadata["answerability_warnings"] = answerability_warnings
+
+    async def _pack_context(self, state: AdaptiveRetrievalState) -> tuple[int, int]:
+        await self._ensure_answerability_candidate_mix(state)
+
+        if not state.reranked_candidates:
+            raise ValueError("pack_context requires reranked_candidates.")
+
+        blocks = await self.components.context_packer.pack(
+            request=state.request,
+            normalized_query=state.normalized_query,
+            reranked_candidates=state.reranked_candidates,
+        )
+        state.context_blocks = tuple(blocks)
+        return (len(state.reranked_candidates), len(state.context_blocks))
+
+    def _clear_after_retrieval_change(self, state: AdaptiveRetrievalState) -> None:
+        state.fused_candidates = ()
+        state.expanded_candidates = ()
+        state.reranked_candidates = ()
+        state.context_blocks = ()
+
+    def _clear_after_fusion_change(self, state: AdaptiveRetrievalState) -> None:
+        state.expanded_candidates = ()
+        state.reranked_candidates = ()
+        state.context_blocks = ()
+
+    def _clear_after_expansion_change(self, state: AdaptiveRetrievalState) -> None:
+        state.reranked_candidates = ()
+        state.context_blocks = ()
+
+    def _clear_after_rerank_change(self, state: AdaptiveRetrievalState) -> None:
+        state.context_blocks = ()
+
+    async def _ensure_query_embedding(self, state: AdaptiveRetrievalState) -> None:
+        if state.query_embedding is not None:
+            return
+
+        state.query_embedding = await self._embed_query(
+            request=state.request,
+            normalized_query=state.normalized_query,
+        )
+        state.query_embedding.validate()
+
+    def _rerank_input(
+        self,
+        state: AdaptiveRetrievalState,
+    ) -> tuple[CandidateLike, ...]:
+        if state.expanded_candidates and state.fused_candidates:
+            return tuple(state.fused_candidates) + tuple(state.expanded_candidates)
+
+        if state.expanded_candidates:
+            return tuple(state.expanded_candidates)
+
+        if state.fused_candidates:
+            return tuple(state.fused_candidates)
+
+        merged: list[CandidateLike] = []
+        merged.extend(state.memory_candidates)
+        merged.extend(state.sparse_candidates)
+        merged.extend(state.dense_candidates)
+        return tuple(merged)
+
+    def _expansion_input(
+        self,
+        state: AdaptiveRetrievalState,
+    ) -> tuple[RetrievalCandidate | FusedCandidate, ...]:
+        if state.fused_candidates:
+            return tuple(state.fused_candidates)
+
+        merged: list[RetrievalCandidate | FusedCandidate] = []
+        merged.extend(state.sparse_candidates)
+        merged.extend(state.dense_candidates)
+        merged.extend(state.memory_candidates)
+        return tuple(merged)
+
+    def _normalize_query(
+        self,
+        request: RetrievalRequest,
+    ) -> NormalizedQuery:
+        query = " ".join(request.query.strip().split())
+
+        return NormalizedQuery(
+            original_query=request.query,
+            normalized_query=query,
+        )
+
+    async def _embed_query(
+        self,
+        *,
+        request: RetrievalRequest,
+        normalized_query: NormalizedQuery,
+    ) -> QueryEmbedding:
+        embedder = self.components.query_embedder
+
+        for method_name in ("embed", "embed_query", "encode"):
+            method = getattr(embedder, method_name, None)
+            if method is None:
+                continue
+
+            result = await _call_with_supported_kwargs(
+                method,
+                request=request,
+                normalized_query=normalized_query,
+                query=normalized_query.normalized_query,
+            )
+            return result
+
+        if callable(embedder):
+            result = embedder(normalized_query)
+            return await _maybe_await(result)
+
+        raise TypeError(
+            "query_embedder must expose embed(...), embed_query(...), encode(...), "
+            "or be callable."
+        )
+
+
+async def _call_with_supported_kwargs(
+    method: Any,
+    **kwargs: Any,
+) -> Any:
+    signature = inspect.signature(method)
+    parameters = signature.parameters
+
+    accepts_kwargs = any(
+        parameter.kind == inspect.Parameter.VAR_KEYWORD
+        for parameter in parameters.values()
+    )
+
+    if accepts_kwargs:
+        result = method(**kwargs)
+        return await _maybe_await(result)
+
+    supported = {
+        key: value
+        for key, value in kwargs.items()
+        if key in parameters
+        and parameters[key].kind
+        in {
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.KEYWORD_ONLY,
+        }
+    }
+
+    result = method(**supported)
+    return await _maybe_await(result)
+
+
+async def _maybe_await(value: Any) -> Any:
+    if inspect.isawaitable(value):
+        return await value
+
+    return value
