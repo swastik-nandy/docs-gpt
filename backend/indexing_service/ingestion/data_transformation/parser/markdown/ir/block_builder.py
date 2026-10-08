@@ -1,0 +1,509 @@
+# rag/ingestion/data_transformation/parser/adapters/markdown/ir/block_builder.py
+
+from typing import Any, Dict, Optional
+
+from .signals import detect_signals
+
+
+# ---------------- TYPE NORMALIZATION ---------------- #
+
+def normalize_base_type(base_type: str) -> str:
+    """
+    Normalize source block type into IR base type.
+    """
+
+    base_type = (base_type or "").strip().lower()
+
+    if base_type in {"paragraph", "sentence", "text"}:
+        return "text"
+
+    if base_type in {"code", "code_block", "fence"}:
+        return "code"
+
+    if base_type in {"list", "bullets", "ordered_list", "unordered_list"}:
+        return "list"
+
+    if base_type in {"table", "generic_table"}:
+        return "table"
+
+    return "text"
+
+
+def normalize_form(base_type: str, form: Optional[str] = None) -> str:
+    """
+    Normalize structural form for a block.
+    """
+
+    if form:
+        return form
+
+    if base_type == "list":
+        return "item"
+
+    if base_type == "table":
+        return "row"
+
+    if base_type == "code":
+        return "block"
+
+    return "paragraph"
+
+
+# ---------------- CONTEXT HELPERS ---------------- #
+
+def _norm(text: str) -> str:
+    return (text or "").strip().lower()
+
+
+def _is_steps_context(meta: Dict[str, Any]) -> bool:
+    """
+    Detect whether a block lives inside procedural context.
+
+    This is intentionally generic:
+    - Steps
+    - numbered step headings like "1. Run the script"
+    - headings containing task/process wording
+    """
+
+    heading = _norm(meta.get("heading", ""))
+    context = _norm(meta.get("context", ""))
+    local_context = _norm(meta.get("local_context", ""))
+
+    candidates = [heading, context, local_context]
+
+    if any("step" in c or "procedure" in c or "workflow" in c for c in candidates):
+        return True
+
+    # Numbered headings, e.g. "1. Run the script"
+    if heading[:2] and heading[0].isdigit() and "." in heading[:4]:
+        return True
+
+    return False
+
+
+def _is_output_context(meta: Dict[str, Any]) -> bool:
+    heading = _norm(meta.get("heading", ""))
+    context = _norm(meta.get("context", ""))
+    local_context = _norm(meta.get("local_context", ""))
+
+    return any(
+        word in {heading, context, local_context}
+        for word in {"output", "report", "result", "results", "summary"}
+    )
+
+
+def _is_overview_context(meta: Dict[str, Any]) -> bool:
+    heading = _norm(meta.get("heading", ""))
+    context = _norm(meta.get("context", ""))
+
+    return heading == "overview" or context == "overview"
+
+
+# ---------------- FUNCTION CLASSIFICATION ---------------- #
+
+def infer_function(
+    base_type: str,
+    form: str,
+    text: str,
+    signals: Dict[str, Any],
+    meta: Optional[Dict[str, Any]] = None,
+) -> tuple[str, float]:
+    """
+    Infer the functional role of a block using only structural signals.
+
+    No product-specific rules.
+    No framework-specific rules.
+    No document-specific rules.
+    """
+
+    meta = meta or {}
+    text = (text or "").strip()
+
+    if not text:
+        return "mixed", 0.0
+
+    ordered = bool(meta.get("ordered", False))
+    in_steps_context = _is_steps_context(meta)
+    in_output_context = _is_output_context(meta)
+    in_overview_context = _is_overview_context(meta)
+
+    # ---------------- UNIVERSAL HIGH-SIGNAL RULES ---------------- #
+
+    if signals.get("has_merge_conflict_marker"):
+        return "warning", 0.95
+
+    # Table rows are retrieval references before labeled-action rules.
+    # Table text naturally looks like "label: value", so global action
+    # detection must not convert table rows into parent instructions.
+    if base_type == "table":
+        return "reference", 0.84
+
+    if signals.get("is_labeled_action"):
+        return "instruction", 0.88
+
+    if signals.get("is_directive"):
+        return "instruction", 0.84
+
+    # ---------------- TABLE ---------------- #
+    # Table rows often look like key-value pairs because row text is rendered as:
+    # header: value | header: value
+    # The table form is stronger than key-value syntax.
+
+    if base_type == "table":
+        if signals.get("starts_with_action") and in_steps_context:
+            return "instruction", 0.72
+
+        return "reference", 0.84
+
+    # ---------------- CODE ---------------- #
+
+    if base_type == "code":
+        if signals.get("has_flags") or signals.get("is_command_like"):
+            return "instruction", 0.88
+
+        if signals.get("has_assignment") or signals.get("is_key_value"):
+            return "configuration", 0.86
+
+        if signals.get("has_path") or signals.get("has_symbols"):
+            return "example", 0.78
+
+        return "example", 0.7
+
+    # ---------------- LIST ---------------- #
+
+    if base_type == "list":
+        if ordered and signals.get("starts_with_action"):
+            return "instruction", 0.9
+
+        if ordered and signals.get("is_command_like"):
+            return "instruction", 0.88
+
+        if signals.get("starts_with_action"):
+            return "instruction", 0.85
+
+        if signals.get("is_command_like"):
+            return "instruction", 0.8
+
+        if ordered and not signals.get("sentence_like"):
+            return "instruction", 0.72
+
+        if signals.get("has_flags"):
+            return "reference", 0.85
+
+        if signals.get("is_key_value") or signals.get("has_assignment"):
+            return "reference", 0.76
+
+        if signals.get("has_path"):
+            return "reference", 0.7
+
+        if signals.get("sentence_like"):
+            return "explanation", 0.65
+
+        if signals.get("is_short"):
+            return "reference", 0.6
+
+        return "mixed", 0.55
+
+    # ---------------- TEXT ---------------- #
+
+    if base_type == "text":
+        if signals.get("is_command_like") and not signals.get("sentence_like"):
+            return "instruction", 0.78
+
+        if signals.get("starts_with_action") and in_steps_context:
+            return "instruction", 0.78
+
+        if signals.get("starts_with_action") and in_output_context:
+            return "instruction", 0.72
+
+        if signals.get("starts_with_action") and in_overview_context:
+            return "explanation", 0.68
+
+        if signals.get("has_flags"):
+            return "reference", 0.75
+
+        if signals.get("is_key_value") or signals.get("has_assignment"):
+            return "reference", 0.72
+
+        if signals.get("has_path"):
+            return "reference", 0.65
+
+        if signals.get("is_long") or signals.get("sentence_like"):
+            return "explanation", 0.7
+
+        if signals.get("is_short"):
+            return "mixed", 0.55
+
+        return "explanation", 0.6
+
+    # ---------------- FALLBACK ---------------- #
+
+    if signals.get("starts_with_action") and in_steps_context:
+        return "instruction", 0.65
+
+    if signals.get("is_command_like"):
+        return "instruction", 0.65
+
+    if signals.get("sentence_like"):
+        return "explanation", 0.6
+
+    return "mixed", 0.5
+
+
+# ---------------- RETRIEVAL TEXT ---------------- #
+
+def build_retrieval_text(block: Dict[str, Any]) -> str:
+    """
+    Build retrieval-optimized text.
+
+    This is NOT an embedding.
+    It is the text that a later indexing layer may send to an embedding model.
+    """
+
+    parts: list[str] = []
+
+    context = block.get("context")
+    heading = block.get("heading")
+    local_context = block.get("local_context")
+    function = block.get("function")
+    text = block.get("text")
+
+    if context:
+        parts.append(f"Context: {context}")
+
+    if heading and heading != context:
+        parts.append(f"Heading: {heading}")
+
+    if local_context and local_context not in {heading, context}:
+        parts.append(f"Local context: {local_context}")
+
+    if function:
+        parts.append(f"Function: {function}")
+
+    meta = block.get("meta") or {}
+
+    parent_instruction = meta.get("parent_instruction")
+    if parent_instruction:
+        parts.append(f"Parent instruction: {parent_instruction}")
+
+    parent_context = meta.get("parent_context")
+    if parent_context:
+        parts.append(f"Parent context: {parent_context}")
+
+    if text:
+        parts.append(f"Text: {text}")
+
+    return "\n".join(parts).strip()
+
+
+# ---------------- CORE BUILDER ---------------- #
+
+def build_block(
+    base_type: str,
+    text: str,
+    form: Optional[str] = None,
+    heading: str = "",
+    context: str = "",
+    local_context: str = "",
+    meta: Optional[Dict[str, Any]] = None,
+) -> Optional[Dict[str, Any]]:
+    """
+    Build one normalized IR block.
+
+    This is the central unit that chunking/retrieval/indexing should consume.
+    """
+
+    text = (text or "").strip()
+
+    if not text:
+        return None
+
+    # Make section context visible to infer_function.
+    meta = {
+        **(meta or {}),
+        "heading": heading or "",
+        "context": context or "",
+        "local_context": local_context or heading or "",
+    }
+
+    normalized_type = normalize_base_type(base_type)
+    normalized_form = normalize_form(normalized_type, form)
+
+    signals = detect_signals(text)
+
+    function, confidence = infer_function(
+        base_type=normalized_type,
+        form=normalized_form,
+        text=text,
+        signals=signals,
+        meta=meta,
+    )
+
+    block = {
+        "id": "",
+        "doc_id": "",
+        "section_id": "",
+        "block_index": -1,
+        "source_type": meta.get("source_type", normalized_type),
+        "source_index": meta.get("source_index", -1),
+        "type": normalized_type,
+        "form": normalized_form,
+        "function": function,
+        "confidence": confidence,
+        "text": text,
+        "retrieval_text": "",
+        "signals": signals,
+        "heading": heading or "",
+        "context": context or "",
+        "local_context": local_context or heading or "",
+        "relationships": [],
+        "meta": meta,
+    }
+
+    block["retrieval_text"] = build_retrieval_text(block)
+
+    return block
+
+
+# ---------------- IDENTITY ---------------- #
+
+def assign_block_identity(
+    block: Dict[str, Any],
+    doc_id: str,
+    section_id: str,
+    block_index: int,
+) -> Dict[str, Any]:
+    """
+    Assign stable block identity after all blocks for a section are built.
+    """
+
+    block["doc_id"] = doc_id
+    block["section_id"] = section_id
+    block["block_index"] = block_index
+    block["id"] = f"{doc_id}:{section_id}:b{block_index}"
+
+    return block
+
+
+def refresh_retrieval_text(block: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Rebuild retrieval text after relationships/meta are updated.
+    """
+
+    block["retrieval_text"] = build_retrieval_text(block)
+    return block
+
+
+# ---------------- BULK HELPERS ---------------- #
+
+def build_blocks_from_list(
+    items: list[str],
+    ordered: bool = False,
+    heading: str = "",
+    context: str = "",
+    local_context: str = "",
+    meta: Optional[Dict[str, Any]] = None,
+) -> list[Dict[str, Any]]:
+    """
+    Convert list items into atomic IR blocks.
+
+    Each list item becomes one retrieval-ready unit.
+    """
+
+    blocks: list[Dict[str, Any]] = []
+    meta = meta or {}
+
+    for index, item in enumerate(items or []):
+        block = build_block(
+            base_type="list",
+            form="item",
+            text=item,
+            heading=heading,
+            context=context,
+            local_context=local_context,
+            meta={
+                **meta,
+                "ordered": ordered,
+                "item_index": index,
+                "source_index": index,
+            },
+        )
+
+        if block:
+            blocks.append(block)
+
+    return blocks
+
+
+def build_blocks_from_table_rows(
+    row_texts: list[str],
+    heading: str = "",
+    context: str = "",
+    local_context: str = "",
+    meta: Optional[Dict[str, Any]] = None,
+) -> list[Dict[str, Any]]:
+    """
+    Convert table rows into atomic IR blocks.
+
+    Each table row becomes one retrieval-ready unit.
+    """
+
+    blocks: list[Dict[str, Any]] = []
+    meta = meta or {}
+
+    for index, row_text in enumerate(row_texts or []):
+        block = build_block(
+            base_type="table",
+            form="row",
+            text=row_text,
+            heading=heading,
+            context=context,
+            local_context=local_context,
+            meta={
+                **meta,
+                "row_index": index,
+                "source_index": index,
+            },
+        )
+
+        if block:
+            blocks.append(block)
+
+    return blocks
+
+
+def build_blocks_from_paragraphs(
+    paragraphs: list[str],
+    heading: str = "",
+    context: str = "",
+    local_context: str = "",
+    meta: Optional[Dict[str, Any]] = None,
+) -> list[Dict[str, Any]]:
+    """
+    Convert paragraph strings into IR blocks.
+
+    Sentence splitting should be added deliberately later.
+    """
+
+    blocks: list[Dict[str, Any]] = []
+    meta = meta or {}
+
+    for index, paragraph in enumerate(paragraphs or []):
+        block = build_block(
+            base_type="text",
+            form="paragraph",
+            text=paragraph,
+            heading=heading,
+            context=context,
+            local_context=local_context,
+            meta={
+                **meta,
+                "paragraph_index": index,
+                "source_index": index,
+            },
+        )
+
+        if block:
+            blocks.append(block)
+
+    return blocks

@@ -1,0 +1,26 @@
+[embedder]
+enabled = true
+provider = "cloudflare"
+
+[embedder.model]
+name = "@cf/qwen/qwen3-embedding-0.6b"
+vector_size = 1024
+max_input_tokens = 8192
+
+[embedder.request]
+batch_size = 32
+timeout_seconds = 30.0
+max_retries = 3
+
+[embedder.input]
+include_heading_path = true
+include_chunk_type = true
+include_parent_context_for_code = true
+
+[qdrant]
+upsert_batch_size = 64
+
+[artifacts]
+chunked_directory = "artifacts/chunked"
+indexed_directory = "artifacts/indexed"
+ready_marker = "_READY"

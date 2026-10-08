@@ -1,0 +1,240 @@
+[markdown.heading_permalink]
+texts = ["", "#", "¶", "🔗", "§", "∞", "link", "permalink"]
+
+[markdown.callouts]
+max_plain_callout_paragraphs = 2
+
+[markdown.callouts.kind_map]
+note = "note"
+info = "info"
+tip = "tip"
+warning = "warning"
+caution = "warning"
+danger = "warning"
+important = "important"
+"good to know" = "note"
+"heads up" = "note"
+"technical details" = "info"
+
+[markdown.signals.thresholds]
+short_text_max_words = 8
+long_text_min_words = 40
+command_max_words = 12
+label_max_words = 6
+label_max_chars = 70
+
+[markdown.signals]
+common_sentence_starters = [
+    "the",
+    "this",
+    "that",
+    "these",
+    "those",
+    "our",
+    "your",
+    "their",
+    "its",
+    "a",
+    "an",
+    "when",
+    "where",
+    "what",
+    "which",
+    "why",
+    "how",
+    "if",
+    "to",
+    "for",
+    "in",
+    "on",
+    "with",
+    "without",
+]
+
+action_starters = [
+    "add",
+    "analyze",
+    "apply",
+    "ask",
+    "build",
+    "check",
+    "choose",
+    "collect",
+    "compare",
+    "configure",
+    "confirm",
+    "copy",
+    "create",
+    "delete",
+    "deploy",
+    "disable",
+    "enable",
+    "fetch",
+    "find",
+    "fix",
+    "generate",
+    "import",
+    "include",
+    "install",
+    "keep",
+    "list",
+    "make",
+    "move",
+    "open",
+    "prefer",
+    "provide",
+    "remove",
+    "replace",
+    "report",
+    "review",
+    "run",
+    "scan",
+    "search",
+    "set",
+    "show",
+    "strip",
+    "summarize",
+    "update",
+    "use",
+    "validate",
+    "verify",
+    "write",
+]
+
+directive_starters = [
+    "do",
+    "do not",
+    "don't",
+    "dont",
+    "never",
+    "always",
+    "avoid",
+    "ensure",
+    "prefer",
+    "remember",
+]
+
+[markdown.metadata]
+keyword_stopwords = [
+    "this",
+    "that",
+    "with",
+    "have",
+    "from",
+    "using",
+    "into",
+    "your",
+    "will",
+    "when",
+    "where",
+    "what",
+    "which",
+    "then",
+    "than",
+    "also",
+    "more",
+    "only",
+    "used",
+    "like",
+    "such",
+    "these",
+    "those",
+]
+
+placeholder_headings = [
+    "",
+    "root",
+]
+
+[markdown.source_provenance]
+enabled = true
+preserve_line_spans = true
+preserve_block_index = true
+preserve_original_text = true
+line_numbers_zero_based = true
+line_end_exclusive = true
+
+[markdown.local_scopes]
+enabled = true
+promote_strong_only_paragraphs = true
+remove_promoted_anchor_from_retrieval = true
+max_anchor_words = 12
+max_anchor_chars = 120
+max_lookahead_blocks = 3
+minimum_structural_followers = 1
+reject_sentence_terminal_period = true
+reject_sentence_terminal_question = true
+reject_sentence_terminal_exclamation = true
+allow_terminal_colon = true
+structural_follower_types = [
+    "code",
+    "generic_table",
+    "list",
+    "blockquote",
+]
+
+[markdown.selector_blocks]
+enabled = true
+max_words = 20
+max_chars = 180
+max_lookahead_blocks = 12
+minimum_following_blocks = 2
+require_short_text = true
+require_non_sentence_like = true
+require_repeated_following_type = true
+eligible_following_types = ["code"]
+remove_selector_from_retrieval = true
+attach_selector_metadata_to_following_blocks = true
+
+[markdown.semantic_packing]
+enabled = true
+preserve_paragraph_boundaries = true
+paragraph_separator = "\n\n"
+merge_only_adjacent_blocks = true
+merge_only_same_section = true
+merge_only_same_local_scope = true
+minimum_target_words = 80
+preferred_target_words = 180
+maximum_target_words = 280
+maximum_blocks_per_group = 6
+allow_single_oversized_block = true
+flush_before_structural_block = true
+flush_after_structural_block = true
+eligible_block_types = ["paragraph"]
+boundary_block_types = [
+    "code",
+    "generic_table",
+    "list",
+    "blockquote",
+    "thematic_break",
+]
+lexical_dependency_detection_enabled = false
+
+[markdown.relationships]
+enabled = true
+scope_aware = true
+maximum_parent_distance = 6
+allow_cross_local_scope_parent = false
+allow_structural_selector_as_parent = false
+allow_table_row_as_code_parent = false
+allow_mixed_short_text_as_parent = false
+attach_section_context_to_orphan_code = true
+embed_parent_text = true
+parent_text_max_words = 48
+parent_text_preserve_complete_sentences = true
+sequential_relation_confidence = 0.55
+command_parent_confidence = 0.88
+immediate_parent_confidence = 0.92
+context_parent_confidence = 0.72
+section_fallback_confidence = 0.60
+
+[markdown.retrieval_text]
+include_context = true
+include_heading = true
+include_local_context = true
+include_function = true
+include_parent_instruction = true
+include_parent_context = true
+include_text = true
+deduplicate_equal_context_fields = true
+preserve_content_paragraphs = true
